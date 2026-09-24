@@ -1,0 +1,87 @@
+:root {
+--color-bg: #0a0b0f;
+--color-surface:#1113818;
+--color-border: rgba(225, 225, 255, 0.08);
+--color-text: #f2efe9;
+--color-muted: #9a9ca5;
+--color-accent: #d6bf94;
+
+--font-body: "inter",system-ui, sans-serif;
+--font-title: "Space Grotesk",system-ui, sans-serif;
+--font-serif: "Instrument Serif",Georgia, serif;
+
+--radius: 16px;
+--max-width: 1100px;
+
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ==== Accent ==== */
+.accent {
+  color: var(--color-accent);
+}
+
+/* ==== Badge ==== */
+.badge {
+  display: inline-block;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.badge::before {
+  content:"";
+  width: 6px;
+  height: 6px;
+  border-radius: 50px;
+  background-color: var(--color-accent);
+
+}
+
+/* ==== Bouton ====  */
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.2s, background-color 0.2s;
+
+}
+
+.btn:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+
+}
+
+.btn-primary {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+.btn-secondary {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
