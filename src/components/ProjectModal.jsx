@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import TechBadge from "./TechBadge";
 
 function ProjectModal({ project, onClose }) {
   useEffect(() => {
@@ -38,7 +39,7 @@ function ProjectModal({ project, onClose }) {
 
           <ul className="project-technos">
             {project.technos.map((techno) => (
-              <li key={techno}>{techno}</li>
+              <TechBadge key={techno} name={techno}/>
             ))}
           </ul>
 

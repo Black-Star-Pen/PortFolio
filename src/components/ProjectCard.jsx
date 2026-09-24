@@ -1,3 +1,6 @@
+import TechBadge from "./TechBadge";
+
+
 function ProjectCard({ title, category, description, technos, image, onClick }) {
   return (
     <article className="project-card" onClick={onClick}>
@@ -19,7 +22,7 @@ function ProjectCard({ title, category, description, technos, image, onClick }) 
         <p>{description}</p>
         <ul className="project-technos">
           {technos.map((techno) => (
-            <li key={techno}>{techno}</li>
+            <TechBadge key={techno} name={techno}/>
           ))}
         </ul>
       </div>
