@@ -4,6 +4,7 @@
     "title": "AskVera",
     "category": "Application web",
     "description": "Description for Project 1",
+    "details": "Texte plus long : le contexte du projet, ton rôle, les difficultés rencontrées et ce que tu as appris.",
     "technos": ["JavaScript", "React"],
     "image": "https://placehold.co/800x500",
     "link": "https://example.com/project1"
@@ -13,6 +14,7 @@
     "title": "Hero-Experience",
     "category": "Site vitrine",
     "description": "Description for Project 2",
+    "details": "Texte plus long : le contexte du projet, ton rôle, les difficultés rencontrées et ce que tu as appris.",
     "technos": ["Python", "Django"],
     "image": "https://placehold.co/800x500",
     "link": "https://github.com/Black-Star-Pen/Hero-experience"
@@ -22,6 +24,7 @@
     "title": "Project 3",
     "category": "API REST",
     "description": "Description for Project 3",
+    "details": "Texte plus long : le contexte du projet, ton rôle, les difficultés rencontrées et ce que tu as appris.",
     "technos": ["Java", "Spring Boot"],
     "image": "https://placehold.co/800x500",
     "link": "https://example.com/project3"

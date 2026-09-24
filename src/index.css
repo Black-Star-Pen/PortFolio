@@ -204,6 +204,7 @@ section {
   border-radius: var(--radius);
   overflow: hidden;
   transition: transform 0.4s, border-color 0.3s;
+  cursor:pointer;
 }
 
 .project-card:hover {
@@ -286,4 +287,96 @@ section {
   border: 1px solid var(--color-border);
   border-radius: 999px;
   color: var(--color-muted);
+}
+
+/* ===== Modale ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background-color: rgba(5, 6, 9, 0.75);
+  backdrop-filter: blur(8px);
+  animation: fade-in 0.25s ease-out;
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  animation: pop-in 0.3s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.modal-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 32px;
+}
+
+.modal-content h3 {
+  font-size: 2rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background-color: rgba(10, 11, 15, 0.85);
+  backdrop-filter: blur(4px);
+  color: var(--color-text);
+  font-size: 1.1rem;
+  transition: background-color 0.3s, color 0.3s, transform 0.3s;
+}
+
+.modal-close:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  transform: rotate(90deg);
+}
+
+@keyframes fade-in {
+  from{
+    opacity: 0;
+  }
+  to{
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from{
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+  }
+  to{
+    opacity: 1;
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

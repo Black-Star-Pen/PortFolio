@@ -1,6 +1,6 @@
-function ProjectCard({ title, category, description, technos, image, link }) {
+function ProjectCard({ title, category, description, technos, image, onClick }) {
   return (
-    <article className="project-card">
+    <article className="project-card" onClick={onClick}>
       <div className="project-image">
         <img src={image} alt={`Aperçu du projet ${title}`} />
       </div>
@@ -10,15 +10,9 @@ function ProjectCard({ title, category, description, technos, image, link }) {
           <span className="project-category">{category}</span>
           <h3>{title}</h3>
         </div>
-        <a
-          href={link}
-          target="_blank"
-          rel="noreferrer"
-          className="project-link"
-          aria-label={`Voir le projet ${title}`}
-        >
+        <span className="project-link" aria-hidden="true">
           ↗
-        </a>
+        </span>
       </div>
 
       <div className="project-body">
