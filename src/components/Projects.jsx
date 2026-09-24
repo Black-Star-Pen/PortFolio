@@ -1,10 +1,16 @@
 import ProjectCard from "./ProjectCard";
 import projectsData from "../data/projectsdata.json";
+import SectionTitle from "./SectionTitle";
 
 function Projects() {
     return (
-        <section>
-            <h2>Mes projets</h2>
+        <section id="projects">
+            <SectionTitle
+            label="Réalisations"
+            title="Des idées devenues "
+            accent="des projets concrets"
+            subtitle="Quelques projets conçus et développés de la maquette à la mise en ligne."
+            />
 
             {projectsData.map((project) => (
                 <ProjectCard
