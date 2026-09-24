@@ -1,20 +1,29 @@
-[  
-    {
-        "id": 1,
-        "title": "Project 1",
-        "description": "Description for Project 1",
-        "technos": ["JavaScript", "React"],
-        "image": "/images/project1.jpg",
-        "link": "https://example.com/project1"          
-    },
-    {
-        "id": 2,
-        "title": "Project 2",
-        "description": "Description for Project 2",
-        "technos": ["Python", "Django"],
-        "image": "/images/project2.jpg",
-        "link": "https://example.com/project2"
-    } 
-    
-     
-]                                       
+[
+  {
+    "id": 1,
+    "title": "AskVera",
+    "category": "Application web",
+    "description": "Description for Project 1",
+    "technos": ["JavaScript", "React"],
+    "image": "https://placehold.co/800x500",
+    "link": "https://example.com/project1"
+  },
+  {
+    "id": 2,
+    "title": "Hero-Experience",
+    "category": "Site vitrine",
+    "description": "Description for Project 2",
+    "technos": ["Python", "Django"],
+    "image": "https://placehold.co/800x500",
+    "link": "https://example.com/project2"
+  },
+  {
+    "id": 3,
+    "title": "Project 3",
+    "category": "API REST",
+    "description": "Description for Project 3",
+    "technos": ["Java", "Spring Boot"],
+    "image": "https://placehold.co/800x500",
+    "link": "https://example.com/project3"
+  }
+]
