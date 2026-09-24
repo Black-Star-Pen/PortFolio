@@ -1,8 +1,12 @@
+import { useState } from "react";
 import ProjectCard from "./ProjectCard";
-import projectsData from "../data/projectsdata.json";
+import ProjectModal from "./ProjectModal";
 import SectionTitle from "./SectionTitle";
+import projectsData from "../data/projectsdata.json";
 
 function Projects() {
+  const [selectedProject, setSelectedProject] = useState(null);
+
   return (
     <section id="projects">
       <SectionTitle
@@ -21,10 +25,17 @@ function Projects() {
             description={project.description}
             technos={project.technos}
             image={project.image}
-            link={project.link}
+            onClick={() => setSelectedProject(project)}
           />
         ))}
       </div>
+
+      {selectedProject && (
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </section>
   );
 }
