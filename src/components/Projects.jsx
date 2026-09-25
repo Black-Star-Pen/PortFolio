@@ -11,7 +11,7 @@ function Projects() {
     <section id="projects">
       <SectionTitle
         label="Réalisations"
-        title="Des idées devenues"
+        title="Des rêves devenues"
         accent="des projets concrets."
         subtitle="Quelques projets conçus et développés de la maquette à la mise en ligne."
       />
