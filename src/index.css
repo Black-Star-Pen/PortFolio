@@ -930,31 +930,81 @@ section {
   border: none;
 }
 
-.form-field label,
-.form-field legend {
+/* Les libellés : doré discret, précédé d'un petit trait */
+.form-field > label,
+.form-field > legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: rgba(214, 191, 148, 0.7);
+  transition: color 0.3s;
+}
+
+.form-field > label::before,
+.form-field > legend::before {
+  content: "";
+  flex-shrink: 0;
+  width: 8px;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.3s;
 }
 
 .form-field legend {
   margin-bottom: 8px;
 }
 
+/* Quand on remplit le champ : le libellé s'allume et le trait s'allonge */
+.form-field:focus-within > label,
+.form-field:focus-within > legend {
+  color: var(--color-accent);
+}
+
+.form-field:focus-within > label::before,
+.form-field:focus-within > legend::before {
+  width: 18px;
+}
+
+/* Dans la fiche de poste : bleu acier */
+.recruit-block .form-field > label,
+.recruit-block .form-field > legend {
+  color: rgba(143, 179, 201, 0.75);
+}
+
+.recruit-block .form-field:focus-within > label,
+.recruit-block .form-field:focus-within > legend {
+  color: var(--color-steel);
+}
+
 .form-field input,
+.form-field select,
 .form-field textarea {
   width: 100%;
   padding: 12px 14px;
   font: inherit;
   color: var(--color-text);
+  color-scheme: dark;
   background-color: rgba(10, 11, 15, 0.7);
   border: 1px solid var(--color-border);
   border-radius: 2px;
   transition:
     border-color 0.3s,
     box-shadow 0.3s;
+}
+
+.form-field input:disabled,
+.form-field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-field select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
 .form-field textarea {
@@ -968,6 +1018,7 @@ section {
 }
 
 .form-field input:focus,
+.form-field select:focus,
 .form-field textarea:focus {
   outline: none;
   border-color: var(--color-accent);
@@ -998,9 +1049,16 @@ section {
   color: var(--color-accent);
 }
 
+.form-status {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
 /* Un champ en erreur : son libellé passe aussi en couleur d'erreur */
 .form-field.has-error > label,
-.form-field.has-error > legend {
+.form-field.has-error > legend,
+.recruit-block .form-field.has-error > label,
+.recruit-block .form-field.has-error > legend {
   color: var(--color-error);
 }
 
