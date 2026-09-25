@@ -330,7 +330,7 @@ section {
   background-color: rgba(214, 191, 148, 0.08);
 }
 
-/* ===== Compétences : l'établi ===== */
+/* ===== 11. Compétences : l'établi ===== */
 .blueprint {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -345,6 +345,28 @@ section {
   background-size: 24px 24px;
 }
 
+/* Le conteneur des tiroirs et ses flèches */
+.skills-tabs-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.tabs-arrow {
+  display: none;
+}
+
+@keyframes nudge-right {
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes nudge-left {
+  50% {
+    transform: translateX(-4px);
+  }
+}
+
 /* Les tiroirs */
 .skills-tabs {
   display: flex;
@@ -353,13 +375,14 @@ section {
 }
 
 .skills-tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
   padding: 16px 20px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 2px;
   background-color: rgba(10, 11, 15, 0.6);
   color: var(--color-muted);
   font-family: var(--font-title);
@@ -391,6 +414,7 @@ section {
 
 /* Le cartouche */
 .skill-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -480,7 +504,154 @@ section {
 .cartouche-footer span + span {
   border-left: 1px solid rgba(214, 191, 148, 0.3);
 }
-/* ===== 11. Modale ===== */
+
+
+/* La soudure */
+.weld {
+  --weld-side: 1s;
+  --weld-start: 0.2s;
+
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+}
+
+/* Soudure des tiroirs : réglage indépendant */
+.skills-tab .weld {
+  --weld-side: 0s;
+  --weld-start: 0s;
+}
+
+
+.weld-line {
+  position: absolute;
+  background-color: var(--color-accent);
+  box-shadow: 0 0 8px rgba(214, 191, 148, 0.7);
+}
+
+.weld-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation:
+    weld-grow-x var(--weld-side) linear var(--weld-start) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-right {
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: top;
+  animation:
+    weld-grow-y var(--weld-side) linear calc(var(--weld-start) + var(--weld-side)) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-bottom {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: right;
+  animation:
+    weld-grow-x var(--weld-side) linear calc(var(--weld-start) + var(--weld-side) * 2) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-left {
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation:
+    weld-grow-y var(--weld-side) linear calc(var(--weld-start) + var(--weld-side) * 3) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background-color: #fffbe8;
+  box-shadow:
+    0 0 6px 2px #fff1c1,
+    0 0 16px 6px rgba(214, 191, 148, 0.8),
+    0 0 32px 12px rgba(214, 150, 60, 0.4);
+  opacity: 0;
+  animation:
+    weld-travel calc(var(--weld-side) * 4) linear var(--weld-start) forwards,
+    weld-flicker 0.08s steps(2) var(--weld-start) infinite;
+}
+
+@keyframes weld-grow-x {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes weld-grow-y {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes weld-cool {
+  to {
+    box-shadow: none;
+    opacity: 0.6;
+  }
+}
+
+@keyframes weld-travel {
+  0% {
+    top: 0;
+    left: 0;
+    opacity: 1;
+  }
+  25% {
+    top: 0;
+    left: 100%;
+  }
+  50% {
+    top: 100%;
+    left: 100%;
+  }
+  75% {
+    top: 100%;
+    left: 0;
+  }
+  98% {
+    top: 0;
+    left: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes weld-flicker {
+  to {
+    transform: scale(1.5);
+  }
+}
+
+/* ===== 12. Modale ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -572,7 +743,7 @@ section {
   }
 }
 
-/* ===== 12. Navbar ===== */
+/* ===== 13. Navbar ===== */
 .navbar {
   position: sticky;
   top: 0;
@@ -618,7 +789,7 @@ section {
   display: none;
 }
 
-/* ===== 13. Burger ===== */
+/* ===== 14. Burger ===== */
 .navbar-burger {
   display: none;
   flex-direction: column;
@@ -655,8 +826,9 @@ section {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ===== 14. Mobile (toujours en dernier) ===== */
+/* ===== 15. Mobile ===== */
 @media (max-width: 768px) {
+  /* Navbar */
   .navbar-burger {
     display: flex;
   }
@@ -742,7 +914,9 @@ section {
     letter-spacing: 0.15em;
     color: var(--color-accent);
   }
-    .blueprint {
+
+  /* Compétences */
+  .blueprint {
     grid-template-columns: 1fr;
     padding: 16px;
   }
@@ -751,13 +925,95 @@ section {
     flex-direction: row;
     overflow-x: auto;
     scrollbar-width: none;
+    padding: 4px;
   }
 
   .skills-tab {
     flex-shrink: 0;
   }
 
+  /* Les flèches */
+  .tabs-arrow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    width: 56px;
+    font-size: 2rem;
+    color: var(--color-accent);
+  }
+
+  .tabs-arrow-left {
+    left: 0;
+    justify-content: flex-start;
+    padding-left: 4px;
+    background: linear-gradient(to right, var(--color-surface) 45%, transparent);
+  }
+
+  .tabs-arrow-right {
+    right: 0;
+    justify-content: flex-end;
+    padding-right: 4px;
+    background: linear-gradient(to left, var(--color-surface) 45%, transparent);
+  }
+
+  .tabs-arrow-left span {
+    animation: nudge-left 1.2s ease-in-out infinite;
+  }
+
+  .tabs-arrow-right span {
+    animation: nudge-right 1.2s ease-in-out infinite;
+  }
+
+  /* Le cartouche compact */
+  .cartouche-header {
+    padding: 12px 16px;
+  }
+
+  .cartouche-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .skill-panel-description {
+    padding: 0 16px;
+  }
+
+  .tool-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 16px 32px;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(214, 191, 148, 0.4) transparent;
+    mask-image: linear-gradient(to bottom, black 85%, transparent);
+  }
+
+  .tool-tile {
+    padding: 12px;
+  }
+
   .cartouche-footer span {
     padding: 10px 12px;
+  }
+}
+
+/* ===== 16. Accessibilité : animations réduites ===== */
+@media (prefers-reduced-motion: reduce) {
+  .weld-line {
+    animation: none;
+    transform: none;
+    opacity: 0.6;
+    box-shadow: none;
+  }
+
+  .weld-spark {
+    display: none;
+  }
+
+  .tabs-arrow span {
+    animation: none;
   }
 }
