@@ -688,7 +688,7 @@ section {
 
 /* La soudure */
 .weld {
-  --weld-side: 0.3s;
+  --weld-side: 1s;
   --weld-start: 0.2s;
 
   position: absolute;
@@ -698,7 +698,7 @@ section {
 
 /* Soudure des tiroirs : réglage indépendant */
 .skills-tab .weld {
-  --weld-side: 0.15s;
+  --weld-side: 0s;
   --weld-start: 0s;
 }
 
