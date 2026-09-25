@@ -25,6 +25,10 @@
 }
 
 /* ===== 3. Base ===== */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
@@ -40,6 +44,14 @@ img {
 a {
   color: var(--color-accent);
   text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 p {
@@ -65,6 +77,7 @@ section {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 100px 24px;
+  scroll-margin-top: 80px;
 }
 
 /* ===== 6. Éléments réutilisables ===== */
@@ -117,6 +130,11 @@ section {
 
 .btn-secondary:hover {
   background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn-small {
+  padding: 10px 20px;
+  font-size: 0.9rem;
 }
 
 /* ===== 7. Hero ===== */
@@ -181,7 +199,7 @@ section {
   color: var(--color-accent);
 }
 
-/* ===== À propos ===== */
+/* ===== 9. À propos ===== */
 .about-text {
   max-width: 680px;
   margin: 0 auto;
@@ -189,7 +207,7 @@ section {
   font-size: 1.1rem;
 }
 
-/* ===== Projets ===== */
+/* ===== 10. Projets ===== */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -203,10 +221,10 @@ section {
   border: 2px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
+  cursor: pointer;
   transition:
     transform 0.4s,
     border-color 0.3s;
-  cursor: pointer;
 }
 
 .project-card:hover {
@@ -264,7 +282,7 @@ section {
     color 0.3s;
 }
 
-.project-link:hover {
+.project-card:hover .project-link {
   background-color: var(--color-accent);
   color: var(--color-bg);
 }
@@ -287,13 +305,31 @@ section {
 
 .project-technos li {
   font-size: 0.8rem;
-  padding: 6px 14px 6px 10px;
-  border: 1px solid var(--color-border);
+  padding: 4px 12px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(214, 191, 148, 0.25);
   border-radius: 999px;
   color: var(--color-muted);
 }
 
-/* ===== Modale ===== */
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  transition:
+    border-color 0.3s,
+    color 0.3s,
+    background-color 0.3s;
+}
+
+.tech-badge:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+  background-color: rgba(214, 191, 148, 0.08);
+}
+
+/* ===== 11. Modale ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -381,23 +417,178 @@ section {
   }
   to {
     opacity: 1;
-  }
-  to {
-    opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
-/* ===== Pastilles technos avec logo ===== */
-.tech-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: border-color 0.3s, color 0.3s;
-  
+/* ===== 12. Navbar ===== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(10, 11, 15, 0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.tech-badge:hover {
-  border-color: var(--color-accent);
+.navbar-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.navbar-logo {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--color-text);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 32px;
+}
+
+.navbar-links a {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  transition: color 0.3s;
+}
+
+.navbar-links a:hover {
+  color: var(--color-text);
+}
+
+.navbar-link-number {
+  display: none;
+}
+
+/* ===== 13. Burger ===== */
+.navbar-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  appearance: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-burger span {
+  display: block;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 2px;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
+}
+
+.navbar-burger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.navbar-burger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-burger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ===== 14. Mobile (toujours en dernier) ===== */
+@media (max-width: 768px) {
+  .navbar-burger {
+    display: flex;
+  }
+
+  .navbar-cta {
+    display: none;
+  }
+
+  .navbar-logo,
+  .navbar-burger {
+    position: relative;
+    z-index: 2;
+  }
+
+  .navbar-links {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100dvh;
+    z-index: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(214, 191, 148, 0.08), transparent 60%),
+      var(--color-bg);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
+  }
+
+  .navbar-links.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .navbar-links a {
+    width: min(80%, 320px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-title);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.2s,
+      transform 0.2s,
+      color 0.3s;
+  }
+
+  .navbar-links a:first-child {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .navbar-links.open a {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.4s ease calc(0.1s + var(--i) * 0.08s),
+      transform 0.4s ease calc(0.1s + var(--i) * 0.08s),
+      color 0.3s;
+  }
+
+  .navbar-links a:hover {
+    color: var(--color-accent);
+  }
+
+  .navbar-link-number {
+    display: inline;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--color-accent);
+  }
 }

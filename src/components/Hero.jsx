@@ -1,7 +1,7 @@
 function Hero() {
   return (
     <section className="hero">
-      <span className="badge">Développeur Full-Stack · Paris</span>
+      <span className="badge">2 ans Développeur Full-Stack Junior · Paris</span>
 
       <h1>
         Je transforme des idées en{" "}
