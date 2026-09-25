@@ -1,7 +1,7 @@
-function Hero() {
+function Hero({ onContactClick }) {
   return (
     <section className="hero">
-      <span className="badge">2 ans Développeur Full-Stack Junior · Paris</span>
+      <span className="badge">2 ans · Développeur Full-Stack · Paris</span>
 
       <h1>
         Je transforme des idées en{" "}
@@ -17,9 +17,13 @@ function Hero() {
         <a href="#projects" className="btn btn-primary">
           Voir mes projets
         </a>
-        <a href="#contact" className="btn btn-secondary">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onContactClick}
+        >
           Me contacter
-        </a>
+        </button>
       </div>
     </section>
   );
