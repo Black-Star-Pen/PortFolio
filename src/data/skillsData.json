@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "title": "Front-End",
+    "description": "Des interfaces rapides et soignées, de la maquette à l'intégration.",
+    "technos": ["React", "Angular", "JavaScript", "TypeScript"]
+  },
+  {
+    "id": 2,
+    "title": "Back-End",
+    "description": "Des API robustes et des bases de données bien structurées.",
+    "technos": [
+      "Node.js",
+      "Express",
+      "NestJS",
+      "Python",
+      "PostgreSQL",
+      "MySQL",
+      "Prisma"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Mobile",
+    "description": "Des applications multiplateformes avec une seule base de code.",
+    "technos": ["Flutter", "Dart"]
+  },
+  {
+    "id": 4,
+    "title": "Outils",
+    "description": "Versioning, conteneurs, maquettes et organisation agile en équipe.",
+    "technos": ["Git", "Docker", "Figma", "Trello"]
+  }
+]
