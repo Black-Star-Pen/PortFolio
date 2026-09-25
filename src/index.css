@@ -7,6 +7,7 @@
   --color-muted: #9a9ca5;
   --color-accent: #d6bf94;
   --color-steel: #8fb3c9;
+  --color-error: #e3a08f;
 
   --font-body: "Inter", system-ui, sans-serif;
   --font-title: "Space Grotesk", system-ui, sans-serif;
@@ -87,6 +88,18 @@ section {
   color: var(--color-accent);
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -106,37 +119,78 @@ section {
   background-color: var(--color-accent);
 }
 
+/* Les boutons, façon plan technique */
 .btn {
-  display: inline-block;
-  padding: 14px 28px;
-  border-radius: 999px;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  padding: 14px 24px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   transition:
-    transform 0.2s,
-    background-color 0.2s;
+    color 0.35s,
+    border-color 0.35s,
+    background-color 0.35s;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .btn-primary {
-  background-color: var(--color-text);
+  border-color: var(--color-accent);
+  background-color: rgba(214, 191, 148, 0.08);
+  color: var(--color-accent);
+}
+
+/* Remplissage doré au survol, comme un cordon de soudure */
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
   color: var(--color-bg);
 }
 
+.btn-primary:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}
+
 .btn-secondary {
-  border: 1px solid var(--color-border);
+  border-color: var(--color-border);
   color: var(--color-text);
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(214, 191, 148, 0.5);
+  background-color: rgba(214, 191, 148, 0.06);
 }
 
 .btn-small {
-  padding: 10px 20px;
-  font-size: 0.9rem;
+  padding: 10px 16px;
+  font-size: 0.72rem;
 }
 
 /* ===== 7. Hero ===== */
@@ -231,7 +285,6 @@ section {
   padding-left: 48px;
 }
 
-/* La ligne en pointillés */
 .timeline-track {
   position: absolute;
   top: 8px;
@@ -245,7 +298,6 @@ section {
   );
 }
 
-/* Le cordon soudé */
 .timeline-weld {
   position: absolute;
   inset: 0;
@@ -255,7 +307,6 @@ section {
   transform-origin: top;
 }
 
-/* L'étincelle */
 .timeline-spark {
   position: absolute;
   top: calc(var(--progress) * 100%);
@@ -278,7 +329,6 @@ section {
   opacity: 1;
 }
 
-/* Les opérations */
 .timeline-list {
   list-style: none;
   display: flex;
@@ -349,7 +399,6 @@ section {
   color: var(--color-muted);
 }
 
-/* Les pastilles de type et de statut */
 .timeline-type {
   padding: 2px 10px;
   border: 1px solid var(--color-border);
@@ -526,7 +575,6 @@ section {
   background-size: 24px 24px;
 }
 
-/* Le conteneur des tiroirs et ses flèches */
 .skills-tabs-wrapper {
   position: relative;
   min-width: 0;
@@ -548,7 +596,6 @@ section {
   }
 }
 
-/* Les tiroirs */
 .skills-tabs {
   display: flex;
   flex-direction: column;
@@ -593,7 +640,6 @@ section {
   color: var(--color-accent);
 }
 
-/* Le cartouche */
 .skill-panel {
   position: relative;
   display: flex;
@@ -629,7 +675,6 @@ section {
   padding: 0 24px;
 }
 
-/* Les outils */
 .tool-grid {
   list-style: none;
   display: grid;
@@ -666,7 +711,6 @@ section {
   color: var(--color-muted);
 }
 
-/* Le pied du cartouche */
 .cartouche-footer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -699,6 +743,12 @@ section {
 /* Soudure des tiroirs : réglage indépendant */
 .skills-tab .weld {
   --weld-side: 0s;
+  --weld-start: 0s;
+}
+
+/* Soudure de l'ordre de fabrication : réglage indépendant */
+.work-order .weld {
+  --weld-side: 0.4s;
   --weld-start: 0s;
 }
 
@@ -830,7 +880,451 @@ section {
   }
 }
 
-/* ===== 13. Modale ===== */
+/* ===== 13. Contact ===== */
+
+/* L'ordre de fabrication (en premier) */
+.work-order {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  border: 1px solid rgba(214, 191, 148, 0.3);
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(rgba(214, 191, 148, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 191, 148, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.work-order-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(214, 191, 148, 0.3);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.work-order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  border: none;
+}
+
+.form-field label,
+.form-field legend {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.form-field legend {
+  margin-bottom: 8px;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--color-text);
+  background-color: rgba(10, 11, 15, 0.7);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.form-field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: rgba(154, 156, 165, 0.5);
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(214, 191, 148, 0.15);
+}
+
+/* Saisie automatique de Chrome : on garde le fond sombre au lieu du bleu clair */
+.form-field input:-webkit-autofill,
+.form-field input:-webkit-autofill:hover,
+.form-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px #0d0e13 inset;
+  caret-color: var(--color-text);
+  transition: background-color 9999s;
+}
+
+.form-field [aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: var(--color-error);
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
+
+/* Un champ en erreur : son libellé passe aussi en couleur d'erreur */
+.form-field.has-error > label,
+.form-field.has-error > legend {
+  color: var(--color-error);
+}
+
+.form-error {
+  animation: error-in 0.3s ease-out;
+}
+
+@keyframes error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-optional {
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.7;
+}
+
+/* La fiche de poste (recrutement) */
+.recruit-block {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 20px;
+  border: 1px dashed rgba(143, 179, 201, 0.45);
+  background-color: rgba(143, 179, 201, 0.04);
+  animation: recruit-in 0.4s ease-out;
+}
+
+.recruit-block-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+
+@keyframes recruit-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Les types de demande (accessibles avec Tab) */
+.type-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.type-option {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  transition:
+    color 0.3s,
+    border-color 0.3s,
+    background-color 0.3s;
+}
+
+.type-option:hover {
+  color: var(--color-text);
+  border-color: rgba(214, 191, 148, 0.4);
+}
+
+.type-option.selected {
+  color: var(--color-bg);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.type-option:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.work-order-submit {
+  align-self: flex-end;
+}
+
+/* La validation */
+.work-order-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.stamp {
+  padding: 8px 24px;
+  border: 4px double var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  transform: rotate(-8deg);
+  animation: stamp-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(2.2);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+.work-order-success h3 {
+  font-size: 1.6rem;
+}
+
+/* Le séparateur */
+.contact-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 760px;
+  margin: 48px auto 24px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.contact-divider::before,
+.contact-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* Le contact direct : un panneau surélevé (en dessous) */
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  border: 1px solid rgba(214, 191, 148, 0.3);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(214, 191, 148, 0.07), transparent 70%),
+    var(--color-surface);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 48px -20px rgba(0, 0, 0, 0.8),
+    0 0 40px -10px rgba(214, 191, 148, 0.15);
+}
+
+.contact-links-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.contact-links-title::before,
+.contact-links-title::after {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background-color: var(--color-accent);
+  opacity: 0.5;
+}
+
+.contact-links-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.contact-links .btn {
+  padding: 12px 20px;
+  font-size: 0.78rem;
+  background-color: rgba(10, 11, 15, 0.6);
+}
+
+.contact-links .btn:hover {
+  border-color: var(--color-accent);
+  background-color: rgba(214, 191, 148, 0.1);
+}
+
+.link-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.icon-in {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.copy-email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.annotation {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 190px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  opacity: 0.8;
+}
+
+.annotation svg {
+  flex-shrink: 0;
+  width: 44px;
+  height: 22px;
+}
+
+/* Liens en version compacte (dans la modale) */
+.contact-links.compact {
+  max-width: none;
+  gap: 14px;
+  padding: 20px 24px 24px;
+  border: none;
+  border-top: 1px dashed rgba(214, 191, 148, 0.3);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.contact-links.compact .contact-links-title {
+  color: var(--color-muted);
+}
+
+/* La modale de contact rapide */
+.contact-modal {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(214, 191, 148, 0.4);
+  background-color: var(--color-surface);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  animation: pop-in 0.3s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(214, 191, 148, 0.4) transparent;
+}
+
+.contact-modal-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px 12px 24px;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid rgba(214, 191, 148, 0.3);
+}
+
+.contact-modal-bar p {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.contact-modal-bar .modal-close {
+  position: static;
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+}
+
+.contact-modal .work-order {
+  max-width: none;
+  border: none;
+}
+
+/* ===== 14. Modale ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -922,7 +1416,7 @@ section {
   }
 }
 
-/* ===== 14. Navbar ===== */
+/* ===== 15. Navbar ===== */
 .navbar {
   position: sticky;
   top: 0;
@@ -968,7 +1462,7 @@ section {
   display: none;
 }
 
-/* ===== 15. Burger ===== */
+/* ===== 16. Burger ===== */
 .navbar-burger {
   display: none;
   flex-direction: column;
@@ -1005,7 +1499,7 @@ section {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ===== 16. Mobile ===== */
+/* ===== 17. Mobile ===== */
 @media (max-width: 768px) {
   /* Navbar */
   .navbar-burger {
@@ -1111,7 +1605,6 @@ section {
     flex-shrink: 0;
   }
 
-  /* Les flèches */
   .tabs-arrow {
     position: absolute;
     top: 0;
@@ -1146,7 +1639,6 @@ section {
     animation: nudge-right 1.2s ease-in-out infinite;
   }
 
-  /* Le cartouche compact */
   .cartouche-header {
     padding: 12px 16px;
   }
@@ -1177,9 +1669,47 @@ section {
   .cartouche-footer span {
     padding: 10px 12px;
   }
+
+  /* Contact */
+  .work-order-header {
+    padding: 12px 16px;
+  }
+
+  .work-order-form {
+    padding: 24px 16px;
+  }
+
+  .work-order-submit {
+    align-self: stretch;
+  }
+
+  .contact-links {
+    padding: 24px 16px;
+  }
+
+  .copy-email {
+    flex-direction: column;
+  }
+
+  .annotation {
+    max-width: none;
+  }
+
+  .annotation svg {
+    transform: rotate(60deg);
+  }
+
+  .contact-modal {
+    max-height: 100dvh;
+  }
+
+  .contact-links.compact .contact-links-list {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
-/* ===== 17. Accessibilité : animations réduites ===== */
+/* ===== 18. Accessibilité : animations réduites ===== */
 @media (prefers-reduced-motion: reduce) {
   .weld-line {
     animation: none;
@@ -1198,5 +1728,14 @@ section {
 
   .timeline-spark {
     display: none;
+  }
+
+  .stamp {
+    animation: none;
+  }
+
+  .form-error,
+  .recruit-block {
+    animation: none;
   }
 }

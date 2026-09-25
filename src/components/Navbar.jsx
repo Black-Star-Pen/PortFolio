@@ -5,11 +5,11 @@ const links = [
   { href: "#skills", label: "Compétences" },
   { href: "#projects", label: "Projets" },
   { href: "#contact", label: "Contact" },
-  
 ];
 
-function Navbar() {
+function Navbar({ onContactClick }) {
   const [isOpen, setIsOpen] = useState(false);
+
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
   }, [isOpen]);
@@ -17,6 +17,7 @@ function Navbar() {
   function closeMenu() {
     setIsOpen(false);
   }
+
   return (
     <header className="navbar">
       <div className="navbar-inner">
@@ -40,10 +41,16 @@ function Navbar() {
           ))}
         </nav>
 
-        <a href="#contact" className="btn btn-primary btn-small navbar-cta">
-          Me contacter
-        </a>
         <button
+          type="button"
+          className="btn btn-primary btn-small navbar-cta"
+          onClick={onContactClick}
+        >
+          Me contacter
+        </button>
+
+        <button
+          type="button"
           className={`navbar-burger ${isOpen ? "open" : ""}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
