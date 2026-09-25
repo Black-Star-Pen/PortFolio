@@ -18,6 +18,7 @@ const technoIcons = {
   Git: "git",
   Docker: "docker",
   Figma: "figma",
+  Trello: "trello",
 };
 
 export default technoIcons;

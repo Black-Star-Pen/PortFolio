@@ -2,7 +2,7 @@ import { useState } from "react";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import SectionTitle from "./SectionTitle";
-import projectsData from "../data/projectsdata.json";
+import projectsData from "../data/projectsData.json";
 
 function Projects() {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -11,7 +11,7 @@ function Projects() {
     <section id="projects">
       <SectionTitle
         label="Réalisations"
-        title="Des rêves devenues"
+        title="Des idées devenues"
         accent="des projets concrets."
         subtitle="Quelques projets conçus et développés de la maquette à la mise en ligne."
       />
