@@ -1,0 +1,17 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "API du portfolio : réception des messages de contact",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=.env --watch index.js",
+    "start": "node --env-file=.env index.js"
+  },
+  "keywords": [],
+  "author": "Adam Boulkhedert",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

@@ -6,7 +6,7 @@ function Contact() {
   return (
     <section id="contact">
       <SectionTitle
-        label="Contacte"
+        label="Contact"
         title="Un projet à lancer ?"
         accent="Passons commande."
         subtitle="Une idée, une mission ou une offre de poste : remplissez l'ordre de fabrication ou écrivez-moi directement, je vous réponds sous 48 heures."
