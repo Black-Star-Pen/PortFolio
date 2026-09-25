@@ -1,0 +1,43 @@
+[
+  {
+    "id": 1,
+    "type": "formation",
+    "date": "2021-2022",
+    "title": "BTS Chaudronnerie industrielle",
+    "place": "Argenteuil · Alternance",
+    "description": "Conception et réalisation de plans métallurgiques. J'y ai appris à lire un plan, à respecter une cote au millimètre et à ne rien laisser au hasard."
+  },
+  {
+    "id": 2,
+    "type": "experience",
+    "date": "2022-2025",
+    "title": "Serveur en hôtellerie 4 et 5 étoiles",
+    "place": "Hôtel Newport, Pullman Paris La Défense, Disneyland Paris",
+    "description": "Service haut de gamme et événementiel. Le travail en équipe, la gestion des priorités et l'exigence du détail, face à une clientèle qui ne pardonne rien."
+  },
+  {
+    "id": 3,
+    "type": "formation",
+    "date": "2024",
+    "title": "Bac+2 Développeur web et web mobile",
+    "place": "WildCode School · Paris",
+    "description": "Ma reconversion : les bases du développement full stack, de la maquette à l'intégration, en méthode agile."
+  },
+  {
+    "id": 4,
+    "type": "experience",
+    "date": "Sept. - Nov. 2024",
+    "title": "Développeur WordPress",
+    "place": "Stage · Projet indépendant · Paris",
+    "description": "Conception et développement de sites en autonomie, du besoin client à la mise en ligne."
+  },
+  {
+    "id": 5,
+    "type": "formation",
+    "date": "2025-2026",
+    "title": "Concepteur développeur full stack",
+    "status": "Titre non obtenu",
+    "place": "Digital Campus · Paris",
+    "description": "Conception et architecture d'applications de bout en bout. Maîtrise de nouveaux outils de conteneurisation (Docker, etc.) et de déploiement."
+  }
+]
