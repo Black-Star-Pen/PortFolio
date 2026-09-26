@@ -14,8 +14,8 @@ app.use(express.json({ limit: "10kb" }));
 
 // Limite d'envoi : 5 messages maximum par visiteur toutes les 15 minutes
 const contactLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
+  windowMs: 5 * 60 * 1000,
+  limit: 3,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
