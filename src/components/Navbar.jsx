@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router";
 
 const links = [
-  { href: "#about", label: "À propos" },
-  { href: "#skills", label: "Compétences" },
-  { href: "#projects", label: "Projets" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#about", label: "À propos" },
+  { href: "/#skills", label: "Compétences" },
+  { href: "/#projects", label: "Projets" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 function Navbar({ onContactClick }) {
@@ -21,21 +22,14 @@ function Navbar({ onContactClick }) {
   return (
     <header className="navbar">
       <div className="navbar-inner">
-        <a href="#" className="navbar-logo" onClick={closeMenu}>
+        <Link to="/" className="navbar-logo" onClick={closeMenu}>
           ADAM <span className="accent">BOULKHEDERT</span>
-        </a>
+        </Link>
 
         <nav className={`navbar-links ${isOpen ? "open" : ""}`}>
           {links.map((link, index) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={closeMenu}
-              style={{ "--i": index }}
-            >
-              <span className="navbar-link-number">
-                {String(index + 1).padStart(2, "0")}
-              </span>
+            <a key={link.href} href={link.href} onClick={closeMenu} style={{ "--i": index }}>
+              <span className="navbar-link-number">{String(index + 1).padStart(2, "0")}</span>
               {link.label}
             </a>
           ))}

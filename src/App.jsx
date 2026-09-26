@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { Routes, Route } from "react-router";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import About from "./components/About";
-import Skills from "./components/Skills";
-import Projects from "./components/Projects";
-import Contact from "./components/Contact";
+import Footer from "./components/Footer.jsx";
 import ContactModal from "./components/ContactModal";
+import ScrollToTop from "./components/ScrollToTop";
+import HomePage from "./pages/HomePage";
+import LegalNotice from "./pages/LegalNotice";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import NotFound from "./pages/NotFound";
 
 function App() {
   // L'état est "remonté" ici : Navbar et Hero peuvent tous les deux ouvrir la modale
@@ -21,14 +23,20 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Navbar onContactClick={openContact} />
+
       <main>
-        <Hero onContactClick={openContact} />
-        <About />
-        <Skills />
-        <Projects />
-        <Contact />
+        {/* Chaque adresse affiche une page différente */}
+        <Routes>
+          <Route path="/" element={<HomePage onContactClick={openContact} />} />
+          <Route path="/mentions-legales" element={<LegalNotice />} />
+          <Route path="/confidentialite" element={<PrivacyPolicy />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
+
+      <Footer />
 
       {isContactOpen && <ContactModal onClose={closeContact} />}
     </>

@@ -640,6 +640,14 @@ function ContactForm() {
             )}
           </div>
 
+          {/* Information RGPD : dans un nouvel onglet, pour ne pas perdre la saisie */}
+          <p className="form-privacy">
+            Vos données servent uniquement à répondre à votre demande.{" "}
+            <a href="/confidentialite" target="_blank" rel="noreferrer">
+              Politique de confidentialité ↗
+            </a>
+          </p>
+
           {submitError && (
             <p className="form-alert" role="alert">
               {submitError}
