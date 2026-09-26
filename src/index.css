@@ -740,6 +740,22 @@ section {
   pointer-events: none;
 }
 
+/* Variante bleue : l'arc blanc bleuté du soudage TIG */
+.weld-blue {
+  --weld-color: var(--color-steel);
+  --weld-glow: rgba(120, 190, 255, 0.8);
+  --spark-core: #f2f9ff;
+  --spark-inner: #d6ecff;
+  --spark-middle: rgba(120, 190, 255, 0.85);
+  --spark-outer: rgba(60, 130, 255, 0.45);
+}
+
+/* Soudure du cartouche du footer : un long cadre, donc un tour un peu plus lent */
+.footer-cartouche .weld {
+  --weld-side: 0.8s;
+  --weld-start: 0.2s;
+}
+
 /* Soudure des tiroirs : réglage indépendant */
 .skills-tab .weld {
   --weld-side: 0s;
@@ -754,8 +770,8 @@ section {
 
 .weld-line {
   position: absolute;
-  background-color: var(--color-accent);
-  box-shadow: 0 0 8px rgba(214, 191, 148, 0.7);
+  background-color: var(--weld-color, var(--color-accent));
+  box-shadow: 0 0 8px var(--weld-glow, rgba(214, 191, 148, 0.7));
 }
 
 .weld-top {
@@ -814,11 +830,11 @@ section {
   height: 8px;
   margin: -3px 0 0 -3px;
   border-radius: 50%;
-  background-color: #fffbe8;
+  background-color: var(--spark-core, #fffbe8);
   box-shadow:
-    0 0 6px 2px #fff1c1,
-    0 0 16px 6px rgba(214, 191, 148, 0.8),
-    0 0 32px 12px rgba(214, 150, 60, 0.4);
+    0 0 6px 2px var(--spark-inner, #fff1c1),
+    0 0 16px 6px var(--spark-middle, rgba(214, 191, 148, 0.8)),
+    0 0 32px 12px var(--spark-outer, rgba(214, 150, 60, 0.4));
   opacity: 0;
   animation:
     weld-travel calc(var(--weld-side) * 4) linear var(--weld-start) forwards,
@@ -1047,6 +1063,16 @@ section {
 .form-hint {
   font-size: 0.85rem;
   color: var(--color-accent);
+}
+
+/* La mention de confidentialité sous le formulaire */
+.form-privacy {
+  font-size: 0.8rem;
+}
+
+.form-privacy a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Le message d'échec d'envoi */
@@ -1594,7 +1620,166 @@ section {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ===== 17. Mobile ===== */
+/* ===== 17. Footer ===== */
+.footer {
+  margin-top: 40px;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(rgba(214, 191, 148, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 191, 148, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 56px 24px 32px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.footer-brand p {
+  max-width: 320px;
+  font-size: 0.95rem;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.footer-col-title {
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.footer-col a {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  transition: color 0.3s;
+}
+
+.footer-col a:hover {
+  color: var(--color-text);
+}
+
+/* Le cartouche du plan */
+.footer-cartouche {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid rgba(143, 179, 201, 0.35);
+}
+
+.footer-cartouche > span {
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.footer-cartouche > span + span {
+  border-left: 1px solid rgba(143, 179, 201, 0.35);
+}
+
+/* ===== 18. Pages légales et 404 ===== */
+.legal-page {
+  min-height: 70vh;
+}
+
+.legal-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.legal-content h3 {
+  margin: 36px 0 12px;
+  font-size: 1.2rem;
+  color: var(--color-accent);
+}
+
+.legal-content h3:first-child,
+.legal-updated + h3 {
+  margin-top: 0;
+}
+
+.legal-content p,
+.legal-content li {
+  line-height: 1.8;
+}
+
+.legal-content p + p {
+  margin-top: 12px;
+}
+
+.legal-content ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  padding-left: 20px;
+  color: var(--color-muted);
+}
+
+.legal-content strong {
+  color: var(--color-text);
+}
+
+.legal-content a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-updated {
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.not-found {
+  min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.not-found-code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--color-accent);
+}
+
+/* ===== 19. Mobile ===== */
 @media (max-width: 768px) {
   /* Navbar */
   .navbar-burger {
@@ -1804,7 +1989,34 @@ section {
   }
 }
 
-/* ===== 18. Accessibilité : animations réduites ===== */
+/* Footer et pages légales sur mobile */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-cartouche {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-cartouche > span:nth-child(3) {
+    border-left: none;
+  }
+
+  .footer-cartouche > span:nth-child(n + 3) {
+    border-top: 1px solid rgba(143, 179, 201, 0.35);
+  }
+
+  .legal-content {
+    padding: 24px 20px;
+  }
+}
+
+/* ===== 20. Accessibilité : animations réduites ===== */
 @media (prefers-reduced-motion: reduce) {
   .weld-line {
     animation: none;
