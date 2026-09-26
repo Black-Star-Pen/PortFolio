@@ -1049,6 +1049,43 @@ section {
   color: var(--color-accent);
 }
 
+/* Le message d'échec d'envoi */
+.form-alert {
+  padding: 12px 16px;
+  border: 1px solid rgba(227, 160, 143, 0.5);
+  border-left-width: 3px;
+  background-color: rgba(227, 160, 143, 0.08);
+  font-size: 0.9rem;
+  color: var(--color-error);
+  animation: error-in 0.3s ease-out;
+}
+
+/* La suggestion de correction d'email */
+.form-suggestion {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.form-suggestion button {
+  padding: 0;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.form-suggestion button:hover {
+  color: var(--color-text);
+}
+
+/* Le champ piège : hors de l'écran, invisible pour un humain */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .form-status {
   font-size: 0.8rem;
   color: var(--color-muted);

@@ -1,3 +1,5 @@
+import { resolveMx } from "node:dns/promises";
+
 // Les valeurs autorisées pour les champs à choix
 const REQUEST_TYPES = ["site", "application", "recrutement", "autre"];
 const CONTRACT_TYPES = ["cdi", "cdd", "alternance", "stage", "freelance"];
@@ -15,7 +17,35 @@ const MAX_LENGTH = {
 };
 
 const NAME_PATTERN = /^\p{L}[\p{L}\s'’-]*$/u;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Forme stricte : caractères autorisés, un seul @, et une extension d'au moins 2 lettres
+const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+
+function isEmailValid(email) {
+  return EMAIL_PATTERN.test(email) && !email.includes("..") && !email.startsWith(".") && !email.includes(".@");
+}
+
+// Garde en mémoire les domaines déjà vérifiés, pour ne pas interroger le DNS à chaque fois
+const mailServerCache = new Map();
+
+// Le domaine de l'adresse possède-t-il un serveur de messagerie ?
+async function hasMailServer(domain) {
+  if (mailServerCache.has(domain)) return mailServerCache.get(domain);
+
+  try {
+    const records = await resolveMx(domain);
+    const result = records.length > 0;
+    mailServerCache.set(domain, result);
+    return result;
+  } catch (error) {
+    // Le domaine n'existe pas, ou n'a aucun serveur de messagerie
+    if (error.code === "ENOTFOUND" || error.code === "ENODATA") {
+      mailServerCache.set(domain, false);
+      return false;
+    }
+    // DNS injoignable : on ne bloque pas un vrai visiteur
+    return true;
+  }
+}
 
 // Transforme n'importe quelle valeur en texte propre (sans espaces autour)
 function clean(value) {
@@ -62,8 +92,10 @@ export async function validateContact(body = {}) {
   if (!NAME_PATTERN.test(data.lastName)) {
     errors.lastName = "Nom invalide.";
   }
-  if (!EMAIL_PATTERN.test(data.email)) {
+  if (!isEmailValid(data.email)) {
     errors.email = "Adresse email invalide.";
+  } else if (!(await hasMailServer(data.email.split("@")[1]))) {
+    errors.email = "Ce domaine ne reçoit pas d'emails. Vérifiez l'adresse.";
   }
   if (data.message.length < 20) {
     errors.message = "Le message doit contenir au moins 20 caractères.";
