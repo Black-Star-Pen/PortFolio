@@ -446,6 +446,7 @@ section {
 }
 
 .project-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background-color: var(--color-surface);
@@ -475,8 +476,89 @@ section {
   transition: transform 0.5s;
 }
 
-.project-card:hover .project-image img {
+.project-card:hover .project-image img,
+.project-card:hover .project-image .project-placeholder {
   transform: scale(1.05);
+}
+
+/* Le bouton du titre : sa zone cliquable (::after) recouvre toute la carte */
+.project-open {
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+}
+
+.project-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.project-open:focus-visible {
+  outline: none;
+}
+
+/* Au clavier, c'est toute la carte qui s'entoure */
+.project-card:has(.project-open:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-color: rgba(214, 191, 148, 0.35);
+}
+
+/* Le visuel de remplacement : un plan quadrillé, en attendant les captures */
+.project-placeholder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  background-color: #0d0f14;
+  background-image:
+    linear-gradient(rgba(143, 179, 201, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 179, 201, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: center;
+  transition: transform 0.5s;
+}
+
+/* Le cadre en pointillés du plan */
+.project-placeholder::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border: 1px dashed rgba(214, 191, 148, 0.3);
+  pointer-events: none;
+}
+
+.project-placeholder-ref,
+.project-placeholder-note {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.project-placeholder-ref {
+  color: var(--color-steel);
+}
+
+.project-placeholder-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-accent);
+}
+
+.project-placeholder-note {
+  color: var(--color-muted);
 }
 
 .project-header {
@@ -1185,31 +1267,36 @@ section {
 }
 
 .type-option {
-  padding: 8px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 2px;
-  font-size: 0.9rem;
-  color: var(--color-muted);
-  transition:
-    color 0.3s,
-    border-color 0.3s,
-    background-color 0.3s;
+  /* Le style vient de .btn .btn-primary .btn-small : ici, seulement l'état « choisi » */
+  letter-spacing: 0.1em;
 }
 
-.type-option:hover {
-  color: var(--color-text);
-  border-color: rgba(214, 191, 148, 0.4);
-}
-
+/* L'option choisie reste remplie de doré, comme un bouton survolé */
 .type-option.selected {
   color: var(--color-bg);
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
 }
 
-.type-option:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+.type-option.selected::before {
+  transform: scaleX(1);
+}
+
+/* « Recrutement » ressort : bleu acier (la couleur de la fiche de poste), léger halo et une mallette */
+.type-option-steel {
+  border-color: var(--color-steel);
+  background-color: rgba(143, 179, 201, 0.1);
+  color: var(--color-steel);
+  box-shadow: 0 0 18px -4px rgba(143, 179, 201, 0.45);
+}
+
+/* Le remplissage au survol et à la sélection passe aussi en bleu acier */
+.type-option-steel::before {
+  background-color: var(--color-steel);
+}
+
+.type-option-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .work-order-submit {
@@ -1459,6 +1546,9 @@ section {
 }
 
 .modal {
+  /* La marge intérieure est dans une variable : le contenu et la barre de boutons s'en servent */
+  --modal-padding: 32px;
+
   position: relative;
   width: 100%;
   max-width: 860px;
@@ -1483,11 +1573,102 @@ section {
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  padding: 32px;
+  padding: var(--modal-padding);
 }
 
 .modal-content h3 {
   font-size: 2rem;
+}
+
+/* L'accroche du projet, juste sous le titre */
+.project-lead {
+  font-size: 1.05rem;
+  color: var(--color-text);
+}
+
+/* Les rubriques : Contexte, Mon rôle, Le défi, Ce que j'ai appris */
+.project-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  margin: 8px 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.project-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Titre de rubrique : doré discret, précédé d'un petit trait (comme les libellés du formulaire) */
+.project-detail h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.project-detail h4::before {
+  content: "";
+  width: 16px;
+  height: 1px;
+  background-color: currentColor;
+}
+
+/* La liste « Mon rôle » : de petits repères carrés à la place des puces */
+.project-role {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.project-role li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--color-muted);
+}
+
+.project-role li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--color-accent);
+  transform: rotate(45deg);
+}
+
+/* La rubrique « Stack technique » */
+.project-stack {
+  width: 100%;
+  gap: 12px;
+}
+
+/* Les boutons « Voir le site » et « Voir le code » */
+.project-actions {
+  /* sticky + bottom: 0 : la barre reste collée en bas de la modale pendant tout le défilement,
+     puis se range à sa place, tout en bas, quand on y arrive.
+     Elle est placée directement dans .modal (la boîte qui défile) pour être visible dès l'ouverture. */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px var(--modal-padding);
+  border-top: 1px solid rgba(214, 191, 148, 0.25);
+  background-color: rgba(17, 19, 24, 0.92);
+  backdrop-filter: blur(8px);
 }
 
 .modal-close {
@@ -1781,6 +1962,19 @@ section {
 
 /* ===== 19. Mobile ===== */
 @media (max-width: 768px) {
+  /* Modale projet : moins de marge, boutons pleine largeur */
+  .modal {
+    --modal-padding: 24px;
+  }
+
+  .modal-content h3 {
+    font-size: 1.6rem;
+  }
+
+  .project-actions .btn {
+    flex: 1 1 100%;
+  }
+
   /* Navbar */
   .navbar-burger {
     display: flex;
