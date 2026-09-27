@@ -12,8 +12,8 @@ function Projects() {
   const { hash } = useLocation();
 
   const selectedSlug = searchParams.get("projet");
-  // Un nom inconnu dans l'adresse (?projet=nimportequoi) : find renvoie undefined, pas de modale
-  const selectedProject = projectsData.find((project) => project.slug === selectedSlug);
+  const selectedIndex = projectsData.findIndex((project) => project.slug === selectedSlug);
+  const selectedProject = projectsData[selectedIndex]; // index -1 → undefined : pas de modale
 
   // Ouvre un projet (slug) ou ferme la modale (null) en changeant l'adresse.
   // - replace : on remplace l'adresse au lieu d'en ajouter une à l'historique
@@ -32,9 +32,10 @@ function Projects() {
       />
 
       <div className="projects-grid">
-        {projectsData.map((project) => (
+        {projectsData.map((project, index) => (
           <ProjectCard
             key={project.id}
+            number={index + 1}
             title={project.title}
             category={project.category}
             description={project.description}
@@ -46,7 +47,11 @@ function Projects() {
       </div>
 
       {selectedProject && (
-        <ProjectModal project={selectedProject} onClose={() => changeProject(null)} />
+        <ProjectModal
+          project={selectedProject}
+          number={selectedIndex + 1}
+          onClose={() => changeProject(null)}
+        />
       )}
     </section>
   );

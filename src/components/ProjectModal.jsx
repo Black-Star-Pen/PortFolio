@@ -1,9 +1,10 @@
 import { useEffect, useId, useRef } from "react";
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
+import RichText from "./RichText";
 
-function ProjectModal({ project, onClose }) {
-  const { title, category, description, details, technos, image, links } = project;
+function ProjectModal({ project, number, onClose }) {
+  const { title, category, description, details, technos, image, links, linksNote } = project;
   const titleId = useId();
   const closeButtonRef = useRef(null);
 
@@ -45,16 +46,25 @@ function ProjectModal({ project, onClose }) {
         <ProjectImage image={image} title={title} className="modal-image" />
 
         <div className="modal-content">
-          <span className="project-category">{category}</span>
-          <h3 id={titleId}>{title}</h3>
-          <p className="project-lead">{description}</p>
+          <span className="project-category">
+            <span className="project-ref">N° {String(number).padStart(2, "0")}</span>
+            {category}
+          </span>
+          <h3 id={titleId} className="project-title">
+            {title}
+          </h3>
+          <p className="project-lead">
+            <RichText text={description} />
+          </p>
 
           {details && (
             <div className="project-details">
               {details.context && (
                 <div className="project-detail">
                   <h4>Contexte</h4>
-                  <p>{details.context}</p>
+                  <p>
+                    <RichText text={details.context} />
+                  </p>
                 </div>
               )}
 
@@ -63,7 +73,9 @@ function ProjectModal({ project, onClose }) {
                   <h4>Mon rôle</h4>
                   <ul className="project-role">
                     {details.role.map((item) => (
-                      <li key={item}>{item}</li>
+                      <li key={item}>
+                        <RichText text={item} />
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -72,14 +84,18 @@ function ProjectModal({ project, onClose }) {
               {details.challenge && (
                 <div className="project-detail">
                   <h4>Le défi</h4>
-                  <p>{details.challenge}</p>
+                  <p>
+                    <RichText text={details.challenge} />
+                  </p>
                 </div>
               )}
 
               {details.learned && (
                 <div className="project-detail">
                   <h4>Ce que j'ai appris</h4>
-                  <p>{details.learned}</p>
+                  <p>
+                    <RichText text={details.learned} />
+                  </p>
                 </div>
               )}
             </div>
@@ -111,6 +127,12 @@ function ProjectModal({ project, onClose }) {
                 <span className="sr-only"> (nouvel onglet)</span>
               </a>
             ))}
+            {/* Une petite précision facultative sous les boutons (ex. : site lent au premier chargement) */}
+            {linksNote && (
+              <p className="project-actions-note">
+                <RichText text={linksNote} />
+              </p>
+            )}
           </div>
         )}
       </div>

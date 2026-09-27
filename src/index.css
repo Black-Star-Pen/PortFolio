@@ -509,6 +509,8 @@ section {
 
 /* Le visuel de remplacement : un plan quadrillé, en attendant les captures */
 .project-placeholder {
+  /* Le visuel devient un « conteneur » : ses textes peuvent se régler sur SA largeur (unité cqi) */
+  container-type: inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -551,7 +553,10 @@ section {
 
 .project-placeholder-title {
   font-family: var(--font-title);
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  /* 8cqi = 8 % de la largeur du visuel (et non de la fenêtre) : le titre tient dans la carte comme dans la modale */
+  font-size: clamp(1.1rem, 8cqi, 2.6rem);
+  line-height: 1.1;
+  text-wrap: balance;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--color-accent);
@@ -570,6 +575,11 @@ section {
 }
 
 .project-category {
+  /* flex : le numéro et la catégorie restent alignés, même quand la ligne se coupe */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 6px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -578,7 +588,31 @@ section {
 }
 
 .project-header h3 {
+  margin-top: 8px;
   font-size: 1.4rem;
+}
+
+/* Le numéro du projet, comme une référence de plan : « N° 01 » */
+.project-ref {
+  display: inline-block;
+  margin-right: 10px;
+  padding: 1px 8px;
+  border: 1px solid rgba(214, 191, 148, 0.4);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+}
+
+/* Le titre d'un projet */
+.project-title {
+  width: fit-content;
+  line-height: 1.2;
+}
+
+/* Les mots importants, écrits **ainsi** dans le JSON : la couleur dorée des boutons principaux */
+.highlight {
+  font-weight: 600;
+  color: var(--color-accent);
 }
 
 .project-link {
@@ -640,6 +674,14 @@ section {
   border-color: var(--color-accent);
   color: var(--color-text);
   background-color: rgba(214, 191, 148, 0.08);
+}
+
+/* Le badge « +8 » : les technos restantes, visibles dans la modale */
+.project-technos .tech-badge-more {
+  padding: 4px 12px;
+  border-style: dashed;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
 }
 
 /* ===== 12. Compétences : l'établi ===== */
@@ -1652,6 +1694,12 @@ section {
 .project-stack {
   width: 100%;
   gap: 12px;
+}
+
+/* La précision sous les boutons : sur sa propre ligne, petite et discrète */
+.project-actions-note {
+  flex-basis: 100%;
+  font-size: 0.8rem;
 }
 
 /* Les boutons « Voir le site » et « Voir le code » */
