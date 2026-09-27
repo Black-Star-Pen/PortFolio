@@ -1,8 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
 import TechBadge from "./TechBadge";
+import ProjectImage from "./ProjectImage";
 
 function ProjectModal({ project, onClose }) {
+  const { title, category, description, details, technos, image, links } = project;
+  const titleId = useId();
+  const closeButtonRef = useRef(null);
+
   useEffect(() => {
+    // On retient l'élément qui avait le focus (la carte cliquée)...
+    const previousFocus = document.activeElement;
+    // ...et on place le focus dans la modale
+    closeButtonRef.current.focus();
     document.body.style.overflow = "hidden";
 
     function handleKeyDown(event) {
@@ -15,43 +24,95 @@ function ProjectModal({ project, onClose }) {
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
+      // À la fermeture, le focus revient sur la carte
+      previousFocus?.focus();
     };
   }, [onClose]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="Fermer">
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button ref={closeButtonRef} className="modal-close" onClick={onClose} aria-label="Fermer">
           ✕
         </button>
 
-        <img
-          className="modal-image"
-          src={project.image}
-          alt={`Aperçu du projet ${project.title}`}
-        />
+        <ProjectImage image={image} title={title} className="modal-image" />
 
         <div className="modal-content">
-          <span className="project-category">{project.category}</span>
-          <h3>{project.title}</h3>
-          <p>{project.description}</p>
-          {project.details && <p>{project.details}</p>}
+          <span className="project-category">{category}</span>
+          <h3 id={titleId}>{title}</h3>
+          <p className="project-lead">{description}</p>
 
-          <ul className="project-technos">
-            {project.technos.map((techno) => (
-              <TechBadge key={techno} name={techno}/>
-            ))}
-          </ul>
+          {details && (
+            <div className="project-details">
+              {details.context && (
+                <div className="project-detail">
+                  <h4>Contexte</h4>
+                  <p>{details.context}</p>
+                </div>
+              )}
 
-          <a
-            href={project.link}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-primary"
-          >
-            Voir le code sur GitHub ↗
-          </a>
+              {details.role && details.role.length > 0 && (
+                <div className="project-detail">
+                  <h4>Mon rôle</h4>
+                  <ul className="project-role">
+                    {details.role.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {details.challenge && (
+                <div className="project-detail">
+                  <h4>Le défi</h4>
+                  <p>{details.challenge}</p>
+                </div>
+              )}
+
+              {details.learned && (
+                <div className="project-detail">
+                  <h4>Ce que j'ai appris</h4>
+                  <p>{details.learned}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="project-detail project-stack">
+            <h4>Stack technique</h4>
+            <ul className="project-technos">
+              {technos.map((techno) => (
+                <TechBadge key={techno} name={techno} />
+              ))}
+            </ul>
+          </div>
         </div>
+
+        {/* Les boutons sont en dehors de .modal-content, directement dans la boîte qui défile :
+            ainsi, ils restent collés en bas pendant tout le défilement (voir .project-actions) */}
+        {links && links.length > 0 && (
+          <div className="project-actions">
+            {links.map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+              >
+                {link.label} <span aria-hidden="true">↗</span>
+                <span className="sr-only"> (nouvel onglet)</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

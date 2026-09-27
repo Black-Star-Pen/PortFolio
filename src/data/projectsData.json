@@ -1,32 +1,83 @@
 [
   {
     "id": 1,
+    "slug": "askvera",
     "title": "AskVera",
-    "category": "Application web",
-    "description": "Description for Project 1",
-    "details": "Texte plus long : le contexte du projet, ton rôle, les difficultés rencontrées et ce que tu as appris.",
-    "technos": ["JavaScript", "React"],
-    "image": "https://placehold.co/800x500",
-    "link": "https://example.com/project1"
+    "category": "Bot IA & landing page",
+    "description": "Un bot Telegram qui analyse texte, images, PDF et vidéos grâce à l'IA, et la landing page de la startup AskVera.",
+    "details": {
+      "context": "Projet d'école réalisé pour les fondateurs de la startup AskVera, en compétition avec d'autres équipes. Équipe de 5 (développeurs et designers), en méthode agile avec Trello et Discord.",
+      "role": [
+        "Conception et développement du bot Telegram de A à Z (Node.js, Telegraf).",
+        "Détection automatique du type de contenu envoyé et vérification des fichiers, puis routage vers le bon traitement (analyse des images et des vidéos via l'API OpenAI, extraction du texte pour les PDF) avant l'envoi à l'API Vera.",
+        "Export CSV des données du Dashboard.",
+        "Participation à l'intégration de la landing page (Angular, Tailwind)."
+      ],
+      "challenge": "Les traitements lourds, comme extraire le texte d'un PDF ou analyser une vidéo, prenaient du temps et risquaient de bloquer le bot pour tout le monde. J'ai rendu ces traitements asynchrones : le bot répond aussitôt « analyse en cours… », puis envoie le résultat quand il est prêt, sans faire attendre les autres utilisateurs. En production, je l'ai passé en webhooks : c'est Telegram qui prévient le serveur à chaque message, au lieu que le bot l'interroge en boucle.",
+      "learned": "Faire dialoguer plusieurs API (Telegram, OpenAI, Vera, la base de données) dans une même application Node.js en gardant un code lisible. Et livrer un produit utilisable par un vrai client, avec ses contraintes."
+    },
+    "technos": [
+      "Node.js",
+      "Telegraf",
+      "API OpenAI",
+      "PostgreSQL",
+      "Angular",
+      "TailwindCSS",
+      "Apache ECharts",
+      "Discord"
+    ],
+    "image": "",
+    "links": []
   },
   {
     "id": 2,
+    "slug": "hero-experience",
     "title": "Hero-Experience",
     "category": "Site vitrine",
     "description": "Description for Project 2",
-    "details": "Texte plus long : le contexte du projet, ton rôle, les difficultés rencontrées et ce que tu as appris.",
-    "technos": ["Python", "Django"],
-    "image": "https://placehold.co/800x500",
-    "link": "https://github.com/Black-Star-Pen/Hero-experience"
+    "details": null,
+    "technos": [
+      "Python",
+      "Django"
+    ],
+    "image": "",
+    "links": [
+      {
+        "type": "code",
+        "label": "Voir le code",
+        "url": "https://github.com/Black-Star-Pen/Hero-experience"
+      }
+    ]
   },
   {
     "id": 3,
-    "title": "Project 3",
-    "category": "API REST",
-    "description": "Description for Project 3",
-    "details": "Texte plus long : le contexte du projet, ton rôle, les difficultés rencontrées et ce que tu as appris.",
-    "technos": ["Java", "Spring Boot"],
-    "image": "https://placehold.co/800x500",
-    "link": "https://example.com/project3"
+    "slug": "portfolio",
+    "title": "Portfolio",
+    "category": "Application full stack",
+    "description": "Mon portfolio, conçu et codé de A à Z : un univers de dessin technique et d'atelier métal, clin d'œil à ma formation en chaudronnerie.",
+    "details": {
+      "context": "Projet personnel, réalisé seul, pour me présenter et reprendre les bases du développement en profondeur.",
+      "role": [
+        "Front en React (Vite) : composants réutilisables, navigation avec React Router, pages légales et page 404.",
+        "Direction artistique inspirée des plans techniques, avec des animations de soudure au scroll (parcours, onglets, footer).",
+        "Formulaire de contact adaptatif : les champs changent selon le type de demande, vérification en direct de la ville (API publique geo.api.gouv.fr) et suggestion en cas de faute de frappe dans l'email.",
+        "API Express qui revérifie tout côté serveur, contrôle que le domaine de l'email existe vraiment (DNS), puis envoie le message par email (Nodemailer).",
+        "Protection anti-spam : limite de 5 messages par 5 minutes et champ piège invisible pour les robots.",
+        "Accessibilité : navigation complète au clavier, modales qui gardent le focus, respect du réglage « réduire les animations »."
+      ],
+      "challenge": "Ne jamais faire confiance au navigateur. Tout ce que vérifie le formulaire peut être contourné, donc le serveur refait chaque contrôle lui-même : liste blanche des champs, longueurs maximales, email, ville. Il limite aussi le nombre d'envois et renvoie des erreurs claires que le formulaire affiche champ par champ.",
+      "learned": "Reprendre les fondamentaux (état, effets, formulaires contrôlés, API REST, codes HTTP) en les appliquant sur un vrai projet, avec une IA comme assistant pour apprendre : je sais expliquer chaque partie du code. Travailler proprement avec Git (une branche par fonctionnalité, Pull Requests) et penser sécurité et vie privée dès la conception."
+    },
+    "technos": [
+      "React",
+      "Vite",
+      "React Router",
+      "Node.js",
+      "Express",
+      "Nodemailer",
+      "CSS"
+    ],
+    "image": "",
+    "links": []
   }
 ]
