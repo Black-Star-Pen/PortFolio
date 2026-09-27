@@ -4,24 +4,24 @@
     "slug": "askvera",
     "title": "AskVera",
     "category": "Bot IA & landing page",
-    "description": "Un bot Telegram qui analyse texte, images, PDF et vidéos grâce à l'IA, et la landing page de la startup AskVera.",
+    "description": "Un **bot Telegram** qui analyse texte, images, PDF et vidéos **grâce à l'IA**, et la landing page de la startup AskVera.",
     "details": {
-      "context": "Projet d'école réalisé pour les fondateurs de la startup AskVera, en compétition avec d'autres équipes. Équipe de 5 (développeurs et designers), en méthode agile avec Trello et Discord.",
+      "context": "Projet d'école réalisé pour les fondateurs de la **startup AskVera**, en compétition avec d'autres équipes. **Équipe de 5** (développeurs et designers), en méthode agile avec Trello et Discord.",
       "role": [
-        "Conception et développement du bot Telegram de A à Z (Node.js, Telegraf).",
-        "Détection automatique du type de contenu envoyé et vérification des fichiers, puis routage vers le bon traitement (analyse des images et des vidéos via l'API OpenAI, extraction du texte pour les PDF) avant l'envoi à l'API Vera.",
-        "Export CSV des données du Dashboard.",
+        "Conception et développement du bot Telegram **de A à Z** (Node.js, Telegraf).",
+        "Détection automatique du type de contenu envoyé et vérification des fichiers, puis routage vers le bon traitement (analyse des images et des vidéos via l'**API OpenAI**, extraction du texte pour les PDF) avant l'envoi à l'API Vera.",
+        "**Export CSV** des données du Dashboard.",
         "Participation à l'intégration de la landing page (Angular, Tailwind)."
       ],
-      "challenge": "Les traitements lourds, comme extraire le texte d'un PDF ou analyser une vidéo, prenaient du temps et risquaient de bloquer le bot pour tout le monde. J'ai rendu ces traitements asynchrones : le bot répond aussitôt « analyse en cours… », puis envoie le résultat quand il est prêt, sans faire attendre les autres utilisateurs. En production, je l'ai passé en webhooks : c'est Telegram qui prévient le serveur à chaque message, au lieu que le bot l'interroge en boucle.",
-      "learned": "Faire dialoguer plusieurs API (Telegram, OpenAI, Vera, la base de données) dans une même application Node.js en gardant un code lisible. Et livrer un produit utilisable par un vrai client, avec ses contraintes."
+      "challenge": "Les traitements lourds, comme extraire le texte d'un PDF ou analyser une vidéo, prenaient du temps et risquaient de bloquer le bot pour tout le monde. J'ai rendu ces traitements **asynchrones** : le bot répond aussitôt « analyse en cours… », puis envoie le résultat quand il est prêt, sans faire attendre les autres utilisateurs. En production, je l'ai passé en **webhooks** : c'est Telegram qui prévient le serveur à chaque message, au lieu que le bot l'interroge en boucle.",
+      "learned": "Faire dialoguer **plusieurs API** (Telegram, OpenAI, Vera, la base de données) dans une même application Node.js en gardant un code lisible. Et livrer un produit utilisable par un vrai client, avec ses contraintes."
     },
     "technos": [
       "Node.js",
-      "Telegraf",
-      "API OpenAI",
-      "PostgreSQL",
       "Angular",
+      "PostgreSQL",
+      "API OpenAI",
+      "Telegraf",
       "TailwindCSS",
       "Apache ECharts",
       "Discord"
@@ -32,48 +32,75 @@
   {
     "id": 2,
     "slug": "hero-experience",
-    "title": "Hero-Experience",
-    "category": "Site vitrine",
-    "description": "Description for Project 2",
-    "details": null,
+    "title": "The Hero Experience",
+    "category": "Application full stack",
+    "description": "Une application de réservation de super-héros : 563 héros, comptes clients, réservations et avis vérifiés. Un projet d'équipe que j'ai ensuite **refondu seul en full stack**.",
+    "details": {
+      "context": "Projet d'examen de la Wild Code School (Paris, avril 2024), réalisé en **équipe de 4**. En septembre 2026, je l'ai entièrement refondu seul dans un dépôt personnel, avec l'aide de **l'assistant IA Claude Code**. Projet fictif, sans vrai paiement.",
+      "role": [
+        "2024, en équipe : le formulaire de réservation, les avis clients sur la fiche héros et l'intégration du paiement PayPal (en mode test).",
+        "2026, seul : création d'une **vraie API** (Node.js, Express) pour un site qui n'avait aucun backend.",
+        "Comptes et sécurité : mots de passe hachés (**Argon2id**), sessions en cookie HttpOnly, protection **CSRF** et limitation du nombre de requêtes.",
+        "Réservations au prix **calculé par le serveur**, sans double réservation possible, et avis réservés aux clients qui ont vraiment réservé.",
+        "Front refait en TypeScript, **158 tests automatisés**, intégration continue et mise en ligne : le site n'est déployé que si tous les tests passent."
+      ],
+      "challenge": "Dans la version d'origine, tout se passait dans le navigateur : fausses données, « connexion » côté navigateur, et identifiants de l'équipe écrits en dur dans le code livré aux visiteurs. J'ai reconstruit un **vrai backend** : c'est le serveur qui gère les sessions, calcule les prix et vérifie les disponibilités, et le nouveau dépôt ne contient plus aucune donnée personnelle. Après la mise en ligne, j'ai aussi corrigé un bug : derrière Cloudflare, le limiteur de requêtes voyait tous les visiteurs avec la même adresse IP. Il lit désormais l'en-tête **CF-Connecting-IP**, et j'ai vérifié en ligne que chaque visiteur a bien son propre compteur.",
+      "learned": "Structurer une API en couches et partager la même validation (Zod) entre le front et le back. Sécuriser une application sans jamais faire confiance au navigateur. Écrire des tests et automatiser le déploiement. Ramener **de 43 à 0** les failles connues des dépendances. Et surtout, faire évoluer un code existant sans tout casser."
+    },
     "technos": [
-      "Python",
-      "Django"
+      "React",
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Express",
+      "Vite",
+      "React Router",
+      "TanStack Query",
+      "Zod",
+      "Drizzle",
+      "Vitest",
+      "GitHub Actions"
     ],
     "image": "",
     "links": [
       {
+        "type": "site",
+        "label": "Voir le site",
+        "url": "https://the-hero-experience.onrender.com"
+      },
+      {
         "type": "code",
         "label": "Voir le code",
-        "url": "https://github.com/Black-Star-Pen/Hero-experience"
+        "url": "https://github.com/Black-Star-Pen/The-Hero-Experience"
       }
-    ]
+    ],
+    "linksNote": "Hébergement gratuit : la première ouverture peut prendre environ une minute. Un compte de démo est proposé sur la page de connexion."
   },
   {
     "id": 3,
     "slug": "portfolio",
     "title": "Portfolio",
     "category": "Application full stack",
-    "description": "Mon portfolio, conçu et codé de A à Z : un univers de dessin technique et d'atelier métal, clin d'œil à ma formation en chaudronnerie.",
+    "description": "Mon portfolio, conçu et codé **de A à Z** : un univers de dessin technique et d'atelier métal, clin d'œil à ma formation en chaudronnerie.",
     "details": {
-      "context": "Projet personnel, réalisé seul, pour me présenter et reprendre les bases du développement en profondeur.",
+      "context": "Projet personnel, **réalisé seul**, pour me présenter et reprendre les bases du développement en profondeur.",
       "role": [
         "Front en React (Vite) : composants réutilisables, navigation avec React Router, pages légales et page 404.",
-        "Direction artistique inspirée des plans techniques, avec des animations de soudure au scroll (parcours, onglets, footer).",
+        "Direction artistique inspirée des plans techniques, avec des **animations de soudure** au scroll (parcours, onglets, footer).",
         "Formulaire de contact adaptatif : les champs changent selon le type de demande, vérification en direct de la ville (API publique geo.api.gouv.fr) et suggestion en cas de faute de frappe dans l'email.",
-        "API Express qui revérifie tout côté serveur, contrôle que le domaine de l'email existe vraiment (DNS), puis envoie le message par email (Nodemailer).",
+        "API Express qui **revérifie tout côté serveur**, contrôle que le domaine de l'email existe vraiment (DNS), puis envoie le message par email (Nodemailer).",
         "Protection anti-spam : limite de 5 messages par 5 minutes et champ piège invisible pour les robots.",
         "Accessibilité : navigation complète au clavier, modales qui gardent le focus, respect du réglage « réduire les animations »."
       ],
-      "challenge": "Ne jamais faire confiance au navigateur. Tout ce que vérifie le formulaire peut être contourné, donc le serveur refait chaque contrôle lui-même : liste blanche des champs, longueurs maximales, email, ville. Il limite aussi le nombre d'envois et renvoie des erreurs claires que le formulaire affiche champ par champ.",
-      "learned": "Reprendre les fondamentaux (état, effets, formulaires contrôlés, API REST, codes HTTP) en les appliquant sur un vrai projet, avec une IA comme assistant pour apprendre : je sais expliquer chaque partie du code. Travailler proprement avec Git (une branche par fonctionnalité, Pull Requests) et penser sécurité et vie privée dès la conception."
+      "challenge": "**Ne jamais faire confiance au navigateur**. Tout ce que vérifie le formulaire peut être contourné, donc le serveur refait chaque contrôle lui-même : liste blanche des champs, longueurs maximales, email, ville. Il limite aussi le nombre d'envois et renvoie des erreurs claires que le formulaire affiche champ par champ.",
+      "learned": "Reprendre les fondamentaux (état, effets, formulaires contrôlés, API REST, codes HTTP) en les appliquant sur un vrai projet, **avec une IA comme assistant pour apprendre** : je sais expliquer chaque partie du code. Travailler proprement avec Git (une branche par fonctionnalité, Pull Requests) et penser sécurité et vie privée dès la conception."
     },
     "technos": [
       "React",
-      "Vite",
-      "React Router",
       "Node.js",
       "Express",
+      "Vite",
+      "React Router",
       "Nodemailer",
       "CSS"
     ],
