@@ -1,7 +1,10 @@
 import { Link } from "react-router";
 import SectionTitle from "../components/SectionTitle";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function PrivacyPolicy() {
+  usePageTitle("Politique de confidentialité");
+
   return (
     <section className="legal-page">
       <SectionTitle label="Vos données" title="Politique de" accent="confidentialité." />
