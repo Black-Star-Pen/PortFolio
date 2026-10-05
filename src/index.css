@@ -8,6 +8,8 @@
   --color-accent: #d6bf94;
   --color-steel: #8fb3c9;
   --color-error: #e3a08f;
+  --color-available: #4ade80;
+  --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
 
   --font-body: "Inter", system-ui, sans-serif;
   --font-title: "Space Grotesk", system-ui, sans-serif;
@@ -37,6 +39,8 @@ body {
   color: var(--color-text);
   font-family: var(--font-body);
   line-height: 1.6;
+  /* clip : rien ne dépasse sur les côtés (les bandes de fond font toute la largeur de l'écran) */
+  overflow-x: clip;
 }
 
 img {
@@ -81,6 +85,86 @@ section {
   margin: 0 auto;
   padding: 100px 24px;
   scroll-margin-top: 80px;
+}
+
+/* Le cordon de soudure entre deux sections (toutes sauf la première, le Hero).
+   « section + section » = une section précédée d'une autre section. */
+main > section + section {
+  --seam-width: min(1000px, 92vw);
+  position: relative;
+}
+
+/* Le cordon : doré et lumineux au centre, il s'estompe vers les bords */
+main > section + section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--seam-width) / 2);
+  width: var(--seam-width);
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(214, 191, 148, 0.2) 15%,
+    var(--color-accent) 50%,
+    rgba(214, 191, 148, 0.2) 85%,
+    transparent
+  );
+  filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.55));
+  transform-origin: left;
+  pointer-events: none;
+}
+
+/* Posées par ScrollReveal : le cordon attend (invisible), puis se soude de gauche à droite */
+main > section.seam-pending::before {
+  transform: scaleX(0);
+}
+
+main > section.seam-welded::before {
+  animation: seam-weld 1.8s cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+/* L'étincelle qui avance en tête du cordon */
+main > section.seam-welded::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background-color: #fffbe8;
+  box-shadow:
+    0 0 6px 2px #fff1c1,
+    0 0 16px 6px rgba(214, 191, 148, 0.8),
+    0 0 32px 12px rgba(214, 150, 60, 0.4);
+  pointer-events: none;
+  animation:
+    seam-spark 1.8s cubic-bezier(0.6, 0, 0.3, 1) both,
+    weld-flicker 0.08s steps(2) infinite;
+}
+
+@keyframes seam-weld {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes seam-spark {
+  from {
+    left: calc(50% - var(--seam-width) / 2);
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  to {
+    left: calc(50% + var(--seam-width) / 2);
+    opacity: 0;
+  }
 }
 
 /* ===== 6. Éléments réutilisables ===== */
@@ -195,6 +279,7 @@ section {
 
 /* ===== 7. Hero ===== */
 .hero {
+  overflow-x: clip;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -203,9 +288,138 @@ section {
   gap: 24px;
 }
 
-.hero p {
-  max-width: 560px;
-  font-size: 1.1rem;
+/* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
+.hero-intro {
+  display: grid;
+  gap: 24px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.hero-intro p {
+  /* contain: inline-size : la longueur du texte n'élargit pas le bloc.
+     C'est donc le titre qui fixe la largeur, et le paragraphe s'étale dessus. */
+  contain: inline-size;
+  font-size: 1.15rem;
+}
+
+/* ----- Arrivée sur la page : le tracé du plan ----- */
+
+/* Chaque élément apparaît à son tour : --reveal-delay est donné dans le JSX */
+.hero-reveal {
+  animation: hero-reveal 0.7s ease-out var(--reveal-delay, 0s) both;
+}
+
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ----- Le paragraphe, mot par mot ----- */
+
+/* Chaque mot sort d'un léger flou, l'un après l'autre (--word-delay est calculé dans le JSX) */
+.reveal-word {
+  display: inline-block;
+  animation: word-reveal 0.5s ease-out var(--word-delay) both;
+}
+
+@keyframes word-reveal {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(6px);
+  }
+}
+
+/* Les technos : dorées, avec un éclat de soudure quand elles apparaissent */
+.reveal-word-highlight {
+  font-weight: 600;
+  color: var(--color-accent);
+  animation:
+    word-reveal 0.5s ease-out var(--word-delay) both,
+    word-weld 1s ease-out var(--word-delay) both;
+}
+
+@keyframes word-weld {
+  0%,
+  20% {
+    color: #fffbe8;
+    text-shadow:
+      0 0 6px #fff1c1,
+      0 0 14px rgba(214, 191, 148, 0.9);
+  }
+}
+
+/* Sécurité et qualité : bleu clair, avec l'éclat blanc bleuté du soudage TIG (comme le footer) */
+.reveal-word-steel {
+  font-weight: 600;
+  color: var(--color-tig);
+  text-shadow: 0 0 10px rgba(168, 212, 245, 0.25);
+  animation:
+    word-reveal 0.5s ease-out var(--word-delay) both,
+    word-weld-blue 1s ease-out var(--word-delay) both;
+}
+
+@keyframes word-weld-blue {
+  0%,
+  20% {
+    color: #f2f9ff;
+    text-shadow:
+      0 0 6px #d6ecff,
+      0 0 14px rgba(120, 190, 255, 0.9),
+      0 0 28px rgba(60, 130, 255, 0.5);
+  }
+}
+
+/* ----- La soudure des lettres ----- */
+
+/* Avant d'être soudée, la lettre n'est qu'un contour, comme dessinée sur le plan.
+   Puis elle chauffe à blanc et refroidit en doré, l'une après l'autre (--i). */
+.weld-letter {
+  animation: letter-weld 0.9s ease-out calc(var(--weld-delay) + var(--i) * 0.07s) both;
+}
+
+@keyframes letter-weld {
+  0% {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(214, 191, 148, 0.5);
+    text-shadow: none;
+  }
+  15% {
+    color: #fffbe8;
+    -webkit-text-stroke: 0 transparent;
+    text-shadow:
+      0 0 6px #fff1c1,
+      0 0 16px rgba(214, 191, 148, 0.9),
+      0 0 32px rgba(214, 150, 60, 0.6);
+  }
+  100% {
+    color: var(--color-accent);
+    -webkit-text-stroke: 0 transparent;
+    text-shadow: none;
+  }
+}
+
+/* Le badge de disponibilité : un point vert qui pulse et un texte qui brille */
+.badge-available::before {
+  background-color: var(--color-available);
+  box-shadow: 0 0 8px var(--color-available);
+  animation: available-pulse 2s ease-in-out infinite;
+}
+
+.badge-status {
+  font-weight: 600;
+  color: var(--color-available);
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+}
+
+@keyframes available-pulse {
+  50% {
+    box-shadow: 0 0 2px var(--color-available);
+    opacity: 0.6;
+  }
 }
 
 .hero-actions {
@@ -257,6 +471,9 @@ section {
 
 /* ===== 9. À propos ===== */
 .about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   max-width: 680px;
   margin: 0 auto;
   text-align: center;
@@ -2258,8 +2475,354 @@ section {
   }
 }
 
+/* ===== 19 bis. Apparition au défilement : les effets « atelier » ===== */
+
+/* Classes posées par le composant ScrollReveal :
+   .reveal         → le bloc attend, caché
+   .reveal-xxx     → l'effet choisi pour ce bloc
+   .revealed       → il est arrivé à l'écran : l'effet se joue
+
+   fill-mode « backwards » : l'état de départ est tenu pendant le délai, puis, une fois
+   l'animation finie, le bloc retrouve ses styles normaux (plus de découpe ni de transformation
+   qui gênerait les soudures ou l'effet de survol des cartes). */
+.reveal {
+  opacity: 0;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  animation-delay: var(--reveal-delay, 0s);
+  animation-fill-mode: backwards;
+}
+
+/* 1. LASER : les titres sont découpés de gauche à droite, un trait lumineux en tête */
+.reveal-laser {
+  position: relative;
+}
+
+.reveal-laser.revealed {
+  animation-name: laser-cut;
+  animation-duration: 1.3s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.reveal-laser.revealed::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  margin-left: -2px; /* le trait reste juste à l'intérieur de la zone déjà découpée */
+  background-color: #fffbe8;
+  box-shadow:
+    0 0 8px 2px #fff1c1,
+    0 0 24px 6px rgba(214, 191, 148, 0.7);
+  opacity: 0;
+  pointer-events: none;
+  animation: laser-beam 1.3s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+@keyframes laser-cut {
+  from {
+    clip-path: inset(-10px 100% -10px 0);
+  }
+  to {
+    clip-path: inset(-10px 0 -10px 0);
+  }
+}
+
+@keyframes laser-beam {
+  from {
+    left: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* 2. CUT : le texte se révèle comme une découpe qui avance, avec un bord adouci */
+.reveal-cut.revealed {
+  animation-name: text-cut;
+  animation-duration: 1.6s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes text-cut {
+  from {
+    -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    -webkit-mask-size: 300% 100%;
+    mask-size: 300% 100%;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    opacity: 0.2;
+  }
+  to {
+    -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    -webkit-mask-size: 300% 100%;
+    mask-size: 300% 100%;
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+    opacity: 1;
+  }
+}
+
+/* 3. UNFOLD : le bloc se déplie de haut en bas, comme un plan qu'on déroule */
+.reveal-unfold.revealed {
+  animation-name: plan-unfold;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+@keyframes plan-unfold {
+  from {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 -12px;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    translate: 0 0;
+  }
+}
+
+/* 4. LIFT : les cartes se redressent en 3D, l'une après l'autre */
+.reveal-lift.revealed {
+  animation-name: card-lift;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: 50% 100%;
+}
+
+@keyframes card-lift {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(38deg) translateY(70px) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0) translateY(0) scale(1);
+  }
+}
+
+/* 5. STAMP : le formulaire est frappé à la presse, avec un éclat doré à l'impact */
+.reveal-stamp.revealed {
+  animation-name: press-stamp;
+  animation-duration: 1.1s;
+  animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+@keyframes press-stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(8px);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.985);
+    filter: blur(0);
+    box-shadow:
+      0 0 0 1px var(--color-accent),
+      0 0 50px rgba(214, 191, 148, 0.35);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 6. RISE : monte doucement, avec un halo qui s'éteint */
+.reveal-rise.revealed {
+  animation-name: soft-rise;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes soft-rise {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+    filter: drop-shadow(0 0 24px rgba(214, 191, 148, 0.5));
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* ===== 19 ter. L'intro : le plan qui se trace au défilement (composant Intro) ===== */
+
+/* Pendant l'intro, les animations du Hero attendent (elles partent quand on arrive dessus) */
+html.intro-playing .hero *,
+html.intro-playing .hero *::before,
+html.intro-playing .hero *::after {
+  animation-play-state: paused !important;
+}
+
+/* Très haut : c'est la distance de défilement pendant laquelle le plan se dessine */
+.intro {
+  --p: 0; /* l'avancement, de 0 à 1, écrit par le JavaScript */
+
+  position: relative;
+  height: 240vh;
+}
+
+/* Le plan reste collé à l'écran pendant tout ce temps */
+.intro-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(rgba(143, 179, 201, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 179, 201, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center;
+}
+
+.intro-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  /* À la fin (de 85 % à 100 %), on « plonge » dans le plan : zoom et fondu */
+  --dive: clamp(0, (var(--p) - 0.85) / 0.15, 1);
+  transform: scale(calc(1 + var(--dive) * 2));
+  opacity: calc(1 - var(--dive));
+}
+
+.intro-plan {
+  width: min(560px, 86vw);
+  overflow: visible;
+}
+
+/* Chaque trait a son début (--s) et sa fin (--e), dans le JSX.
+   Son propre avancement = (--p - début) / (fin - début), limité entre 0 et 1 par clamp(). */
+.intro .draw,
+.intro .fade {
+  --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
+}
+
+/* pathLength="1" : chaque trait mesure « 1 ». Décalé de 1 = invisible, décalé de 0 = dessiné. */
+.intro .draw {
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--t));
+}
+
+.intro .fade {
+  opacity: var(--t);
+}
+
+.intro .construction .draw {
+  stroke: rgba(143, 179, 201, 0.45);
+  stroke-width: 0.6;
+}
+
+.intro .letter .draw {
+  stroke: var(--color-accent);
+  stroke-width: 4;
+  stroke-linecap: square;
+  filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.5));
+}
+
+.intro .dimension {
+  stroke: var(--color-steel);
+  stroke-width: 0.8;
+}
+
+.intro .dimension text {
+  stroke: none;
+  fill: var(--color-steel);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-anchor: middle;
+}
+
+/* La légende du plan, sous le dessin */
+.intro-caption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-steel);
+  opacity: clamp(0, (var(--p) - 0.72) / 0.08, 1);
+}
+
+/* L'invitation à défiler, qui s'efface dès qu'on commence */
+.intro-hint {
+  position: absolute;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  opacity: calc(1 - clamp(0, var(--p) / 0.05, 1));
+}
+
+.intro-hint span {
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  animation: hint-bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes hint-bounce {
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+/* Le bouton « Passer », en bas à droite */
+.intro-skip {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2;
+  padding: 8px 14px;
+  border: 1px solid rgba(214, 191, 148, 0.3);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  opacity: calc(1 - clamp(0, (var(--p) - 0.85) / 0.1, 1));
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+
+.intro-skip:hover,
+.intro-skip:focus-visible {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  outline: none;
+}
+
 /* ===== 20. Accessibilité : animations réduites ===== */
 @media (prefers-reduced-motion: reduce) {
+
   .weld-line {
     animation: none;
     transform: none;
@@ -2272,6 +2835,15 @@ section {
   }
 
   .tabs-arrow span {
+    animation: none;
+  }
+
+  .badge-available::before,
+  .hero-reveal,
+  .reveal-word,
+  .reveal-word-highlight,
+  .reveal-word-steel,
+  .weld-letter {
     animation: none;
   }
 
