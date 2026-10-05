@@ -6,6 +6,9 @@ import skillsData from "../data/skillsData.json";
 
 function Skills() {
   const [activeIndex, setActiveIndex] = useState(0);
+  // Les tiroirs déjà ouverts une fois. Leur encadré a eu sa soudure : quand on y revient,
+  // on l'affiche déjà en place au lieu de la rejouer depuis le début.
+  const [weldedIds, setWeldedIds] = useState([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const tabsRef = useRef(null);
@@ -32,6 +35,14 @@ function Skills() {
 
   function scrollTabs(direction) {
     tabsRef.current.scrollBy({ left: direction * 160, behavior: "smooth" });
+  }
+
+  function openDrawer(index) {
+    if (index === activeIndex) return;
+
+    // Le tiroir qu'on quitte a eu sa soudure : on s'en souvient avant d'ouvrir l'autre
+    setWeldedIds((ids) => (ids.includes(activeSkill.id) ? ids : [...ids, activeSkill.id]));
+    setActiveIndex(index);
   }
 
   return (
@@ -65,9 +76,11 @@ function Skills() {
               <button
                 key={skill.id}
                 className={`skills-tab ${index === activeIndex ? "active" : ""}`}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => openDrawer(index)}
                 role="tab"
                 aria-selected={index === activeIndex}
+                // --i : le rang du tiroir, pour qu'ils arrivent l'un après l'autre (voir reveal-drawers)
+                style={{ "--i": index }}
               >
                 {index === activeIndex && <Weld />}
                 <span className="skills-tab-ref">
@@ -93,6 +106,9 @@ function Skills() {
           key={activeSkill.id}
           skill={activeSkill}
           reference={activeIndex + 1}
+          isWelded={weldedIds.includes(activeSkill.id)}
+          // Tant qu'on n'a changé de tiroir aucune fois, c'est le panneau présent à l'arrivée de la boîte
+          isFirst={weldedIds.length === 0}
         />
       </div>
     </section>

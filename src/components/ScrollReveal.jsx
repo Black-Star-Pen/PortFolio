@@ -7,6 +7,7 @@ import { createSparks } from "./sparks";
 //   laser   : découpé par un trait laser, de gauche à droite
 //   cut     : le texte se révèle comme une découpe qui avance
 //   unfold  : se déplie de haut en bas, comme un plan qu'on déroule
+//   drawers : la boîte à outils : ses tiroirs se rangent un par un, puis le panneau se découvre
 //   lift    : se lève en 3D, comme une pièce qu'on redresse sur l'établi
 //   stamp   : frappé comme une tôle à la presse, avec un éclat doré
 //   rise    : monte doucement avec un halo
@@ -14,7 +15,7 @@ const TARGETS = [
   { selector: ".section-title", effect: "laser" },
   { selector: ".about-text > p", effect: "cut" },
   { selector: ".timeline", effect: "unfold" },
-  { selector: ".blueprint", effect: "unfold" },
+  { selector: ".blueprint", effect: "drawers" },
   { selector: ".projects-grid > *", effect: "lift" },
   { selector: ".work-order", effect: "stamp" },
   { selector: ".contact-divider", effect: "cut" },

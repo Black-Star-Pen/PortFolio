@@ -1144,7 +1144,25 @@ html.has-intro .hero-pin {
   gap: 24px;
   border: 1px solid rgba(214, 191, 148, 0.3);
   background-color: rgba(10, 11, 15, 0.7);
-  animation: pop-in 0.3s ease-out;
+
+  /* L'apparition du panneau, à chaque tiroir qu'on ouvre : le cadre arrive en fondu, puis son en-tête
+     et sa description, puis les outils se posent un par un (voir .tool-tile).
+     --panel-start : le moment où tout ça commence. 0s ici ; plus tard à l'arrivée de la boîte à outils,
+     pour laisser passer les tiroirs d'abord (voir reveal-drawers). Les enfants en héritent.
+     « backwards » : l'élément reste dans son état de départ (invisible) pendant qu'il attend son tour. */
+  --panel-start: 0s;
+  animation: panel-fade 0.25s ease-out var(--panel-start) backwards;
+}
+
+.skill-panel .cartouche-header,
+.skill-panel-description {
+  animation: panel-fade 0.3s ease-out calc(var(--panel-start) + 0.15s) backwards;
+}
+
+@keyframes panel-fade {
+  from {
+    opacity: 0;
+  }
 }
 
 .cartouche-header {
@@ -1191,6 +1209,18 @@ html.has-intro .hero-pin {
   transition:
     border-color 0.3s,
     transform 0.3s;
+  /* Chaque outil tombe à sa place, 0,11s après le précédent (--i est son rang, voir SkillPanel.jsx).
+     La courbe dépasse 1 : il descend un peu trop bas puis remonte, comme un outil qu'on pose.
+     min(…, 6) : à partir du 7e, les outils arrivent ensemble, pour qu'un tiroir bien rempli ne traîne pas. */
+  animation: tool-drop 0.45s cubic-bezier(0.3, 1.5, 0.5, 1)
+    calc(var(--panel-start) + 0.25s + min(var(--i, 0), 6) * 0.11s) backwards;
+}
+
+@keyframes tool-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.95);
+  }
 }
 
 .tool-tile:hover {
@@ -1336,6 +1366,19 @@ html.has-intro .hero-pin {
   animation:
     weld-travel calc(var(--weld-side) * 4) linear var(--weld-start) forwards,
     weld-flicker 0.08s steps(2) var(--weld-start) infinite;
+}
+
+/* Soudure déjà faite (voir Weld.jsx, isDone) : le cordon est en place et refroidi,
+   sans animation ni étincelle. C'est l'état où l'animation s'arrête d'habitude. */
+.weld-done .weld-line {
+  animation: none;
+  transform: none;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.weld-done .weld-spark {
+  display: none;
 }
 
 @keyframes weld-grow-x {
@@ -2874,6 +2917,57 @@ html.has-intro .hero-pin {
   }
 }
 
+/* 7. DRAWERS : la boîte à outils. Quatre temps, l'un après l'autre :
+      0s      l'encadré apparaît
+      0,15s   les tiroirs glissent à leur place, un toutes les 0,12s (--i est leur rang, voir Skills.jsx)
+      0,7s    le panneau apparaît et ses outils se posent un par un (voir .skill-panel, section 12)
+      1,7s    la soudure fait le tour du panneau */
+.reveal-drawers.revealed {
+  animation-name: drawers-box;
+  animation-duration: 0.35s;
+}
+
+.reveal-drawers.revealed .skills-tab {
+  animation: drawer-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) calc(0.15s + var(--i, 0) * 0.12s) backwards;
+}
+
+/* Le panneau présent à l'arrivée (.skill-panel-first) joue la même apparition que les autres, mais
+   0,7s plus tard : il laisse passer les tiroirs. Ceux qu'on ouvre ensuite apparaissent tout de suite. */
+.reveal-drawers.revealed .skill-panel-first {
+  --panel-start: 0.7s;
+}
+
+/* Sa soudure attend que le dernier outil soit posé. Les soudures suivantes gardent leur départ normal. */
+.reveal-drawers.revealed .skill-panel-first .weld {
+  --weld-start: 1.7s;
+}
+
+/* Tant que la boîte n'est pas arrivée à l'écran, rien ne part à l'intérieur : ni l'apparition du panneau
+   et de ses outils, ni les soudures. Sans ça, tout se jouerait au chargement de la page, bien avant
+   qu'on arrive ici, et on ne le verrait jamais.
+   (.reveal est posée par ScrollReveal ; avec « animations réduites », elle n'existe pas et rien n'attend.) */
+.reveal-drawers:not(.revealed) .skill-panel,
+.reveal-drawers:not(.revealed) .cartouche-header,
+.reveal-drawers:not(.revealed) .skill-panel-description,
+.reveal-drawers:not(.revealed) .tool-tile,
+.reveal-drawers:not(.revealed) .weld-line,
+.reveal-drawers:not(.revealed) .weld-spark {
+  animation: none;
+}
+
+@keyframes drawers-box {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(-64px);
+  }
+}
+
 /* ===== 19 ter. L'intro : le plan qui se soude au défilement (composant Intro) ===== */
 
 /* Pendant l'intro, les animations du Hero attendent (elles partent quand on arrive dessus) */
@@ -3479,6 +3573,14 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
 
   .form-error,
   .recruit-block {
+    animation: none;
+  }
+
+  /* Le panneau d'un tiroir et ses outils s'affichent directement, sans fondu ni chute */
+  .skill-panel,
+  .skill-panel .cartouche-header,
+  .skill-panel-description,
+  .tool-tile {
     animation: none;
   }
 }
