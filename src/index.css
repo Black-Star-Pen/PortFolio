@@ -20,6 +20,11 @@
 
   --radius: 16px;
   --max-width: 1100px;
+
+  /* L'espace au-dessus et au-dessous de chaque section de l'accueil, sauf le Hero (voir section 5).
+     clamp(mini, idéal, maxi) : 100px sur téléphone, 160px à partir de 1280px de large,
+     et entre les deux l'espace suit la largeur de l'écran. Pour aérer plus ou moins : change le 160px. */
+  --section-space: clamp(100px, 12.5vw, 160px);
 }
 
 /* ===== 2. Reset ===== */
@@ -92,8 +97,18 @@ section {
 /* Le cordon de soudure entre deux sections (toutes sauf la première, le Hero).
    « section + section » = une section précédée d'une autre section. */
 main > section + section {
-  --seam-width: min(1000px, 92vw);
+  /* La longueur du cordon : 1500px, plus large que le contenu (1100px), il dépasse donc de chaque côté.
+     Sur un écran plus étroit, il s'arrête à 92 % de la largeur de l'écran. */
+  --seam-width: min(1500px, 92vw);
+  /* Le temps que met le cordon à se souder. Presque deux fois plus court que la découpe du titre
+     juste en dessous (1,3s, voir .reveal-laser) : la soudure est finie quand le texte arrive. */
+  --seam-duration: 0.7s;
   position: relative;
+  /* Plus d'air entre deux sections que les 100px de base. Le Hero n'est pas concerné (il n'est précédé
+     d'aucune section) : sa hauteur est calculée sur ces 100px, voir .hero-pin.
+     Le cordon reste au milieu de l'espace : il en a autant au-dessus (bas de la section d'avant) qu'en dessous,
+     sauf après le Hero, qui garde 100px en bas. */
+  padding-block: var(--section-space);
 }
 
 /* Le cordon : doré et lumineux au centre, il s'estompe vers les bords */
@@ -123,10 +138,11 @@ main > section.seam-pending::before {
 }
 
 main > section.seam-welded::before {
-  animation: seam-weld 1.8s cubic-bezier(0.6, 0, 0.3, 1) both;
+  animation: seam-weld var(--seam-duration) cubic-bezier(0.6, 0, 0.3, 1) both;
 }
 
-/* L'étincelle qui avance en tête du cordon */
+/* La pointe lumineuse qui avance en tête du cordon. ScrollReveal lit sa position à chaque image
+   pour en faire jaillir les étincelles (voir weldSeam) : c'est elle qui donne le rythme. */
 main > section.seam-welded::after {
   content: "";
   position: absolute;
@@ -142,8 +158,20 @@ main > section.seam-welded::after {
     0 0 32px 12px rgba(214, 150, 60, 0.4);
   pointer-events: none;
   animation:
-    seam-spark 1.8s cubic-bezier(0.6, 0, 0.3, 1) both,
+    seam-spark var(--seam-duration) cubic-bezier(0.6, 0, 0.3, 1) both,
     weld-flicker 0.08s steps(2) infinite;
+}
+
+/* La toile des étincelles du cordon, posée par ScrollReveal le temps de la soudure.
+   Elle suit le cordon sur toute sa longueur, avec 40px de marge à chaque bout. Elle dépasse au-dessus
+   (les étincelles montent un peu) et surtout en dessous (elles retombent). */
+.seam-sparks {
+  position: absolute;
+  top: -80px;
+  left: calc(50% - var(--seam-width) / 2 - 40px);
+  width: calc(var(--seam-width) + 80px);
+  height: 300px;
+  pointer-events: none;
 }
 
 @keyframes seam-weld {
@@ -310,6 +338,16 @@ html.has-intro .hero-pin {
   position: sticky;
   /* sa place naturelle : sous la navbar (--navbar-h, mesurée par Intro) et la marge de 100px de la section */
   top: calc(var(--navbar-h, 73px) + 100px);
+}
+
+/* Sur téléphone, le Hero tient deux fois moins longtemps. Au doigt, 70vh d'arrêt, c'est un à deux gestes
+   pendant lesquels rien ne bouge : on a l'impression d'être bloqué. Avec 35vh, un seul geste suffit à repartir.
+   On ne descend pas à 0 : l'intro suit le défilement avec un léger retard (voir SMOOTHING dans Intro.jsx),
+   et sans arrêt le Hero serait déjà parti avant qu'elle ait fini de s'effacer. */
+@media (max-width: 768px) {
+  html.has-intro .hero {
+    --hero-hold: 35vh;
+  }
 }
 
 /* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
@@ -502,6 +540,100 @@ html.has-intro .hero-pin {
   margin: 0 auto;
   text-align: center;
   font-size: 1.1rem;
+}
+
+/* Sur grand écran, l'À propos se lit en deux colonnes : la présentation à gauche, le parcours à droite.
+   Les deux s'arrêtent sous la navbar et restent en place pendant que le cordon du parcours se soude
+   au défilement (voir Timeline.jsx), puis repartent ensemble.
+   Sur un écran trop étroit ou trop bas pour ça, les deux blocs s'empilent, centrés, avec les styles de base.
+   (La même condition est écrite dans Timeline.jsx : PINNED_SCREEN.)
+   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre. */
+@media (min-width: 1000px) and (min-height: 820px) {
+  .about-layout {
+    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran */
+    --frame-top: calc(var(--navbar-h, 73px) + 40px);
+    --frame-height: calc(100vh - var(--frame-top) - 40px);
+    /* La distance de défilement pendant laquelle elles restent en place, le temps de souder le cordon.
+       Pour que ça dure plus ou moins longtemps, change cette valeur. */
+    --about-hold: 110vh;
+
+    display: grid;
+    /* La présentation a un peu plus de place que le parcours : ses paragraphes s'étalent en largeur
+       et prennent moins de lignes. Le parcours, lui, est repoussé vers la droite.
+       minmax(0, …) : une colonne garde sa part, elle ne s'élargit pas pour un mot trop long. */
+    grid-template-columns: minmax(0, 10fr) minmax(0, 9fr);
+    /* Une seule rangée, plus haute que le cadre : c'est dans cette hauteur en plus que les colonnes
+       « tiennent » (un élément sticky ne peut se déplacer que dans la place que lui laisse son parent) */
+    grid-template-rows: calc(var(--frame-height) + var(--about-hold));
+    /* L'écart entre les deux colonnes : assez large pour qu'on lise deux blocs distincts */
+    column-gap: 104px;
+    align-items: start;
+  }
+
+  /* Même arrêt et même hauteur pour les deux colonnes : elles s'arrêtent et repartent au même moment */
+  .about-intro,
+  .about-layout .timeline {
+    position: sticky;
+    top: var(--frame-top);
+    height: var(--frame-height);
+  }
+
+  .about-intro .section-title {
+    max-width: none;
+    margin: 0 0 32px;
+    text-align: left;
+  }
+
+  /* Un titre un peu plus petit que dans les autres sections : dans une demi-largeur,
+     « le goût du travail bien fait. » doit tenir sur une seule ligne */
+  .about-intro .section-title h2 {
+    font-size: clamp(1.9rem, 2.9vw, 2.3rem);
+  }
+
+  /* Aligné à gauche, le libellé perd son trait de gauche : le mot démarre au bord, comme le titre */
+  .about-intro .section-label::before {
+    display: none;
+  }
+
+  .about-intro .about-text {
+    max-width: none;
+    margin: 0;
+    text-align: left;
+  }
+
+  /* Le parcours : son titre en haut, et en dessous une fenêtre qui prend toute la hauteur restante */
+  .about-layout .timeline {
+    display: flex;
+    flex-direction: column;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* Il se déplie un peu après l'arrivée du texte de gauche : on lit d'abord la présentation */
+  .about-layout .timeline.revealed {
+    animation-delay: 0.4s;
+  }
+
+  .about-layout .timeline-heading {
+    margin-bottom: 0;
+  }
+
+  /* La fenêtre : la gamme est plus haute qu'elle et glisse derrière (--shift, calculé par Timeline.jsx).
+     Le masque la fait disparaître en fondu en haut et en bas, au lieu d'une coupure nette.
+     Les marges intérieures du haut (40px) et du bas (72px) ont la hauteur des deux fondus : au début
+     comme à la fin, la gamme s'arrête donc juste avant, et sa première et sa dernière étape restent nettes.
+     La marge négative à gauche élargit la fenêtre : la lueur de la pointe déborde de ce côté. */
+  .about-layout .timeline-window {
+    flex: 1;
+    min-height: 0;
+    margin-left: -40px;
+    padding: 40px 0 72px 40px;
+    mask-image: linear-gradient(to bottom, transparent, #000 40px, #000 calc(100% - 72px), transparent);
+  }
+
+  .about-layout .timeline-body {
+    transform: translateY(calc(var(--shift, 0) * -1px));
+  }
 }
 
 /* ===== 10. Parcours : la gamme de fabrication ===== */
@@ -3138,7 +3270,7 @@ html.intro-playing .hero *::after {
 }
 
 /* La toile des étincelles : elle recouvre tout l'écran de l'intro, par-dessus le dessin
-   (le JavaScript de introSparks.js dessine dedans) */
+   (le JavaScript de sparks.js dessine dedans) */
 .intro-sparks {
   position: absolute;
   inset: 0;

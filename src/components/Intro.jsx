@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { createSparks } from "./introSparks";
+import { createSparks } from "./sparks";
 
 // GSAP est la bibliothèque d'animation ; ScrollTrigger est son module qui relie une animation
 // au défilement de la page ; useGSAP est le « hook » qui les fait fonctionner proprement avec React.
@@ -212,7 +212,7 @@ function Intro() {
       const letterGroups = intro.querySelectorAll(".letter");
       const canvas = document.createElement("canvas"); // jamais affiché : il sert seulement à mesurer du texte
 
-      // Les étincelles (voir introSparks.js), et ce dont elles ont besoin :
+      // Les étincelles (voir sparks.js), et ce dont elles ont besoin :
       const sparks = createSparks(intro.querySelector(".intro-sparks"));
       let unit = 1; // la taille d'une unité du dessin à l'écran, en pixels (calculée dans measure)
       let torch = null; // la position de la torche à l'écran quand on soude, sinon null
@@ -614,7 +614,7 @@ function Intro() {
           </p>
         </div>
 
-        {/* La toile des étincelles : elle recouvre tout l'écran, par-dessus le dessin (voir introSparks.js) */}
+        {/* La toile des étincelles : elle recouvre tout l'écran, par-dessus le dessin (voir sparks.js) */}
         <canvas className="intro-sparks" aria-hidden="true" />
 
         <button type="button" className="intro-skip" onClick={skipIntro}>

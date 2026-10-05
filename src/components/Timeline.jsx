@@ -1,83 +1,155 @@
-import { useState, useEffect, useRef } from "react";
+import { useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import timelineData from "../data/timelineData.json";
 
+// Mêmes outils que l'intro : GSAP, son module ScrollTrigger (qui relie une animation au défilement)
+// et le hook useGSAP (qui range tout proprement quand le composant disparaît).
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+// La gamme se parcourt de deux façons, selon l'écran (la même condition est écrite dans le CSS, section 9) :
+// - grand écran : l'À propos est en deux colonnes qui restent en place le temps que le cordon se soude ;
+// - sinon : la gamme défile avec la page, et le cordon suit une ligne aux 60 % de la hauteur de l'écran.
+const PINNED_SCREEN = "(min-width: 1000px) and (min-height: 820px)";
+
+const SMOOTHING = 0.5; // en secondes : le retard du cordon sur le défilement, pour qu'il glisse (comme l'intro)
+const TIP_PLACE = 0.45; // où se tient la pointe du cordon dans la fenêtre : 0 = tout en haut, 1 = tout en bas
+const FIRST_STEP = 16; // en pixels : de quoi allumer la première étape d'entrée, avant que le cordon parte
+
 function Timeline() {
-  const [progress, setProgress] = useState(0);
-  const [reachedCount, setReachedCount] = useState(0);
-  const bodyRef = useRef(null);
+  // progress : l'avancement du cordon, de 0 à 1 · reached : le nombre d'étapes atteintes
+  // shift : de combien de pixels la gamme est remontée dans sa fenêtre (grand écran seulement)
+  const [weld, setWeld] = useState({ progress: 0, reached: 0, shift: 0 });
+  const rootRef = useRef(null);
 
-  useEffect(() => {
-    function handleScroll() {
-      const body = bodyRef.current;
-      if (!body) return;
+  useGSAP(() => {
+    const root = rootRef.current;
+    const frame = root.querySelector(".timeline-window");
+    const body = root.querySelector(".timeline-body");
+    const dots = [...body.querySelectorAll(".timeline-dot")];
 
-      const triggerLine = window.innerHeight * 0.6;
-      const rect = body.getBoundingClientRect();
-      const value = (triggerLine - rect.top) / rect.height;
-      setProgress(Math.min(Math.max(value, 0), 1));
+    // Traduit l'avancement du cordon (0 à 1) en ce qui s'affiche
+    function show(progress, isPinned) {
+      const tip = progress * body.offsetHeight; // la pointe, en pixels depuis le haut de la gamme
+      const lead = isPinned ? FIRST_STEP : 0;
+      // Une étape est atteinte quand la pointe a dépassé son point (la position du point dans la gamme)
+      const reached = dots.filter(
+        (dot) => dot.parentElement.offsetTop + dot.offsetTop < tip + lead
+      ).length;
 
-      const dots = body.querySelectorAll(".timeline-dot");
-      const reached = [...dots].filter(
-        (dot) => dot.getBoundingClientRect().top < triggerLine,
+      // Sur grand écran, la gamme est plus haute que sa fenêtre : on la remonte pour garder la pointe
+      // à la même place, sans jamais dépasser ni le début (0) ni la fin (hidden) de la gamme.
+      let shift = 0;
+      if (isPinned) {
+        // La hauteur utile de la fenêtre : sans ses marges intérieures, là où le masque fait son fondu
+        const { paddingTop, paddingBottom } = getComputedStyle(frame);
+        const room = frame.clientHeight - parseFloat(paddingTop) - parseFloat(paddingBottom);
+        const hidden = Math.max(body.offsetHeight - room, 0); // ce qui dépasse en bas au départ
+        shift = gsap.utils.clamp(0, hidden, tip - room * TIP_PLACE);
+      }
+
+      // On ne redessine le composant que si quelque chose a vraiment changé
+      setWeld((previous) =>
+        previous.progress === progress && previous.reached === reached && previous.shift === shift
+          ? previous
+          : { progress, reached, shift }
       );
-      setReachedCount(reached.length);
     }
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
+    // Relie l'avancement du cordon au défilement. GSAP fait varier « state.progress » de 0 à 1
+    // entre le début et la fin décrits par scrollTrigger, et on affiche le résultat à chaque image.
+    function weldOnScroll(scrollTrigger, isPinned) {
+      const state = { progress: 0 };
+      const update = () => show(state.progress, isPinned);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, []);
+      gsap.to(state, {
+        progress: 1,
+        ease: "none",
+        onUpdate: update,
+        // onRefresh : la fenêtre a changé de taille, on recalcule avec les nouvelles mesures
+        scrollTrigger: { ...scrollTrigger, onRefresh: update },
+      });
+      update();
+    }
 
-  const isWelding = progress > 0 && progress < 1;
+    // matchMedia : chaque réglage n'existe que tant que sa condition est vraie.
+    // Si la fenêtre change de taille et passe de l'un à l'autre, GSAP défait le premier et installe le second.
+    const media = gsap.matchMedia();
+
+    media.add(PINNED_SCREEN, () => {
+      const layout = root.closest(".about-layout");
+
+      weldOnScroll(
+        {
+          trigger: layout,
+          // Du moment où les deux colonnes s'arrêtent sous la navbar (leur « top », écrit dans le CSS)…
+          start: () => `top ${parseFloat(getComputedStyle(root).top)}px`,
+          // … à celui où elles repartent : la distance qu'elles peuvent parcourir dans leur rangée
+          end: () => `+=${layout.offsetHeight - root.offsetHeight}`,
+          scrub: SMOOTHING,
+          invalidateOnRefresh: true, // au changement de taille de la fenêtre, refaire ces deux calculs
+        },
+        true
+      );
+    });
+
+    media.add(`not all and ${PINNED_SCREEN}`, () => {
+      // Le cordon commence quand le haut de la gamme passe la ligne des 60 %, et finit quand son bas la passe
+      weldOnScroll({ trigger: body, start: "top 60%", end: "bottom 60%", scrub: true }, false);
+    });
+
+    return () => media.revert();
+  });
+
+  const isWelding = weld.progress > 0 && weld.progress < 1;
 
   return (
-    <div className="timeline">
+    <div className="timeline" ref={rootRef}>
       <p className="timeline-heading">
         Gamme de fabrication · Développeur Full Stack
       </p>
 
-      <div
-        className={`timeline-body ${isWelding ? "welding" : ""}`}
-        ref={bodyRef}
-        style={{ "--progress": progress }}
-      >
-        <div className="timeline-track" aria-hidden="true">
-          <div className="timeline-weld"></div>
-          <div className="timeline-spark"></div>
-        </div>
+      {/* La fenêtre : sur grand écran, elle a une hauteur fixe et la gamme glisse derrière elle (--shift).
+          Sur petit écran, elle n'a aucun style : la gamme défile avec la page. */}
+      <div className="timeline-window">
+        <div
+          className={`timeline-body ${isWelding ? "welding" : ""}`}
+          style={{ "--progress": weld.progress, "--shift": weld.shift }}
+        >
+          <div className="timeline-track" aria-hidden="true">
+            <div className="timeline-weld"></div>
+            <div className="timeline-spark"></div>
+          </div>
 
-        <ol className="timeline-list">
-          {timelineData.map((step, index) => (
-            <li
-              key={step.id}
-              className={`timeline-item ${index < reachedCount ? "reached" : ""}`}
-            >
-              <span className="timeline-dot" aria-hidden="true"></span>
-              <div className="timeline-content">
-                <div className="timeline-meta">
-                  <span className="timeline-op">OP {(index + 1) * 10}</span>
-                  <span className="timeline-date">{step.date}</span>
-                  <span className={`timeline-type ${step.type}`}>
-                    {step.type === "formation" ? "Formation" : "Expérience"}
-                  </span>
-                  {step.status && (
-                    <span className="timeline-type timeline-status">
-                      {step.status}
+          <ol className="timeline-list">
+            {timelineData.map((step, index) => (
+              <li
+                key={step.id}
+                className={`timeline-item ${index < weld.reached ? "reached" : ""}`}
+              >
+                <span className="timeline-dot" aria-hidden="true"></span>
+                <div className="timeline-content">
+                  <div className="timeline-meta">
+                    <span className="timeline-op">OP {(index + 1) * 10}</span>
+                    <span className="timeline-date">{step.date}</span>
+                    <span className={`timeline-type ${step.type}`}>
+                      {step.type === "formation" ? "Formation" : "Expérience"}
                     </span>
-                  )}
+                    {step.status && (
+                      <span className="timeline-type timeline-status">
+                        {step.status}
+                      </span>
+                    )}
+                  </div>
+                  <h3>{step.title}</h3>
+                  <p className="timeline-place">{step.place}</p>
+                  <p>{step.description}</p>
                 </div>
-                <h3>{step.title}</h3>
-                <p className="timeline-place">{step.place}</p>
-                <p>{step.description}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </div>
   );
