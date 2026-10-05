@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer.jsx";
 import ContactModal from "./components/ContactModal";
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollReveal from "./components/ScrollReveal";
+import Intro from "./components/Intro";
 import HomePage from "./pages/HomePage";
 import LegalNotice from "./pages/LegalNotice";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -23,7 +25,13 @@ function App() {
 
   return (
     <>
+      {/* Composants « invisibles » : ils n'affichent rien, ils agissent sur la page */}
       <ScrollToTop />
+      <ScrollReveal />
+
+      {/* L'écran d'intro : le plan qui se trace (une fois par visite) */}
+      <Intro />
+
       <Navbar onContactClick={openContact} />
 
       <main>

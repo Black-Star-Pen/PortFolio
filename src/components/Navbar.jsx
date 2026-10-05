@@ -22,8 +22,13 @@ function Navbar({ onContactClick }) {
   return (
     <header className="navbar">
       <div className="navbar-inner">
-        <Link to="/" className="navbar-logo" onClick={closeMenu}>
-          ADAM <span className="accent">BOULKHEDERT</span>
+        {/* Les deux initiales ont leur propre <span> : à la fin de l'intro, le « A » et le « B » soudés
+            viennent se poser dessus (voir Intro.jsx). data-text sert au reflet qui balaie le nom (CSS). */}
+        <Link to="/" className="navbar-logo" data-text="ADAM BOULKHEDERT" onClick={closeMenu}>
+          <span className="logo-initial">A</span>DAM{" "}
+          <span className="accent">
+            <span className="logo-initial">B</span>OULKHEDERT
+          </span>
         </Link>
 
         <nav className={`navbar-links ${isOpen ? "open" : ""}`}>
