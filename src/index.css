@@ -280,12 +280,34 @@ main > section.seam-welded::after {
 /* ===== 7. Hero ===== */
 .hero {
   overflow-x: clip;
-  min-height: 90vh;
+}
+
+/* Le contenu du Hero. 90vh moins les 200px de marges intérieures de la section (100px en haut et en bas) :
+   la section fait donc 90vh en tout, comme avant. */
+.hero-pin {
+  min-height: calc(90vh - 200px);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   gap: 24px;
+}
+
+/* Après l'intro (classe has-intro posée par le composant Intro), le Hero « tient » à l'écran :
+   - la section est rallongée de --hero-hold ;
+   - son contenu est sticky : il reste en place pendant qu'on parcourt cette distance.
+   Pour tenir plus ou moins longtemps, change --hero-hold.
+   (On rallonge avec min-height et pas avec padding : un élément sticky ne peut se déplacer
+   que dans la zone de contenu de son parent, pas dans ses marges intérieures.) */
+html.has-intro .hero {
+  --hero-hold: 70vh;
+  min-height: calc(90vh + var(--hero-hold));
+}
+
+html.has-intro .hero-pin {
+  position: sticky;
+  /* sa place naturelle : sous la navbar (--navbar-h, mesurée par Intro) et la marge de 100px de la section */
+  top: calc(var(--navbar-h, 73px) + 100px);
 }
 
 /* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
@@ -2660,7 +2682,7 @@ main > section.seam-welded::after {
   }
 }
 
-/* ===== 19 ter. L'intro : le plan qui se trace au défilement (composant Intro) ===== */
+/* ===== 19 ter. L'intro : le plan qui se soude au défilement (composant Intro) ===== */
 
 /* Pendant l'intro, les animations du Hero attendent (elles partent quand on arrive dessus) */
 html.intro-playing .hero *,
@@ -2672,9 +2694,31 @@ html.intro-playing .hero *::after {
 /* Très haut : c'est la distance de défilement pendant laquelle le plan se dessine */
 .intro {
   --p: 0; /* l'avancement, de 0 à 1, écrit par le JavaScript */
+  /* Le raccord final (de 80 % à 100 %) : 0 = le plan plein écran, 1 = « AB » rangé dans la navbar */
+  --land: clamp(0, (var(--p) - 0.8) / 0.2, 1);
+  /* Tout ce qui n'est pas « AB » s'efface dans le premier tiers du raccord */
+  --clear: calc(1 - clamp(0, var(--land) * 3, 1));
+  /* Le vol des lettres vers le logo : il se termine un peu avant la fin du raccord (à 85 %),
+     pour qu'on les voie bien posées à leur place avant que les vraies lettres prennent le relais */
+  --fly: clamp(0, var(--land) / 0.85, 1);
+  /* L'épaisseur du cordon. Elle augmente pendant le raccord (de 4 à 22) : une fois rétrécies,
+     les lettres ont ainsi la même graisse que le logo. (22 = LANDED_WIDTH dans Intro.jsx) */
+  --w: calc(4px + var(--fly) * 18px);
+  /* Le cadre du plan : sa distance au bord de l'écran, et la largeur de la bande des repères */
+  --frame-edge: 12px;
+  --frame-band: 22px;
+  --frame-line: rgba(143, 179, 201, 0.3);
 
   position: relative;
+  z-index: 60; /* au-dessus de la navbar (50) */
+  /* L'intro recouvre le haut du site : sans ça, elle intercepterait les clics sur la navbar */
+  pointer-events: none;
   height: 240vh;
+  height: 240svh;
+  /* Marge négative d'un écran : le site (navbar + Hero) remonte SOUS le dernier écran de l'intro.
+     Quand l'intro se termine, la navbar est donc déjà en place, pile derrière le plan. */
+  margin-bottom: -100vh;
+  margin-bottom: -100svh;
 }
 
 /* Le plan reste collé à l'écran pendant tout ce temps */
@@ -2684,30 +2728,238 @@ html.intro-playing .hero *::after {
   height: 100vh;
   height: 100svh;
   overflow: hidden;
+}
+
+/* Le fond du plan (couleur + quadrillage) est à part, pour pouvoir l'effacer seul
+   et laisser voir le site derrière pendant que « AB » voyage vers la navbar */
+.intro-sticky::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-color: var(--color-bg);
   background-image:
     linear-gradient(rgba(143, 179, 201, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(143, 179, 201, 0.06) 1px, transparent 1px);
   background-size: 32px 32px;
   background-position: center;
+  opacity: calc(1 - var(--land));
+}
+
+/* La lueur de la torche sur le plan : un halo chaud + le même quadrillage en plus lumineux,
+   visibles seulement dans un rond autour de la torche (mask-image).
+   --lx et --ly = la position de la torche, écrite par le JavaScript ; --light = 1 quand on soude. */
+.intro-sticky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), rgba(255, 176, 96, 0.14), transparent 230px),
+    linear-gradient(rgba(143, 179, 201, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 179, 201, 0.3) 1px, transparent 1px);
+  background-size:
+    auto,
+    32px 32px,
+    32px 32px;
+  background-position:
+    0 0,
+    center,
+    center;
+  -webkit-mask-image: radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), #000, transparent 250px);
+  mask-image: radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), #000, transparent 250px);
+  opacity: var(--light, 0);
+  transition: opacity 0.3s;
+}
+
+/* Le cadre du plan : deux bordures l'une dans l'autre, avec les repères de zones entre les deux */
+.intro-frame {
+  position: absolute;
+  z-index: 1; /* au-dessus de la lueur */
+  inset: var(--frame-edge);
+  border: 1px solid var(--frame-line);
+  font-family: var(--font-mono);
+  opacity: var(--clear);
+}
+
+/* La bordure intérieure */
+.intro-frame::before {
+  content: "";
+  position: absolute;
+  inset: var(--frame-band);
+  border: 1px solid var(--frame-line);
+}
+
+/* Une rangée de repères : chaque <span> prend la même place (flex: 1) et centre son chiffre ou sa lettre */
+.intro-zones {
+  position: absolute;
+  display: flex;
+  font-size: 0.6rem;
+  color: rgba(143, 179, 201, 0.65);
+}
+
+.intro-zones span {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-zones-top,
+.intro-zones-bottom {
+  left: var(--frame-band);
+  right: var(--frame-band);
+  height: var(--frame-band);
+}
+
+.intro-zones-top {
+  top: 0;
+}
+
+.intro-zones-bottom {
+  bottom: 0;
+}
+
+.intro-zones-left,
+.intro-zones-right {
+  top: var(--frame-band);
+  bottom: var(--frame-band);
+  width: var(--frame-band);
+  flex-direction: column;
+}
+
+.intro-zones-left {
+  left: 0;
+}
+
+.intro-zones-right {
+  right: 0;
+}
+
+/* Le petit trait qui sépare deux zones */
+.intro-zones-top span + span,
+.intro-zones-bottom span + span {
+  border-left: 1px solid var(--frame-line);
+}
+
+.intro-zones-left span + span,
+.intro-zones-right span + span {
+  border-top: 1px solid var(--frame-line);
+}
+
+/* Le cartouche, dans le coin en bas à droite du cadre.
+   L'astuce pour les traits entre les cases : la grille a un fond de la couleur des traits et
+   un espace de 1px entre les cases (gap), et chaque case a le fond sombre du plan. */
+.intro-cartouche {
+  position: absolute;
+  right: calc(var(--frame-band) + 1px);
+  bottom: calc(var(--frame-band) + 1px);
+  width: 340px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  border-top: 1px solid var(--frame-line);
+  border-left: 1px solid var(--frame-line);
+  background-color: rgba(143, 179, 201, 0.3);
+}
+
+.intro-cartouche > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  background-color: var(--color-bg);
+  text-transform: uppercase;
+}
+
+/* La grande case (« Dessiné par ») prend 2 colonnes sur 3 */
+.intro-cartouche .intro-cartouche-wide {
+  grid-column: span 2;
+}
+
+/* L'étiquette de la case… */
+.intro-cartouche span {
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: rgba(143, 179, 201, 0.7);
+}
+
+/* … et sa valeur */
+.intro-cartouche strong {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+/* La case « Contrôle » : ses deux valeurs sont posées l'une sur l'autre (même case de la grille),
+   et on passe de l'une à l'autre quand la soudure est terminée (entre 72 % et 78 % du défilement) */
+.intro-cartouche .intro-cartouche-check {
+  --done: clamp(0, (var(--p) - 0.72) / 0.06, 1);
+  display: grid;
+}
+
+.intro-cartouche-check strong {
+  grid-area: 2 / 1;
+}
+
+.intro-cartouche-check .pending {
+  color: var(--color-muted);
+  opacity: calc(1 - var(--done));
+}
+
+.intro-cartouche-check .done {
+  opacity: var(--done);
+}
+
+/* Sur mobile : un cadre plus fin, 4 repères au lieu de 6, et le cartouche sur toute la largeur */
+@media (max-width: 600px) {
+  .intro {
+    --frame-edge: 6px;
+    --frame-band: 16px;
+  }
+
+  .intro-zones-top span:nth-child(n + 5),
+  .intro-zones-bottom span:nth-child(n + 5) {
+    display: none;
+  }
+
+  .intro-cartouche {
+    left: calc(var(--frame-band) + 1px);
+    width: auto;
+    border-left: none;
+  }
+
+  .intro-cartouche > div {
+    padding: 6px 8px;
+  }
+
+  .intro-cartouche strong {
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+  }
 }
 
 .intro-stage {
   position: absolute;
+  z-index: 1; /* au-dessus de la lueur */
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  /* À la fin (de 85 % à 100 %), on « plonge » dans le plan : zoom et fondu */
-  --dive: clamp(0, (var(--p) - 0.85) / 0.15, 1);
-  transform: scale(calc(1 + var(--dive) * 2));
-  opacity: calc(1 - var(--dive));
 }
 
+/* Le dessin */
 .intro-plan {
-  width: min(560px, 86vw);
+  /* Le plus grand possible, mais jamais plus que 720px, 80 % de la largeur ou 88 % de la hauteur de l'écran */
+  width: min(720px, 80vw, 88vh);
+  width: min(720px, 80vw, 88svh);
+}
+
+.intro-plan svg {
+  display: block;
+  width: 100%;
   overflow: visible;
 }
 
@@ -2718,27 +2970,149 @@ html.intro-playing .hero *::after {
   --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
 }
 
-/* pathLength="1" : chaque trait mesure « 1 ». Décalé de 1 = invisible, décalé de 0 = dessiné. */
+/* Le trait qui « se dessine ». --len = sa longueur (donnée dans le JSX).
+   On le transforme en un seul grand tiret, de la longueur du trait, suivi d'un vide deux fois plus long.
+   Décalé de toute sa longueur = invisible ; décalé de 0 = entièrement dessiné. */
 .intro .draw {
   fill: none;
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--t));
+  stroke-dasharray: var(--len) calc(var(--len) * 2);
+  stroke-dashoffset: calc(var(--len) * (1 - var(--t)));
 }
 
 .intro .fade {
-  opacity: var(--t);
+  opacity: calc(var(--t) * var(--clear));
 }
 
-.intro .construction .draw {
-  stroke: rgba(143, 179, 201, 0.45);
+/* Les traits de construction : déjà là à l'arrivée */
+.intro .construction {
+  fill: none;
+  stroke: rgba(143, 179, 201, 0.4);
   stroke-width: 0.6;
+  opacity: var(--clear);
 }
 
-.intro .letter .draw {
-  stroke: var(--color-accent);
-  stroke-width: 4;
+/* L'esquisse de « AB » : des pointillés pâles, comme un tracé au crayon avant de souder */
+.intro .sketch {
+  fill: none;
+  stroke: rgba(214, 191, 148, 0.4);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 3;
+  opacity: var(--clear);
+}
+
+/* Une lettre (« A » ou « B »), en cordon de soudure.
+   Pendant le raccord, elle se déplace (--mx, --my) et rétrécit (--sx, --sy) jusqu'à son initiale
+   dans le logo : ces 4 valeurs sont mesurées par le JavaScript (fonction measure).
+   Elle reste visible jusqu'au logo, puis s'efface juste à l'arrivée : la vraie lettre prend le relais. */
+.intro .letter {
+  fill: none;
+  stroke-linejoin: round; /* des angles arrondis, comme les écailles (sinon une pointe dépasse au sommet du A) */
+  /* Visible pendant tout le vol, elle s'efface ensuite (les 15 derniers % du raccord) */
+  opacity: clamp(0, (1 - var(--land)) / 0.15, 1);
+  filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.45));
+  /* Le point fixe du rétrécissement : le milieu de la lettre (--ox est donné dans le JSX) */
+  transform-origin: var(--ox) 70px;
+  /* La cible bouge : tant que l'intro n'est pas finie, la navbar est encore plus bas que sa place finale.
+     Il lui reste (1 - --p) × --travel à remonter : on l'ajoute au déplacement vertical. */
+  --target-y: calc(var(--my, 0) + (1 - var(--p)) * var(--travel, 0));
+  /* pow(taille finale, avancement) : la lettre rétrécit vite au début, puis de plus en plus doucement.
+     Avec un simple calcul en ligne droite, elle resterait énorme presque jusqu'au bout. */
+  transform: translate(calc(var(--fly) * var(--mx, 0) * 1px), calc(var(--fly) * var(--target-y) * 1px))
+    scale(pow(var(--sx, 1), var(--fly)), pow(var(--sy, 1), var(--fly)));
+}
+
+/* Le masque : en blanc, la partie du cordon déjà soudée (un peu plus large que lui, pour ne rien rogner) */
+.intro mask .draw {
+  stroke: #fff;
+  stroke-width: calc(var(--w) + 1px);
   stroke-linecap: square;
-  filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.5));
+}
+
+/* Les 4 calques du cordon, du dessous vers le dessus */
+/* Le cœur : un trait continu, un peu plus sombre et plus étroit, qui remplit le dessous */
+.intro .bead-core {
+  stroke: #b89f70;
+  stroke-width: calc(var(--w) - 1.4px);
+  stroke-linecap: round;
+}
+
+/* Les écailles : le même trait, découpé en points ronds qui se chevauchent
+   (un tiret presque nul + des bouts arrondis = un rond, tous les 2 unités).
+   C'est ce qui donne au cordon son bord bosselé, comme une vraie soudure.
+   Pour des écailles plus serrées ou plus espacées, change le 2 ici ET dans les deux calques suivants
+   (le tiret + le vide doivent toujours faire le même total). */
+.intro .bead-scales {
+  stroke: var(--color-accent);
+  stroke-width: var(--w);
+  stroke-linecap: round;
+  stroke-dasharray: 0.01 1.99;
+}
+
+/* Le relief des écailles : un trait sombre entre deux écailles (ce calque)
+   et un reflet clair sur le dessus de chacune (le calque suivant) */
+.intro .bead-ripples {
+  stroke: rgba(70, 46, 14, 0.36);
+  stroke-width: calc(var(--w) - 1px);
+  stroke-dasharray: 0.4 1.6;
+  stroke-dashoffset: -0.8; /* décalé pour tomber pile entre deux écailles */
+  opacity: var(--clear);
+}
+
+.intro .bead-ripples-light {
+  stroke: rgba(255, 250, 235, 0.4);
+  stroke-width: calc(var(--w) - 1.8px);
+  stroke-dasharray: 0.5 1.5;
+  stroke-dashoffset: 0.25; /* centré sur l'écaille */
+}
+
+/* La chaleur. --u = l'avancement du trait, comme --t, mais il continue après 1 :
+   une fois le trait fini, la zone chaude continue d'avancer et sort du trait (le cordon refroidit). */
+.intro .heat {
+  --u: max(0, (var(--p) - var(--s)) / (var(--e) - var(--s)));
+  opacity: clamp(0, var(--u) * 40, 1);
+  /* un léger flou fond les couleurs entre elles, puis un halo orange autour */
+  filter: blur(0.8px) drop-shadow(0 0 5px rgba(255, 130, 40, 0.75));
+}
+
+/* Chaque calque est un tiret de longueur --hot, dont le bout avant est au niveau de la torche */
+.intro .heat path {
+  stroke-width: calc(var(--w) + 0.4px);
+  stroke-linecap: round;
+  stroke-dasharray: var(--hot) 9999;
+  stroke-dashoffset: calc(var(--hot) - var(--u) * var(--len));
+}
+
+/* La torche : elle suit le chemin du trait (offset-path, donné dans le JSX).
+   offset-distance la place le long du chemin : 0 % au début, 100 % à la fin. */
+.intro .torch {
+  --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
+  offset-distance: calc(var(--t) * 100%);
+  offset-rotate: 0deg; /* la torche ne tourne pas avec le trait : les étincelles tombent toujours vers le bas */
+  /* Visible seulement pendant que SON trait se soude : min() vaut 0 au début (t = 0) et à la fin (t = 1) */
+  opacity: clamp(0, min(var(--t), 1 - var(--t)) * 40, 1);
+}
+
+.intro .torch-core {
+  fill: #fffdf2;
+  filter: drop-shadow(0 0 2px #fff1c1) drop-shadow(0 0 7px rgba(255, 200, 120, 0.95))
+    drop-shadow(0 0 16px rgba(255, 140, 50, 0.7));
+}
+
+/* Les étincelles : elles partent de la torche (--dx, --dy donnés dans le JSX) et s'éteignent */
+.intro .torch-spark {
+  fill: #ffe9b0;
+  animation: torch-spark 0.6s linear infinite;
+}
+
+@keyframes torch-spark {
+  from {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
 }
 
 .intro .dimension {
@@ -2755,21 +3129,32 @@ html.intro-playing .hero *::after {
   text-anchor: middle;
 }
 
-/* La légende du plan, sous le dessin */
-.intro-caption {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--color-steel);
-  opacity: clamp(0, (var(--p) - 0.72) / 0.08, 1);
+/* Les annotations (symbole de soudure, angle, rayon) : plus fines et plus discrètes que les cotes */
+.intro .annotation {
+  fill: none;
+  stroke: rgba(143, 179, 201, 0.75);
+  stroke-width: 0.6;
 }
 
-/* L'invitation à défiler, qui s'efface dès qu'on commence */
+.intro .annotation text {
+  fill: rgba(143, 179, 201, 0.9);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  /* Un contour de la couleur du fond, peint SOUS les lettres (paint-order) :
+     il « gomme » les traits du plan qui passeraient derrière le texte */
+  stroke: var(--color-bg);
+  stroke-width: 3px;
+  paint-order: stroke;
+}
+
+.intro .annotation .arrow {
+  stroke: none;
+  fill: rgba(143, 179, 201, 0.9);
+}
+
+/* L'invitation à défiler, sous le dessin : elle s'efface dès qu'on commence */
 .intro-hint {
-  position: absolute;
-  bottom: 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2794,11 +3179,12 @@ html.intro-playing .hero *::after {
   }
 }
 
-/* Le bouton « Passer », en bas à droite */
+/* Le bouton « Passer », en haut à droite, à l'intérieur du cadre
+   (le coin en bas à droite est pris par le cartouche) */
 .intro-skip {
   position: absolute;
-  right: 24px;
-  bottom: 24px;
+  top: calc(var(--frame-edge) + var(--frame-band) + 14px);
+  right: calc(var(--frame-edge) + var(--frame-band) + 14px);
   z-index: 2;
   padding: 8px 14px;
   border: 1px solid rgba(214, 191, 148, 0.3);
@@ -2807,10 +3193,16 @@ html.intro-playing .hero *::after {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-muted);
-  opacity: calc(1 - clamp(0, (var(--p) - 0.85) / 0.1, 1));
+  opacity: var(--clear);
+  pointer-events: auto; /* le bouton, lui, reste cliquable */
   transition:
     color 0.3s,
     border-color 0.3s;
+}
+
+/* Pendant le raccord final (classe posée par le JavaScript), le bouton n'existe plus pour la souris ni le clavier */
+.intro.is-landing .intro-skip {
+  visibility: hidden;
 }
 
 .intro-skip:hover,
@@ -2818,6 +3210,72 @@ html.intro-playing .hero *::after {
   color: var(--color-accent);
   border-color: var(--color-accent);
   outline: none;
+}
+
+/* --- Le logo de la navbar, à l'arrivée de l'intro ---
+   Deux classes posées par Intro sur <html> servent ici :
+   - intro-playing : l'intro est en cours (les initiales du logo sont cachées, elles attendent) ;
+   - has-intro sans intro-playing : l'intro vient de se terminer (on joue l'arrivée). */
+
+/* Pendant l'intro, le logo affiche « _DAM _OULKHEDERT » : les deux places sont libres */
+html.intro-playing .navbar .logo-initial {
+  opacity: 0;
+}
+
+/* À l'arrivée, chaque initiale apparaît « encore chaude » : blanche, avec un halo, puis elle refroidit.
+   Pas de couleur dans « to » : l'animation finit donc sur la couleur normale de la lettre. */
+html.has-intro:not(.intro-playing) .navbar .logo-initial {
+  animation: initial-cool 1.1s ease-out both;
+}
+
+@keyframes initial-cool {
+  from {
+    color: #fff;
+    text-shadow:
+      0 0 4px #fff5d6,
+      0 0 12px rgba(255, 195, 86, 0.95),
+      0 0 26px rgba(245, 143, 46, 0.8);
+  }
+  to {
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+/* Le reflet qui balaie le nom : une copie du texte, blanche et lumineuse, posée pile sur le logo
+   (::after + data-text), dont on ne montre qu'une bande étroite qui se déplace (mask-image). */
+.navbar .navbar-logo {
+  position: relative;
+}
+
+html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
+  content: attr(data-text);
+  content: attr(data-text) / ""; /* le « / "" » dit aux lecteurs d'écran de ne pas lire cette copie */
+  position: absolute;
+  inset: 0; /* la même boîte que le logo : si le nom passe sur 2 lignes, la copie aussi */
+  color: #fff;
+  text-shadow:
+    0 0 6px #fff5d6,
+    0 0 14px rgba(255, 195, 86, 0.9);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(105deg, transparent 42%, #000 50%, transparent 58%);
+  mask-image: linear-gradient(105deg, transparent 42%, #000 50%, transparent 58%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: logo-glint 1.2s 0.25s ease-in-out both;
+}
+
+/* La bande part de la gauche du nom et sort par la droite */
+@keyframes logo-glint {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
 }
 
 /* ===== 20. Accessibilité : animations réduites ===== */
