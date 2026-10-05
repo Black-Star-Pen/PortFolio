@@ -11,9 +11,11 @@
   --color-available: #4ade80;
   --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
 
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-title: "Space Grotesk", system-ui, sans-serif;
-  --font-serif: "Newsreader", Georgia, serif;
+  /* Les trois premières sont installées dans le projet (voir les imports dans main.jsx).
+     Leur nom se termine par « Variable » : c'est celui que leur donnent les paquets @fontsource. */
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-title: "Space Grotesk Variable", system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", Georgia, serif;
   --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
 
   --radius: 16px;

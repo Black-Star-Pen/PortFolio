@@ -35,7 +35,7 @@ Site en ligne : à venir.
 - un corps de requête limité à 10 Ko ;
 - les identifiants d'envoi dans un fichier `.env`, jamais versionné.
 
-**La vie privée.** L'adresse email n'est jamais écrite en clair dans la page, et une politique de confidentialité explique ce que deviennent les données du formulaire.
+**La vie privée.** L'adresse email n'est jamais écrite en clair dans la page, et une politique de confidentialité explique ce que deviennent les données du formulaire. Les polices et les logos sont hébergés par le site lui-même : afficher une page n'envoie rien à un service extérieur.
 
 **L'accessibilité.** Les fenêtres modales sont annoncées comme telles aux lecteurs d'écran et se ferment avec Échap. Les animations sont coupées pour les personnes qui ont activé « réduire les animations » dans leur système.
 
@@ -44,9 +44,9 @@ Site en ligne : à venir.
 ```
 PortFolio/
 ├── index.html
-├── public/             favicon et captures des projets (en WebP)
+├── public/             favicon, logos des technologies et captures des projets (en WebP)
 ├── images-source/      les captures d'origine, avant conversion
-├── scripts/            le script qui convertit les captures en WebP
+├── scripts/            deux scripts : convertir les captures, télécharger les logos
 ├── src/
 │   ├── components/     les composants React (Intro, Hero, Navbar, ContactForm…)
 │   ├── pages/          accueil, mentions légales, confidentialité, 404
@@ -104,6 +104,7 @@ Sans l'API, le site s'affiche normalement : seul l'envoi du formulaire échoue.
 | `npm run preview` | sert cette version en local, pour la vérifier |
 | `npm run lint` | vérifie le code avec ESLint |
 | `npm run images` | convertit les captures de `images-source/projects/` en WebP dans `public/projects/` |
+| `npm run icons` | télécharge dans `public/icons/` les logos listés dans `src/data/technoIcons.js` |
 
 ## Contact
 

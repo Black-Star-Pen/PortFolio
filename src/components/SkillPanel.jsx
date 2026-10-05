@@ -26,7 +26,7 @@ function SkillPanel({ skill, reference }) {
             <li key={techno} className="tool-tile">
               {slug && (
                 <img
-                  src={`https://cdn.simpleicons.org/${slug}/d6bf94`}
+                  src={`/icons/${slug}.svg`}
                   alt=""
                   width="32"
                   height="32"

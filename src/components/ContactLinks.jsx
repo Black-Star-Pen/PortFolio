@@ -34,7 +34,7 @@ function ContactLinks({ compact = false }) {
         >
           <img
             className="link-icon"
-            src="https://cdn.simpleicons.org/github/d6bf94"
+            src="/icons/github.svg"
             alt=""
             width="18"
             height="18"

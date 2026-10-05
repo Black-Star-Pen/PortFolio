@@ -1,4 +1,6 @@
 // Nom affiché → nom du logo sur Simple Icons (simpleicons.org).
+// Les logos sont rangés dans public/icons/ : après avoir ajouté une ligne ici,
+// lance « npm run icons » pour télécharger le fichier manquant.
 // Pas de logo disponible pour Nodemailer, OpenAI et Slack : ils s'affichent en texte seul
 // (inutile de les ajouter ici, il suffit de les écrire dans une liste "technos").
 const technoIcons = {
