@@ -2261,8 +2261,11 @@ html.has-intro .hero-pin {
   .project-actions .btn {
     flex: 1 1 100%;
   }
+}
 
-  /* Navbar */
+/* La navbar passe en menu burger dès 900px, plus tôt que le reste du mobile :
+   en dessous, le logo, les 4 liens et le bouton « Me contacter » ne tiennent plus sur une ligne */
+@media (max-width: 900px) {
   .navbar-burger {
     display: flex;
   }
@@ -2348,7 +2351,9 @@ html.has-intro .hero-pin {
     letter-spacing: 0.15em;
     color: var(--color-accent);
   }
+}
 
+@media (max-width: 768px) {
   /* Compétences */
   .blueprint {
     grid-template-columns: 1fr;

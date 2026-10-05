@@ -61,7 +61,9 @@ app.use((req, res) => {
   res.status(404).json({ ok: false, error: "Route introuvable." });
 });
 
-
+// Le gestionnaire d'erreurs. Express le reconnaît à ses 4 paramètres : « next » doit donc rester,
+// même s'il n'est pas utilisé (la ligne suivante dit à ESLint de ne pas le signaler).
+// eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
   if (error.type === "entity.parse.failed" || error.type === "entity.too.large") {
     return res.status(400).json({ ok: false, error: "Requête invalide." });
