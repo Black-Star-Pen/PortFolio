@@ -3,7 +3,17 @@
 // dans le style du site : un plan quadrillé avec le nom du projet.
 function ProjectImage({ image, title, className = "" }) {
   if (image) {
-    return <img className={className} src={image} alt={`Aperçu du projet ${title}`} />;
+    // loading="lazy" : le navigateur ne télécharge l'image que lorsqu'on s'en approche en défilant.
+    // Les projets sont loin sous le haut de la page : inutile de la charger dès l'arrivée.
+    return (
+      <img
+        className={className}
+        src={image}
+        alt={`Aperçu du projet ${title}`}
+        loading="lazy"
+        decoding="async"
+      />
+    );
   }
 
   return (

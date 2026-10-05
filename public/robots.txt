@@ -1,0 +1,4 @@
+# Ce fichier s'adresse aux robots des moteurs de recherche (Google, Bing…).
+# « User-agent: * » = la règle vaut pour tous les robots ; « Allow: / » = ils peuvent tout parcourir.
+User-agent: *
+Allow: /

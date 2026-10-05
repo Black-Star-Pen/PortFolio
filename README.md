@@ -44,7 +44,9 @@ Site en ligne : à venir.
 ```
 PortFolio/
 ├── index.html
-├── public/             favicon et captures des projets
+├── public/             favicon et captures des projets (en WebP)
+├── images-source/      les captures d'origine, avant conversion
+├── scripts/            le script qui convertit les captures en WebP
 ├── src/
 │   ├── components/     les composants React (Intro, Hero, Navbar, ContactForm…)
 │   ├── pages/          accueil, mentions légales, confidentialité, 404
@@ -101,6 +103,7 @@ Sans l'API, le site s'affiche normalement : seul l'envoi du formulaire échoue.
 | `npm run build` | construit la version de production dans `dist/` |
 | `npm run preview` | sert cette version en local, pour la vérifier |
 | `npm run lint` | vérifie le code avec ESLint |
+| `npm run images` | convertit les captures de `images-source/projects/` en WebP dans `public/projects/` |
 
 ## Contact
 
