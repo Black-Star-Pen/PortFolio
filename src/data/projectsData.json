@@ -94,7 +94,7 @@
         "Accessibilité : navigation complète au clavier, modales qui gardent le focus, respect du réglage « réduire les animations »."
       ],
       "challenge": "**Ne jamais faire confiance au navigateur**. Tout ce que vérifie le formulaire peut être contourné, donc le serveur refait chaque contrôle lui-même : liste blanche des champs, longueurs maximales, email, ville. Il limite aussi le nombre d'envois et renvoie des erreurs claires que le formulaire affiche champ par champ.",
-      "learned": "Concevoir des **animations pilotées par le défilement** sans bibliothèque, uniquement en CSS et en SVG (tracés, masques, variables CSS). Construire une API qui se défend seule, en pensant **sécurité et vie privée dès la conception**. Et mener un projet de bout en bout avec un flux Git propre : une branche par fonctionnalité et des Pull Requests."
+      "learned": "Concevoir des **animations pilotées par le défilement** avec GSAP et ScrollTrigger, dessinées en CSS et en SVG (tracés, masques, variables CSS). Construire une API qui se défend seule, en pensant **sécurité et vie privée dès la conception**. Et mener un projet de bout en bout avec un flux Git propre : une branche par fonctionnalité et des Pull Requests."
     },
     "technos": [
       "React",
@@ -102,6 +102,7 @@
       "Express",
       "Vite",
       "React Router",
+      "GSAP",
       "Nodemailer",
       "CSS"
     ],

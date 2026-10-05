@@ -18,13 +18,13 @@ Site en ligne : à venir.
 
 | Partie | Technologies |
 | --- | --- |
-| Front | React 19, Vite, React Router, CSS sans framework |
+| Front | React 19, Vite, React Router, GSAP (ScrollTrigger), CSS sans framework |
 | Back | Node.js, Express 5, Nodemailer, express-rate-limit |
 | Qualité | ESLint, une branche Git par fonctionnalité et des Pull Requests |
 
 ## Quelques choix techniques
 
-**Des animations sans bibliothèque.** Pour l'intro, le JavaScript ne fait qu'une chose : calculer l'avancement du défilement (de 0 à 1) et l'écrire dans une variable CSS. Tout le reste est du CSS et du SVG : `stroke-dasharray` pour tracer les traits, un masque pour révéler le cordon de soudure, `offset-path` pour faire suivre la torche.
+**Une intro pilotée par GSAP, dessinée en CSS.** Le déroulé de l'intro est une timeline GSAP, que ScrollTrigger fait avancer avec le défilement en lissant le mouvement. Cette timeline ne fait que changer des variables CSS ; l'apparence, elle, reste du CSS et du SVG : `stroke-dasharray` pour tracer les traits, un masque pour révéler le cordon de soudure, `offset-path` pour faire suivre la torche. Les autres animations du site (apparition des sections, soudures du parcours et du footer) n'utilisent aucune bibliothèque.
 
 **La sécurité du formulaire.** Tout ce que vérifie le navigateur peut être contourné, donc le serveur refait chaque contrôle lui-même :
 

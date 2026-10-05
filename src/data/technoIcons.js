@@ -8,6 +8,7 @@ const technoIcons = {
   TypeScript: "typescript",
   React: "react",
   "React Router": "reactrouter",
+  GSAP: "greensock",
   Vite: "vite",
   CSS: "css",
   TailwindCSS: "tailwindcss",

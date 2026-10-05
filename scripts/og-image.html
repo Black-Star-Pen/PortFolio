@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Image d'aperçu du site — outil</title>
+    <!-- Cette page est un outil : elle dessine l'image d'aperçu du site (voir og-image.js).
+         Elle ne fait pas partie du site en ligne. Pour l'ouvrir : lance « npm run dev »,
+         puis va sur http://localhost:5173/scripts/og-image.html -->
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #16181d;
+        color: #f2efe9;
+        font-family: system-ui, sans-serif;
+      }
+
+      p {
+        max-width: 70ch;
+        color: #9a9ca5;
+        line-height: 1.5;
+      }
+
+      canvas {
+        display: block;
+        width: min(100%, 1200px);
+        height: auto;
+        margin: 24px 0;
+        border: 1px solid #333842;
+      }
+
+      button {
+        padding: 12px 20px;
+        border: 1px solid #d6bf94;
+        background: transparent;
+        color: #d6bf94;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #d6bf94;
+        color: #0a0b0f;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Image d'aperçu du site</h1>
+    <p>
+      C'est l'image qui s'affiche quand on partage le lien du site (LinkedIn, WhatsApp, Discord…).
+      Elle mesure 1200 × 630 pixels, le format attendu par ces services. Pour la modifier, change
+      le code de <code>scripts/og-image.js</code> : la page se met à jour toute seule.
+    </p>
+
+    <canvas id="og" width="1200" height="630"></canvas>
+
+    <button id="save" type="button">Enregistrer l'image (og-image.png)</button>
+
+    <script type="module" src="./og-image.js"></script>
+  </body>
+</html>

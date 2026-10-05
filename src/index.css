@@ -2049,6 +2049,59 @@ html.has-intro .hero-pin {
   color: var(--color-text);
 }
 
+/* Sur ordinateur seulement : au survol, le lien réagit comme un bouton (.btn-primary, section 6) :
+   un contour doré, puis un remplissage doré de gauche à droite, comme un cordon de soudure.
+   En dessous de 900px, les liens deviennent le menu plein écran (voir plus bas) : pas de survol au doigt. */
+@media (min-width: 901px) {
+  .navbar-links {
+    /* Toujours 32px entre deux mots : 4px ici + 14px de chaque côté (13px de marge intérieure + 1px de bordure) */
+    gap: 4px;
+  }
+
+  .navbar-links a {
+    position: relative;
+    /* isolate : le remplissage (z-index: -1) passe derrière le texte du lien, pas derrière la navbar */
+    isolation: isolate;
+    padding: 7px 13px;
+    /* Bordure transparente au repos : elle réserve sa place, le lien ne bouge pas quand elle se colore */
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition:
+      color 0.35s,
+      border-color 0.35s;
+  }
+
+  .navbar-links a::before {
+    content: "";
+    position: absolute;
+    /* -1px : le remplissage déborde sur la bordure et la recouvre. Avec inset: 0, il s'arrêtait pile contre elle :
+       le lien a une taille à virgule (40,3px de haut), et pendant l'animation le navigateur n'arrondit pas
+       le remplissage et la bordure de la même façon. Un filet sombre restait entre les deux jusqu'à la fin. */
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+  }
+
+  .navbar-links a:hover {
+    border-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .navbar-links a:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Au clavier (touche Tab) : le même contour que les boutons */
+  .navbar-links a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
+
 .navbar-link-number {
   display: none;
 }
@@ -2700,17 +2753,17 @@ html.intro-playing .hero *::after {
 
 /* Très haut : c'est la distance de défilement pendant laquelle le plan se dessine */
 .intro {
-  --p: 0; /* l'avancement, de 0 à 1, écrit par le JavaScript */
-  /* Le raccord final (de 80 % à 100 %) : 0 = le plan plein écran, 1 = « AB » rangé dans la navbar */
-  --land: clamp(0, (var(--p) - 0.8) / 0.2, 1);
+  /* Les variables ci-dessous valent 0 au départ. C'est la timeline GSAP (dans Intro.jsx) qui les fait
+     passer de 0 à 1 au fil du défilement ; ce fichier dit seulement à quoi ressemble chaque valeur. */
+  --p: 0; /* l'avancement réel du défilement, de 0 à 1 */
+  /* Le raccord final : 0 = le plan plein écran, 1 = le plan effacé, « AB » rangé dans la navbar */
+  --land: 0;
   /* Tout ce qui n'est pas « AB » s'efface dans le premier tiers du raccord */
   --clear: calc(1 - clamp(0, var(--land) * 3, 1));
-  /* Le vol des lettres vers le logo : il se termine un peu avant la fin du raccord (à 85 %),
-     pour qu'on les voie bien posées à leur place avant que les vraies lettres prennent le relais */
-  --fly: clamp(0, var(--land) / 0.85, 1);
-  /* L'épaisseur du cordon. Elle augmente pendant le raccord (de 4 à 22) : une fois rétrécies,
-     les lettres ont ainsi la même graisse que le logo. (22 = LANDED_WIDTH dans Intro.jsx) */
-  --w: calc(4px + var(--fly) * 18px);
+  /* Le vol des lettres vers le logo : 0 = à leur place sur le plan, 1 = posées sur le logo */
+  --fly: 0;
+  /* L'épaisseur des lettres : --bead (BEAD_WIDTH dans Intro.jsx, transmis par le JSX) */
+  --w: calc(var(--bead, 14) * 1px);
   /* Le cadre du plan : sa distance au bord de l'écran, et la largeur de la bande des repères */
   --frame-edge: 12px;
   --frame-band: 22px;
@@ -2720,6 +2773,8 @@ html.intro-playing .hero *::after {
   z-index: 60; /* au-dessus de la navbar (50) */
   /* L'intro recouvre le haut du site : sans ça, elle intercepterait les clics sur la navbar */
   pointer-events: none;
+  /* La hauteur règle la vitesse de l'intro : plus elle est grande, plus il faut défiler pour tout voir,
+     donc plus la soudure avance lentement. 240 = 1,4 écran de défilement (240 moins l'écran lui-même). */
   height: 240vh;
   height: 240svh;
   /* Marge négative d'un écran : le site (navbar + Hero) remonte SOUS le dernier écran de l'intro.
@@ -2899,9 +2954,9 @@ html.intro-playing .hero *::after {
 }
 
 /* La case « Contrôle » : ses deux valeurs sont posées l'une sur l'autre (même case de la grille),
-   et on passe de l'une à l'autre quand la soudure est terminée (entre 72 % et 78 % du défilement) */
+   et on passe de l'une à l'autre quand la soudure est terminée (--done passe de 0 à 1, animée par GSAP) */
 .intro-cartouche .intro-cartouche-check {
-  --done: clamp(0, (var(--p) - 0.72) / 0.06, 1);
+  --done: 0;
   display: grid;
 }
 
@@ -2970,11 +3025,12 @@ html.intro-playing .hero *::after {
   overflow: visible;
 }
 
-/* Chaque trait a son début (--s) et sa fin (--e), dans le JSX.
-   Son propre avancement = (--p - début) / (fin - début), limité entre 0 et 1 par clamp(). */
+/* --t = l'avancement propre à chaque élément : 0 = pas commencé, 1 = terminé.
+   La timeline GSAP l'anime au bon moment pour chacun (voir STROKES et FADES dans Intro.jsx). */
 .intro .draw,
-.intro .fade {
-  --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
+.intro .fade,
+.intro .torch {
+  --t: 0;
 }
 
 /* Le trait qui « se dessine ». --len = sa longueur (donnée dans le JSX).
@@ -2983,7 +3039,10 @@ html.intro-playing .hero *::after {
 .intro .draw {
   fill: none;
   stroke-dasharray: var(--len) calc(var(--len) * 2);
-  stroke-dashoffset: calc(var(--len) * (1 - var(--t)));
+  /* Le premier terme dévoile le trait jusqu'à la torche. Le second concerne le bout carré du trait,
+     qui dépasse de --cap : on le retient presque jusqu'à la fin (pow(t, 6) reste proche de 0, puis
+     monte d'un coup vers 1), sinon la lettre apparaîtrait en avance sur la torche. */
+  stroke-dashoffset: calc(var(--len) * (1 - var(--t)) + var(--cap, 0) * (1 - pow(var(--t), 6)));
 }
 
 .intro .fade {
@@ -3013,7 +3072,6 @@ html.intro-playing .hero *::after {
    Elle reste visible jusqu'au logo, puis s'efface juste à l'arrivée : la vraie lettre prend le relais. */
 .intro .letter {
   fill: none;
-  stroke-linejoin: round; /* des angles arrondis, comme les écailles (sinon une pointe dépasse au sommet du A) */
   /* Visible pendant tout le vol, elle s'efface ensuite (les 15 derniers % du raccord) */
   opacity: clamp(0, (1 - var(--land)) / 0.15, 1);
   filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.45));
@@ -3028,63 +3086,37 @@ html.intro-playing .hero *::after {
     scale(pow(var(--sx, 1), var(--fly)), pow(var(--sy, 1), var(--fly)));
 }
 
-/* Le masque : en blanc, la partie du cordon déjà soudée (un peu plus large que lui, pour ne rien rogner) */
+/* Le masque : en blanc, la partie de la lettre déjà soudée.
+   (Sa largeur est donnée dans le JSX : MASK_WIDTH, plus large que la lettre pour ne rien rogner.) */
 .intro mask .draw {
   stroke: #fff;
-  stroke-width: calc(var(--w) + 1px);
   stroke-linecap: square;
+  stroke-linejoin: miter;
 }
 
-/* Les 4 calques du cordon, du dessous vers le dessus */
-/* Le cœur : un trait continu, un peu plus sombre et plus étroit, qui remplit le dessous */
-.intro .bead-core {
-  stroke: #b89f70;
-  stroke-width: calc(var(--w) - 1.4px);
-  stroke-linecap: round;
-}
-
-/* Les écailles : le même trait, découpé en points ronds qui se chevauchent
-   (un tiret presque nul + des bouts arrondis = un rond, tous les 2 unités).
-   C'est ce qui donne au cordon son bord bosselé, comme une vraie soudure.
-   Pour des écailles plus serrées ou plus espacées, change le 2 ici ET dans les deux calques suivants
-   (le tiret + le vide doivent toujours faire le même total). */
-.intro .bead-scales {
-  stroke: var(--color-accent);
+/* Les traits d'une lettre : lisses, sans aucune texture. Leur couleur est le dégradé doré
+   « intro-gold », défini dans le JSX. Bouts carrés et angles vifs : des lettres grasses et nettes. */
+.intro .letter-solid {
   stroke-width: var(--w);
-  stroke-linecap: round;
-  stroke-dasharray: 0.01 1.99;
-}
-
-/* Le relief des écailles : un trait sombre entre deux écailles (ce calque)
-   et un reflet clair sur le dessus de chacune (le calque suivant) */
-.intro .bead-ripples {
-  stroke: rgba(70, 46, 14, 0.36);
-  stroke-width: calc(var(--w) - 1px);
-  stroke-dasharray: 0.4 1.6;
-  stroke-dashoffset: -0.8; /* décalé pour tomber pile entre deux écailles */
-  opacity: var(--clear);
-}
-
-.intro .bead-ripples-light {
-  stroke: rgba(255, 250, 235, 0.4);
-  stroke-width: calc(var(--w) - 1.8px);
-  stroke-dasharray: 0.5 1.5;
-  stroke-dashoffset: 0.25; /* centré sur l'écaille */
+  stroke-linecap: square;
+  stroke-linejoin: miter;
 }
 
 /* La chaleur. --u = l'avancement du trait, comme --t, mais il continue après 1 :
-   une fois le trait fini, la zone chaude continue d'avancer et sort du trait (le cordon refroidit). */
+   une fois le trait fini, la zone chaude continue d'avancer et sort du trait (le métal refroidit). */
 .intro .heat {
-  --u: max(0, (var(--p) - var(--s)) / (var(--e) - var(--s)));
+  --u: 0; /* animée par GSAP, de 0 jusqu'un peu au-delà de 1 */
   opacity: clamp(0, var(--u) * 40, 1);
-  /* un léger flou fond les couleurs entre elles, puis un halo orange autour */
-  filter: blur(0.8px) drop-shadow(0 0 5px rgba(255, 130, 40, 0.75));
+  /* un léger flou gomme les dernières marches entre les calques */
+  filter: blur(1px);
 }
 
-/* Chaque calque est un tiret de longueur --hot, dont le bout avant est au niveau de la torche */
+/* Chaque calque est un tiret de longueur --hot, dont le bout avant est au niveau de la torche.
+   Même épaisseur et mêmes angles que la lettre : la couleur chaude la recouvre exactement. */
 .intro .heat path {
-  stroke-width: calc(var(--w) + 0.4px);
-  stroke-linecap: round;
+  stroke-width: var(--w);
+  stroke-linecap: square;
+  stroke-linejoin: miter;
   stroke-dasharray: var(--hot) 9999;
   stroke-dashoffset: calc(var(--hot) - var(--u) * var(--len));
 }
@@ -3092,34 +3124,27 @@ html.intro-playing .hero *::after {
 /* La torche : elle suit le chemin du trait (offset-path, donné dans le JSX).
    offset-distance la place le long du chemin : 0 % au début, 100 % à la fin. */
 .intro .torch {
-  --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
   offset-distance: calc(var(--t) * 100%);
-  offset-rotate: 0deg; /* la torche ne tourne pas avec le trait : les étincelles tombent toujours vers le bas */
+  offset-rotate: 0deg; /* la torche ne tourne pas avec le trait */
   /* Visible seulement pendant que SON trait se soude : min() vaut 0 au début (t = 0) et à la fin (t = 1) */
   opacity: clamp(0, min(var(--t), 1 - var(--t)) * 40, 1);
 }
 
+/* Le bain de métal en fusion, au bout du trait */
 .intro .torch-core {
   fill: #fffdf2;
-  filter: drop-shadow(0 0 2px #fff1c1) drop-shadow(0 0 7px rgba(255, 200, 120, 0.95))
-    drop-shadow(0 0 16px rgba(255, 140, 50, 0.7));
+  filter: drop-shadow(0 0 2px #fff1c1) drop-shadow(0 0 8px rgba(255, 200, 120, 0.95))
+    drop-shadow(0 0 18px rgba(255, 140, 50, 0.7));
 }
 
-/* Les étincelles : elles partent de la torche (--dx, --dy donnés dans le JSX) et s'éteignent */
-.intro .torch-spark {
-  fill: #ffe9b0;
-  animation: torch-spark 0.6s linear infinite;
-}
-
-@keyframes torch-spark {
-  from {
-    transform: translate(0, 0);
-    opacity: 1;
-  }
-  to {
-    transform: translate(var(--dx), var(--dy));
-    opacity: 0;
-  }
+/* La toile des étincelles : elle recouvre tout l'écran de l'intro, par-dessus le dessin
+   (le JavaScript de introSparks.js dessine dedans) */
+.intro-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .intro .dimension {
@@ -3171,7 +3196,7 @@ html.intro-playing .hero *::after {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--color-muted);
-  opacity: calc(1 - clamp(0, var(--p) / 0.05, 1));
+  /* son effacement est animé par GSAP (étape 1 de la timeline) */
 }
 
 .intro-hint span {
