@@ -818,27 +818,131 @@ html.has-intro .hero-pin {
   gap: 24px;
 }
 
+/* La carte se lit en quatre étages : le visuel, la référence, le titre, puis la description et les technos.
+   Un filet doré les sépare (--project-line).
+   subgrid : la carte n'a pas ses propres rangées, elle emprunte celles de la grille des projets
+   (« span 4 » = elle en occupe quatre). Les cartes d'une même ligne partagent donc les mêmes rangées :
+   si un titre passe sur deux lignes, son étage grandit sur toutes les cartes, et les filets restent alignés. */
 .project-card {
+  --project-line: rgba(214, 191, 148, 0.2);
+  /* Le métal de la bordure : un dégradé en biais qui alterne reflets clairs et creux sombres,
+     comme une baguette de laiton poli. Ce sont les ors de l'intro (#fbe8b6, #e2bf78, #b08542). */
+  --project-metal: linear-gradient(
+    135deg,
+    #b08542 0%,
+    #fbe8b6 14%,
+    #d6bf94 28%,
+    #8f6c33 46%,
+    #e2bf78 62%,
+    #fbe8b6 76%,
+    #a57c3c 100%
+  );
+
+  /* L'épaisseur de la bordure métallique, et l'arrondi qui reste à l'intérieur d'elle */
+  --project-border: 3px;
+  --project-inner-radius: calc(var(--radius) - var(--project-border));
+
   position: relative;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-border);
+  /* isolate : les deux calques ci-dessous (z-index: -1) restent dans la carte, derrière son contenu */
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 4;
+  /* Pas d'écart entre les étages : sans ça, la carte reprendrait les 24px d'écart de la grille */
+  row-gap: 0;
+  /* La bordure métallique n'est pas une vraie bordure : la carte entière est en métal, et sa marge
+     intérieure (padding) laisse dépasser ce métal tout autour d'un fond sombre (::after).
+     Trois calques, du fond vers le dessus : le métal, les lueurs qui tournent (::before), le fond sombre. */
+  padding: var(--project-border);
   border-radius: var(--radius);
+  background: var(--project-metal);
+  /* Le métal est deux fois plus grand que la carte : au survol, on le fait glisser (voir plus bas) */
+  background-size: 200% 200%;
+  background-position: 0% 0%;
   overflow: hidden;
   cursor: pointer;
   transition:
     transform 0.4s,
-    border-color 0.3s;
+    background-position 0.8s ease;
 }
 
+/* Le fond sombre de la carte, en retrait de l'épaisseur de la bordure */
+.project-card::after {
+  content: "";
+  position: absolute;
+  inset: var(--project-border);
+  z-index: -1;
+  border-radius: var(--project-inner-radius);
+  background-color: var(--color-surface);
+}
+
+/* Les deux lueurs qui parcourent le contour : un dégradé « en cône », transparent sur presque tout le tour,
+   avec deux traînes qui s'éclaircissent jusqu'à une tête presque blanche. La principale, dorée, finit à
+   98,5 % du tour ; la seconde est en face (elle finit à 48,5 %) et elle est bleue, comme l'arc TIG :
+   il y a toujours de la lumière quelque part, et les deux couleurs du site se répondent.
+   On fait tourner l'angle de départ du dégradé (--spark-angle) : les deux têtes font le tour de la carte.
+   Seule la partie sous la bordure se voit, le reste est caché par le fond sombre (::after), posé juste au-dessus. */
+.project-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: conic-gradient(
+    from var(--spark-angle),
+    transparent 0 32%,
+    rgba(120, 190, 255, 0.45) 44%,
+    #e8f4ff 48.5%,
+    transparent 50% 80%,
+    rgba(251, 232, 182, 0.55) 93%,
+    #fffdf2 98.5%,
+    transparent 100%
+  );
+  /* Un tour en 15 secondes, et un scintillement sur 4,5 secondes : les lueurs se promènent, elles ne courent pas */
+  animation:
+    spark-orbit 15s linear infinite,
+    spark-twinkle 4.5s ease-in-out infinite;
+}
+
+/* Chaque carte a ses lueurs à un endroit différent du tour (un délai négatif = une animation déjà entamée) */
+.project-card:nth-child(3n + 2)::before {
+  animation-delay: -5s, -1.5s;
+}
+
+.project-card:nth-child(3n)::before {
+  animation-delay: -10s, -3s;
+}
+
+/* @property déclare --spark-angle comme un angle : sans ça, le navigateur ne saurait pas l'animer
+   progressivement de 0 à 360 degrés, il sauterait d'une valeur à l'autre */
+@property --spark-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes spark-orbit {
+  to {
+    --spark-angle: 360deg;
+  }
+}
+
+/* Le scintillement, doux : les lueurs faiblissent un peu puis reprennent, lentement */
+@keyframes spark-twinkle {
+  50% {
+    opacity: 0.72;
+  }
+}
+
+/* Au survol, la carte se soulève et les reflets du métal glissent le long de la bordure */
 .project-card:hover {
   transform: translateY(-7px);
-  border-color: rgba(214, 191, 148, 0.35);
+  background-position: 100% 100%;
 }
 
+/* Les coins du haut suivent l'arrondi intérieur de la bordure */
 .project-image {
   aspect-ratio: 16 / 10;
+  border-radius: var(--project-inner-radius) var(--project-inner-radius) 0 0;
   overflow: hidden;
 }
 
@@ -877,7 +981,6 @@ html.has-intro .hero-pin {
 .project-card:has(.project-open:focus-visible) {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
-  border-color: rgba(214, 191, 148, 0.35);
 }
 
 /* Le visuel de remplacement : un plan quadrillé, en attendant les captures */
@@ -939,12 +1042,80 @@ html.has-intro .hero-pin {
   color: var(--color-muted);
 }
 
+/* Étage 2, la référence : le numéro à gauche, le type de projet à droite.
+   C'est le haut du bloc de texte : il remonte de 16px sur le visuel, avec deux coins arrondis,
+   comme une fiche posée par-dessus la photo.
+   Le filet du haut est une ombre décalée d'1px vers le haut (box-shadow) et pas une bordure :
+   une ombre suit l'arrondi des coins, une bordure posée sur un seul côté s'y arrêterait net. */
+.project-meta {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: calc(var(--radius) * -1);
+  padding: 14px 24px 12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  /* La plaque d'acier sombre dans laquelle la référence est gravée (voir .project-category) :
+     un peu plus claire en haut qu'en bas, avec un filet de lumière sous son bord haut et une ombre
+     au-dessus de son bord bas (les deux ombres « inset », à l'intérieur de la plaque). */
+  background: linear-gradient(180deg, #171c22, #0c0f13);
+  box-shadow:
+    0 -1px 0 var(--project-line),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Sur la carte, le type est un peu plus petit et plus serré que dans la modale :
+   il doit tenir sur une ligne à côté du numéro, même dans une carte étroite */
+.project-meta .project-category {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-align: right;
+}
+
+.project-meta .project-ref {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+/* Étage 3, le titre : un cartouche de plan, fait de deux cases.
+   À gauche, la case du titre, avec un voile doré. À droite, une petite case hachurée, séparée par
+   un trait vertical net : sur une carte elle contient la flèche, dans la modale le bouton de
+   fermeture vient s'y ranger quand le titre reste en haut. Les hachures ont ainsi une raison
+   d'être : elles remplissent une case, elles ne commencent plus au milieu de nulle part.
+   Tout est fait avec des fonds superposés (du dessus vers le dessous), sans élément en plus :
+   1 et 2. les deux filets, en haut et en bas ;
+   3. le trait vertical, à --cell du bord droit (la largeur de la case) ;
+   4. les hachures en bleu acier, limitées à la case : calées à droite, larges de --cell ;
+   5. le voile doré, qui part du bord gauche et s'éteint avant la case.
+   (Pas de position: relative ici : la zone cliquable du titre doit continuer de recouvrir toute la carte.)
+   Ce fond sert à deux endroits : l'étage du titre d'une carte, et le titre dans la modale du projet.
+   ESSAI en cours : les deux versions précédentes sont notées dans feuille-de-route.md. */
+.project-header,
+.modal-content .project-title {
+  --title-line: linear-gradient(rgba(214, 191, 148, 0.35), rgba(214, 191, 148, 0.35));
+  /* La case fait la largeur de ce qu'elle contient (44px : la flèche, ou le bouton de fermeture)
+     plus 16px de chaque côté */
+  --cell: 76px;
+
+  background:
+    var(--title-line) top / 100% 1px no-repeat,
+    var(--title-line) bottom / 100% 1px no-repeat,
+    var(--title-line) calc(100% - var(--cell)) 0 / 1px 100% no-repeat,
+    repeating-linear-gradient(135deg, rgba(143, 179, 201, 0.3) 0 1px, transparent 1px 7px) right / var(--cell)
+      100% no-repeat,
+    linear-gradient(90deg, rgba(214, 191, 148, 0.1), rgba(214, 191, 148, 0) 70%);
+}
+
+/* 16px à droite (et non 24) : la flèche est ainsi au milieu de sa case de 76px */
 .project-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 24px 24px 0;
+  padding: 18px 16px 18px 24px;
 }
 
 .project-category {
@@ -957,11 +1128,19 @@ html.has-intro .hero-pin {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--color-muted);
+  /* La référence (le type et le numéro) est gravée dans une plaque d'acier sombre, et la gravure
+     est remplie d'or, comme les lettres dorées d'une plaque d'atelier : le doré se lit bien sur
+     l'acier, là où des lettres simplement en creux (sombres sur sombre) étaient trop difficiles à lire.
+     Deux ombres nettes, sans flou, décalées d'1px, donnent le creux : une ombre noire au-dessus des
+     lettres (le bord de la gravure, à l'ombre) et un filet clair en dessous (le bord d'en face,
+     qui prend la lumière). */
+  color: var(--color-accent);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .project-header h3 {
-  margin-top: 8px;
   font-size: 1.4rem;
 }
 
@@ -970,10 +1149,20 @@ html.has-intro .hero-pin {
   display: inline-block;
   margin-right: 10px;
   padding: 1px 8px;
-  border: 1px solid rgba(214, 191, 148, 0.4);
+  /* Le numéro est gravé et doré comme le type (voir .project-category). Son cadre est une petite
+     cuvette dans la plaque : un fond plus sombre, une ombre à l'intérieur sous le bord du haut (inset),
+     et un filet clair sous le bord du bas. */
+  border: 1px solid rgba(214, 191, 148, 0.55);
   font-family: var(--font-mono);
   letter-spacing: 0.1em;
   color: var(--color-accent);
+  background-color: rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* Le titre d'un projet */
@@ -994,8 +1183,10 @@ html.has-intro .hero-pin {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(214, 191, 148, 0.35);
   border-radius: 50%;
+  /* Un fond plein : les hachures de l'étage du titre ne traversent pas la pastille */
+  background-color: var(--color-surface);
   color: var(--color-text);
   transition:
     background-color 0.3s,
@@ -1007,12 +1198,12 @@ html.has-intro .hero-pin {
   color: var(--color-bg);
 }
 
+/* Étage 4 : la description, et les technos poussées tout en bas de la carte */
 .project-body {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 16px 24px 24px;
+  padding: 20px 24px 24px;
 }
 
 .project-technos {
@@ -1021,6 +1212,14 @@ html.has-intro .hero-pin {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: auto;
+}
+
+/* Sur une carte, les technos passent au-dessus de la zone cliquable du titre, qui recouvre toute la carte
+   (voir .project-open::after) : sans ça, la souris ne les « touche » jamais et leur survol ne se voit pas.
+   Cliquer sur une techno ouvre quand même le projet : le clic remonte jusqu'à la carte (ProjectCard.jsx). */
+.project-card .project-technos {
+  position: relative;
+  z-index: 2;
 }
 
 .project-technos li {
@@ -2009,7 +2208,8 @@ html.has-intro .hero-pin {
 
   position: relative;
   width: 100%;
-  max-width: 860px;
+  /* La largeur maximale, sur grand écran. En dessous, la modale prend toute la largeur disponible. */
+  max-width: 960px;
   max-height: 90vh;
   overflow-y: auto;
   background-color: var(--color-surface);
@@ -2020,22 +2220,65 @@ html.has-intro .hero-pin {
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
+/* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
+   Le bloc de texte, posé au-dessus de lui, remonte et le recouvre peu à peu, comme une fiche
+   qu'on fait glisser sur une photo. */
 .modal-image {
+  position: sticky;
+  top: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
+/* Le bloc de texte de la modale. Comme sur les cartes, il remonte de 16px sur le visuel avec deux
+   coins arrondis : une fiche posée par-dessus la photo. Son filet du haut est une ombre décalée d'1px
+   (box-shadow) : contrairement à une bordure posée sur un seul côté, elle suit l'arrondi des coins. */
 .modal-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
+  margin-top: calc(var(--radius) * -1);
   padding: var(--modal-padding);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background-color: var(--color-surface);
+  box-shadow: 0 -1px 0 rgba(214, 191, 148, 0.35);
 }
 
 .modal-content h3 {
   font-size: 2rem;
+}
+
+/* Dans la modale, la référence n'est pas dans un étage comme sur les cartes : elle reçoit sa propre
+   petite plaque d'acier sombre, pour que ses lettres gravées aient un métal dans lequel se creuser. */
+.modal-content > .project-category {
+  padding: 8px 12px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #171c22, #0c0f13);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Le titre du projet : une bande qui va d'un bord à l'autre de la modale, avec le même fond
+   « cartouche » que sur les cartes (voir .project-header) : deux filets dorés, un voile, des hachures.
+   Les marges négatives annulent la marge intérieure de .modal-content, la bande touche donc les deux bords ;
+   la marge intérieure remet le texte à sa place, aligné avec le reste.
+   sticky + top: 0 : quand on fait défiler au-delà du titre, la bande s'arrête en haut de la modale
+   et y reste : on sait toujours quel projet on est en train de lire. Elle reçoit un fond plein
+   (sous ses hachures, en partie transparentes) pour que le texte qui défile ne se voie pas à travers.
+   La marge de droite, plus large, laisse la place au bouton de fermeture, qui reste en haut lui aussi. */
+.modal-content .project-title {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-self: stretch;
+  width: auto;
+  margin-inline: calc(var(--modal-padding) * -1);
+  padding: 18px calc(var(--modal-padding) + 52px) 18px var(--modal-padding);
+  background-color: var(--color-surface);
 }
 
 /* L'accroche du projet, juste sous le titre */
@@ -2160,6 +2403,17 @@ html.has-intro .hero-pin {
   background-color: var(--color-accent);
   color: var(--color-bg);
   transform: rotate(90deg);
+}
+
+/* Dans la modale d'un projet, le bouton de fermeture reste en haut à droite pendant tout le défilement
+   (sticky), au lieu de partir avec le visuel : il se retrouve dans la bande du titre quand elle s'arrête.
+   Un élément sticky reste dans le fil de la page, il prendrait donc sa hauteur au-dessus du visuel :
+   - margin-left: auto le pousse à droite ;
+   - la marge négative du bas (ses 44px + les 16px du haut) annule la place qu'il occupe. */
+.modal > .modal-close {
+  position: sticky;
+  z-index: 3;
+  margin: 16px 16px -60px auto;
 }
 
 @keyframes fade-in {
@@ -2870,6 +3124,103 @@ html.has-intro .hero-pin {
   }
 }
 
+/* 4 bis. SCAN : les cartes projet. Un trait doré balaie la carte de haut en bas et la révèle sur
+      son passage, comme un scanner ; chaque étage (le visuel, la référence, le titre, la description)
+      monte à sa place au moment où le trait arrive sur lui.
+      Trois animations de même durée et de même courbe, qui restent donc ensemble :
+      - la carte se découvre de haut en bas (clip-path) ;
+      - le trait (.project-scan, voir ProjectCard.jsx) descend avec le bord de la découpe ;
+      - les étages montent, chacun à son heure (--tier-at).
+      Les trois cartes partent l'une après l'autre (--reveal-delay, posé par ScrollReveal). */
+.reveal-scan.revealed {
+  animation-name: card-scan;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* inset(haut droite bas gauche) : ce qu'on retire de chaque côté. Au départ, on retire toute la
+   hauteur par le bas : la carte est entièrement cachée. À l'arrivée, -16px : la découpe prend peu à peu
+   16px d'avance sur le trait, pour que sa lueur, qui déborde en dessous de lui, ne soit pas coupée. */
+@keyframes card-scan {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 -16px 0);
+  }
+}
+
+/* Le trait : invisible en temps normal, il ne se montre que pendant le balayage.
+   Il est bleu, pas doré : c'est le blanc bleuté de l'arc TIG, les mêmes teintes que la soudure
+   bleue du pied de page (voir .weld-blue). Le bleu « fabrique » la carte, le doré est la pièce finie. */
+.project-scan {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 2px;
+  background-color: #f2f9ff;
+  box-shadow:
+    0 0 8px 2px #d6ecff,
+    0 0 22px 6px rgba(120, 190, 255, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reveal-scan.revealed .project-scan {
+  animation: scan-line 0.9s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+@keyframes scan-line {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Les étages : chacun monte quand le trait l'atteint. --tier-at est ce moment, compté depuis le
+   début du balayage (le trait va lentement au départ et à l'arrivée, vite au milieu : les trois
+   derniers étages se suivent donc de près).
+   « backwards » : l'étage reste à son point de départ tant que son tour n'est pas venu. */
+.reveal-scan.revealed > .project-image,
+.reveal-scan.revealed > .project-meta,
+.reveal-scan.revealed > .project-header,
+.reveal-scan.revealed > .project-body {
+  animation: tier-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + var(--tier-at, 0s));
+}
+
+.reveal-scan > .project-image {
+  --tier-at: 0.05s;
+}
+
+.reveal-scan > .project-meta {
+  --tier-at: 0.36s;
+}
+
+.reveal-scan > .project-header {
+  --tier-at: 0.44s;
+}
+
+.reveal-scan > .project-body {
+  --tier-at: 0.52s;
+}
+
+@keyframes tier-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
 /* 5. STAMP : le formulaire est frappé à la presse, avec un éclat doré à l'impact */
 .reveal-stamp.revealed {
   animation-name: press-stamp;
@@ -3574,6 +3925,11 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   .form-error,
   .recruit-block {
     animation: none;
+  }
+
+  /* Les lueurs qui tournent autour des cartes projet sont retirées : il reste la bordure métallique, fixe */
+  .project-card::before {
+    display: none;
   }
 
   /* Le panneau d'un tiroir et ses outils s'affichent directement, sans fondu ni chute */

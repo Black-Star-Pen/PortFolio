@@ -8,15 +8,22 @@ import { createSparks } from "./sparks";
 //   cut     : le texte se révèle comme une découpe qui avance
 //   unfold  : se déplie de haut en bas, comme un plan qu'on déroule
 //   drawers : la boîte à outils : ses tiroirs se rangent un par un, puis le panneau se découvre
-//   lift    : se lève en 3D, comme une pièce qu'on redresse sur l'établi
+//   lift    : se lève en 3D, comme une pièce qu'on redresse sur l'établi (plus utilisé pour l'instant)
+//   scan    : les cartes projet : un trait doré balaie la carte de haut en bas et la révèle, étage par étage
 //   stamp   : frappé comme une tôle à la presse, avec un éclat doré
 //   rise    : monte doucement avec un halo
+//
+// visible (facultatif) : la part du bloc qui doit être à l'écran pour qu'il apparaisse.
+// Sans précision, c'est 10 %. Les cartes projet sont hautes et leur apparition se joue en deux
+// temps : on attend d'en voir un bon tiers, sinon tout se passerait sous le bas de l'écran.
+const DEFAULT_VISIBLE = 0.1;
+
 const TARGETS = [
   { selector: ".section-title", effect: "laser" },
   { selector: ".about-text > p", effect: "cut" },
   { selector: ".timeline", effect: "unfold" },
   { selector: ".blueprint", effect: "drawers" },
-  { selector: ".projects-grid > *", effect: "lift" },
+  { selector: ".projects-grid > *", effect: "scan", visible: 0.35 },
   { selector: ".work-order", effect: "stamp" },
   { selector: ".contact-divider", effect: "cut" },
   { selector: ".contact-links", effect: "rise" },
@@ -131,9 +138,11 @@ function ScrollReveal() {
     // Réglage « réduire les animations » : on ne cache rien, tout reste affiché normalement
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const elements = [];
+    // Pour chaque bloc à faire apparaître : la part de lui-même qui doit être visible (une Map
+    // associe une valeur à un élément de la page, comme un petit carnet « élément → réglage »)
+    const visibleNeeded = new Map();
 
-    TARGETS.forEach(({ selector, effect }) => {
+    TARGETS.forEach(({ selector, effect, visible = DEFAULT_VISIBLE }) => {
       document.querySelectorAll(`main ${selector}`).forEach((element) => {
         // Décalage en cascade entre voisins du même type (ex. : les cartes, les paragraphes)
         const siblings = [...element.parentElement.children].filter((child) =>
@@ -142,25 +151,31 @@ function ScrollReveal() {
         const order = Math.min(siblings.indexOf(element), 4);
         element.style.setProperty("--reveal-delay", `${order * 0.2}s`);
         element.classList.add("reveal", `reveal-${effect}`);
-        elements.push(element);
+        visibleNeeded.set(element, visible);
       });
     });
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          // Le -0.01 : le navigateur annonce parfois 0.0999 au lieu de 0.1, on ne rate pas le coche pour si peu
+          if (entry.intersectionRatio >= visibleNeeded.get(entry.target) - 0.01) {
             entry.target.classList.add("revealed");
             // Une seule fois : on arrête de surveiller ce bloc
             observer.unobserve(entry.target);
           }
         });
       },
-      // -15 % en bas : le bloc apparaît quand il est bien entré à l'écran, pas au ras du bord
-      { rootMargin: "0px 0px -15% 0px", threshold: 0.1 }
+      {
+        // -15 % en bas : le bloc apparaît quand il est bien entré à l'écran, pas au ras du bord
+        rootMargin: "0px 0px -15% 0px",
+        // Le navigateur nous prévient à chacun des seuils demandés (ici 10 % et 35 %) ;
+        // new Set(...) retire les doublons de la liste
+        threshold: [...new Set(visibleNeeded.values())],
+      }
     );
 
-    elements.forEach((element) => observer.observe(element));
+    visibleNeeded.forEach((visible, element) => observer.observe(element));
 
     // Les cordons de soudure entre les sections : chacun se soude quand le haut de sa section
     // arrive aux 4/5 de l'écran (voir « section + section » dans le CSS)
