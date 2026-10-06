@@ -22,13 +22,16 @@ function LegalNotice() {
         </p>
 
         <h3>Hébergement</h3>
-        {/* ⚠️ À COMPLÉTER lors de la mise en ligne, avec les informations exactes de l'hébergeur */}
+        {/* Les coordonnées de l'hébergeur sont celles qu'il publie dans ses conditions d'utilisation
+            (render.com/terms), relevées le 6 octobre 2026. À revérifier si le site change d'hébergeur. */}
         <p>
-          Hébergeur du site : <strong>[nom de l'hébergeur]</strong>
+          Hébergeur du site : <strong>Render Services, Inc.</strong>
           <br />
-          Adresse : <strong>[adresse postale de l'hébergeur]</strong>
+          Adresse : 525 Brannan Street, Suite 300, San Francisco, CA 94107, États-Unis
           <br />
-          Téléphone : <strong>[numéro de téléphone de l'hébergeur]</strong>
+          Téléphone : +1 415 319 8186
+          <br />
+          Site : render.com
         </p>
 
         <h3>Propriété intellectuelle</h3>
