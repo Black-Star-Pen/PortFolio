@@ -19,7 +19,8 @@ Site en ligne : à venir.
 | Partie | Technologies |
 | --- | --- |
 | Front | React 19, Vite, React Router, GSAP (ScrollTrigger), Canvas, Web Audio, CSS sans framework |
-| Back | Node.js, Express 5, Nodemailer, express-rate-limit, helmet, cors |
+| Back | Node.js, Express 5, Nodemailer en local et Resend en ligne, express-rate-limit, helmet, cors |
+| Hébergement | Render : le site en fichiers statiques, l'API en service Node (configuration dans `render.yaml`) |
 | Qualité | ESLint, une branche Git par fonctionnalité et des Pull Requests |
 
 ## Quelques choix techniques
@@ -55,6 +56,7 @@ Les autres animations du site (apparition des sections, soudures du parcours et 
 ```
 PortFolio/
 ├── index.html
+├── render.yaml         la configuration de l'hébergement : les deux services et les en-têtes de sécurité du site
 ├── public/             favicon, logos des technologies, captures des projets et images du film de l'intro (en WebP)
 ├── images-source/      les captures d'origine, avant conversion
 ├── scripts/            deux scripts : convertir les captures, télécharger les logos
@@ -96,7 +98,7 @@ npm run dev
 
 L'API écoute sur http://localhost:3001. En développement, Vite lui transmet toutes les requêtes qui commencent par `/api`.
 
-Le fichier `.env` attend quatre valeurs, et deux de plus pour la mise en ligne :
+Le fichier `.env` attend quatre valeurs, et quelques autres pour la mise en ligne :
 
 | Variable | Rôle |
 | --- | --- |
@@ -104,6 +106,8 @@ Le fichier `.env` attend quatre valeurs, et deux de plus pour la mise en ligne :
 | `MAIL_USER` | le compte Gmail qui envoie les emails |
 | `MAIL_PASS` | son mot de passe d'application |
 | `MAIL_TO` | l'adresse qui reçoit les demandes |
+| `RESEND_API_KEY` | en ligne : la clé Resend ; dès qu'elle est remplie, l'envoi passe par Resend au lieu de Gmail |
+| `MAIL_FROM` | en ligne : l'expéditeur des emails envoyés par Resend (facultatif) |
 | `CORS_ORIGIN` | en ligne : l'adresse du site autorisé à appeler l'API (vide en local) |
 | `TRUST_PROXY` | en ligne : le nombre d'intermédiaires devant le serveur, 1 le plus souvent (vide en local) |
 
