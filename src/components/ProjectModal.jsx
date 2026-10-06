@@ -46,13 +46,18 @@ function ProjectModal({ project, number, onClose }) {
         <ProjectImage image={image} title={title} className="modal-image" />
 
         <div className="modal-content">
-          <span className="project-category">
-            <span className="project-ref">N° {String(number).padStart(2, "0")}</span>
-            {category}
-          </span>
-          <h3 id={titleId} className="project-title">
-            {title}
-          </h3>
+          {/* L'en-tête de la fiche : la plaque de référence et le titre, regroupés. C'est ce bloc entier
+              qui reste en haut de la modale pendant que le texte défile dessous (voir .modal-heading) */}
+          <div className="modal-heading">
+            <span className="project-category">
+              <span className="project-ref">N° {String(number).padStart(2, "0")}</span>
+              {category}
+            </span>
+            <h3 id={titleId} className="project-title">
+              {title}
+            </h3>
+          </div>
+
           <p className="project-lead">
             <RichText text={description} />
           </p>
@@ -115,24 +120,30 @@ function ProjectModal({ project, number, onClose }) {
             ainsi, ils restent collés en bas pendant tout le défilement (voir .project-actions) */}
         {links && links.length > 0 && (
           <div className="project-actions">
-            {links.map((link) => (
-              <a
-                key={link.url}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary"
-              >
-                {link.label} <span aria-hidden="true">↗</span>
-                <span className="sr-only"> (nouvel onglet)</span>
-              </a>
-            ))}
-            {/* Une petite précision facultative sous les boutons (ex. : site lent au premier chargement) */}
+            {/* Une petite précision facultative (ex. : site lent au premier chargement).
+                Elle est écrite AVANT les boutons, mais le CSS l'affiche sous eux sur grand écran.
+                Sur téléphone, où la place manque, elle quitte la barre : elle reste à la fin du texte,
+                et seuls les boutons restent collés en bas (voir .project-actions dans la section Mobile). */}
             {linksNote && (
               <p className="project-actions-note">
                 <RichText text={linksNote} />
               </p>
             )}
+
+            <div className="project-actions-buttons">
+              {links.map((link) => (
+                <a
+                  key={link.url}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  {link.label} <span aria-hidden="true">↗</span>
+                  <span className="sr-only"> (nouvel onglet)</span>
+                </a>
+              ))}
+            </div>
           </div>
         )}
       </div>
