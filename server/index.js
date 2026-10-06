@@ -14,7 +14,9 @@ app.disable("x-powered-by");
 // Chez un hébergeur, les requêtes n'arrivent pas directement au serveur : elles passent d'abord par un
 // intermédiaire (un « proxy »), qui les lui transmet. Sans ce réglage, Express croit que TOUS les visiteurs
 // ont l'adresse de cet intermédiaire, et la limite d'envoi les bloquerait tous ensemble.
-// TRUST_PROXY = le nombre d'intermédiaires : 0 sur ton ordinateur, 1 chez la plupart des hébergeurs.
+// TRUST_PROXY = le nombre d'intermédiaires : 0 sur ton ordinateur, 3 chez Render (mesuré en ligne).
+// Le bon nombre se vérifie avec la limite d'envoi : trop petit, elle compte l'adresse d'un intermédiaire
+// (les visiteurs se bloquent entre eux) ; trop grand, un visiteur peut mentir sur son adresse.
 // (On ne met jamais « true » : n'importe qui pourrait alors se faire passer pour une autre adresse.)
 app.set("trust proxy", Number(process.env.TRUST_PROXY) || 0);
 
