@@ -2299,7 +2299,10 @@ html.has-intro .hero-pin {
   width: 100%;
   /* La largeur maximale, sur grand écran. En dessous, la modale prend toute la largeur disponible. */
   max-width: 960px;
+  /* dvh = la hauteur de l'écran réellement visible (sur téléphone, elle change quand la barre d'adresse
+     se replie). Les navigateurs qui ne connaissent pas dvh gardent la ligne en vh. */
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -2311,20 +2314,31 @@ html.has-intro .hero-pin {
 
 /* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
    Le bloc de texte, posé au-dessus de lui, remonte et le recouvre peu à peu, comme une fiche
-   qu'on fait glisser sur une photo. */
+   qu'on fait glisser sur une photo.
+   z-index: 0 ici et 1 sur .modal-content : l'ordre des couches est écrit en toutes lettres. Sans ça,
+   Safari dessinait le visuel PAR-DESSUS le texte (il dessine à part un élément sticky).
+   max-height : sur un écran peu haut (un ordinateur portable), le visuel en 16/9 prenait toute la
+   modale, et on ne voyait plus que lui et les boutons. Il a droit au plus à la hauteur de la modale
+   (90vh) moins 320px, la place de l'en-tête, des boutons et d'un début de texte ; jamais moins de 160px.
+   Quand il est raccourci, object-fit: cover le rogne, et object-position: top garde le haut de la capture. */
 .modal-image {
   position: sticky;
   top: 0;
+  z-index: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
+  max-height: max(160px, calc(90vh - 320px));
   object-fit: cover;
+  object-position: top;
 }
 
 /* Le bloc de texte de la modale. Comme sur les cartes, il remonte de 16px sur le visuel avec deux
    coins arrondis : une fiche posée par-dessus la photo. Son filet du haut est une ombre décalée d'1px
-   (box-shadow) : contrairement à une bordure posée sur un seul côté, elle suit l'arrondi des coins. */
+   (box-shadow) : contrairement à une bordure posée sur un seul côté, elle suit l'arrondi des coins.
+   z-index: 1 : toujours au-dessus du visuel (voir .modal-image). */
 .modal-content {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -2881,6 +2895,13 @@ html.has-intro .hero-pin {
      défilement (voir .modal-heading) : chaque pixel qu'il prend est retiré au texte. */
   .modal {
     --modal-padding: 20px;
+  }
+
+  /* Sur téléphone, le visuel ne reste pas collé en haut : il part avec le défilement, et l'en-tête
+     prend sa place. C'est le montage le plus simple, donc le plus sûr : sur iPhone (Safari), le visuel
+     collé se retrouvait par-dessus le texte. */
+  .modal-image {
+    position: static;
   }
 
   .modal-heading {
@@ -3661,6 +3682,20 @@ html.intro-playing .hero *::after {
 .intro.has-film {
   height: 280vh;
   height: 280svh;
+}
+
+/* Un fond fixe, derrière le plan, qui couvre TOUT l'écran visible.
+   Pourquoi : sur téléphone, la barre d'adresse du navigateur se replie quand on défile, et l'écran
+   visible devient alors plus haut que le plan (qui mesure 100svh : la hauteur AVEC la barre).
+   Dans la bande ainsi libérée, en bas, on voyait le site défiler derrière l'intro.
+   position: fixed colle ce fond aux bords réels de l'écran, barre repliée ou non.
+   Il s'efface avec le plan (--land), au même rythme, pour laisser apparaître le site. */
+.intro::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg);
+  opacity: calc(1 - var(--land));
 }
 
 /* Le plan reste collé à l'écran pendant tout ce temps */
