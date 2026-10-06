@@ -2186,6 +2186,21 @@ html.has-intro .hero-pin {
   height: 22px;
 }
 
+/* La précision sous les liens (« code source sur demande ») : discrète, dans la police des annotations.
+   Le petit « </> » devant est doré, comme un repère. */
+.contact-links-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.contact-links-note span {
+  margin-right: 4px;
+  color: var(--color-accent);
+}
+
 /* Liens en version compacte (dans la modale) */
 .contact-links.compact {
   max-width: none;

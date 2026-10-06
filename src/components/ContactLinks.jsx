@@ -91,6 +91,14 @@ function ContactLinks({ compact = false }) {
           )}
         </div>
       </div>
+
+      {/* Le dépôt GitHub du portfolio est privé. On le dit ici, juste sous le lien GitHub, pour que le
+          visiteur sache que le code existe et qu'il peut le demander (pas dans la modale, plus compacte). */}
+      {!compact && (
+        <p className="contact-links-note">
+          <span aria-hidden="true">&lt;/&gt;</span> Code source de ce portfolio disponible sur demande
+        </p>
+      )}
     </div>
   );
 }
