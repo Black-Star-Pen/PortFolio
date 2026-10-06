@@ -38,8 +38,17 @@ function PrivacyPolicy() {
         <h3>Destinataires et services utilisés</h3>
         <ul>
           <li>
-            Votre message m'est transmis par email via <strong>Gmail</strong> (Google). Vos données
-            sont donc stockées dans ma boîte de réception.
+            Le site et le serveur qui reçoit le formulaire sont hébergés par <strong>Render</strong>{" "}
+            (États-Unis). Le serveur du formulaire se trouve à Francfort, en Allemagne.
+          </li>
+          <li>
+            Votre message m'est transmis par email par le service <strong>Resend</strong>{" "}
+            (États-Unis), puis il est stocké dans ma boîte de réception <strong>Gmail</strong>{" "}
+            (Google).
+          </li>
+          <li>
+            Pour éviter les abus, le serveur limite le nombre d'envois par adresse IP. Cette adresse
+            n'est gardée que quelques minutes, le temps du comptage, puis elle est oubliée.
           </li>
           <li>
             Pour vérifier la ville, le code postal saisi est envoyé au service public{" "}
