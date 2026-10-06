@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router";
+import { wakeApi } from "./utils/api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer.jsx";
 import ContactModal from "./components/ContactModal";
@@ -22,6 +23,11 @@ function App() {
   function closeContact() {
     setIsContactOpen(false);
   }
+
+  // Une fois, à l'arrivée sur le site : on réveille l'API du formulaire (voir wakeApi)
+  useEffect(() => {
+    wakeApi();
+  }, []);
 
   return (
     <>

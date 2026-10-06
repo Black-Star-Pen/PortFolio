@@ -1,5 +1,6 @@
 import { useState, useId, useRef, useEffect } from "react";
 import Weld from "./Weld";
+import { API_URL } from "../utils/api";
 
 /* ===== Les listes de choix ===== */
 // Une petite mallette, pour mettre en avant le choix « Recrutement »
@@ -42,9 +43,6 @@ const remoteOptions = [
   { value: "remote", label: "Télétravail complet" },
 ];
 
-// En développement : "" (le proxy Vite redirige /api vers le serveur).
-// En production : l'adresse de l'API, définie dans une variable d'environnement.
-const API_URL = import.meta.env.VITE_API_URL || "";
 
 const initialForm = {
   website: "", // champ piège anti-robots, toujours vide pour un humain

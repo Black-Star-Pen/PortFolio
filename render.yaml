@@ -1,0 +1,101 @@
+# La configuration de l'hébergement chez Render (un « Blueprint »).
+# Render lit ce fichier et crée les deux services décrits ici : le site et l'API.
+# Les adresses obtenues dépendent des noms ci-dessous :
+#   le site  →  https://adam-boulkhedert.onrender.com
+#   l'API    →  https://adam-boulkhedert-api.onrender.com
+# Si Render a dû changer un nom (déjà pris), il faut corriger les adresses écrites plus bas :
+# VITE_API_URL, CORS_ORIGIN et la ligne connect-src de Content-Security-Policy.
+
+services:
+  # ----- Le site : des fichiers statiques, construits par Vite -----
+  - type: web
+    name: adam-boulkhedert
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      # La version de Node utilisée pour construire le site
+      - key: NODE_VERSION
+        value: "22"
+      # L'adresse de l'API, lue par le site au moment de sa construction (voir src/utils/api.js)
+      - key: VITE_API_URL
+        value: https://adam-boulkhedert-api.onrender.com
+    # Le site n'a qu'une vraie page (index.html) : c'est React Router qui affiche /mentions-legales, etc.
+    # Toute adresse qui ne correspond à aucun fichier est donc servie par index.html.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    # Les en-têtes de sécurité : des consignes envoyées au navigateur avec chaque page.
+    headers:
+      # La liste de ce que la page a le droit de charger, et d'où. Tout le reste est refusé :
+      # un script injecté par un pirate ne s'exécuterait pas.
+      #   default-src 'self'   par défaut, uniquement depuis le site lui-même
+      #   style-src            les styles du site, et ceux que React et GSAP posent sur les éléments
+      #   img-src data:        les petits dessins écrits directement dans le CSS (masques, flèches)
+      #   connect-src          les seuls serveurs que le site peut appeler : lui-même (les images du film),
+      #                        l'API du formulaire, et le service public des codes postaux
+      #   frame-ancestors      le site ne peut pas être affiché dans une page d'un autre site
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://adam-boulkhedert-api.onrender.com https://geo.api.gouv.fr; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+      # Le navigateur ne devine pas le type d'un fichier : il s'en tient à celui annoncé
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      # Même protection que frame-ancestors, pour les navigateurs plus anciens
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      # En quittant le site par un lien, on ne transmet que son adresse, pas la page précise
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      # Le site n'utilise ni caméra, ni micro, ni position : on le déclare, personne ne pourra s'en servir
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), payment=()
+      # Pendant un an, le navigateur n'acceptera ce site qu'en HTTPS
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+      # Les fichiers construits par Vite ont un nom unique à chaque version : le navigateur peut les
+      # garder un an sans jamais redemander
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      # Les images du film de l'intro : gardées une semaine
+      - path: /intro/*
+        name: Cache-Control
+        value: public, max-age=604800
+
+  # ----- L'API : le serveur Express du formulaire de contact -----
+  - type: web
+    name: adam-boulkhedert-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: server
+    buildCommand: npm ci
+    # « node index.js » et non « npm start » : en ligne il n'y a pas de fichier .env,
+    # les réglages viennent des variables ci-dessous
+    startCommand: node index.js
+    # L'adresse que Render appelle pour savoir si le serveur est en bonne santé
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Seul ce site a le droit d'appeler l'API
+      - key: CORS_ORIGIN
+        value: https://adam-boulkhedert.onrender.com
+      # Un intermédiaire (celui de Render) entre les visiteurs et le serveur
+      - key: TRUST_PROXY
+        value: "1"
+      # Les deux secrets : « sync: false » = leur valeur n'est pas dans ce fichier,
+      # Render te la demandera à la création du service.
+      # MAIL_TO : l'adresse qui reçoit les demandes (celle de ton compte Resend)
+      - key: MAIL_TO
+        sync: false
+      # RESEND_API_KEY : la clé créée dans ton compte Resend
+      - key: RESEND_API_KEY
+        sync: false
