@@ -9,13 +9,14 @@ import { createSparks } from "./sparks";
 //   unfold  : se déplie de haut en bas, comme un plan qu'on déroule
 //   drawers : la boîte à outils : ses tiroirs se rangent un par un, puis le panneau se découvre
 //   lift    : se lève en 3D, comme une pièce qu'on redresse sur l'établi (plus utilisé pour l'instant)
-//   scan    : les cartes projet : un trait doré balaie la carte de haut en bas et la révèle, étage par étage
-//   stamp   : frappé comme une tôle à la presse, avec un éclat doré
+//   scan    : les cartes projet : un trait bleu balaie la carte de haut en bas et la révèle, étage par étage
+//   order   : le formulaire : le même trait bleu révèle la feuille vide, puis les champs sont soudés un par un
+//   stamp   : frappé comme une tôle à la presse, avec un éclat doré (plus utilisé pour l'instant)
 //   rise    : monte doucement avec un halo
 //
 // visible (facultatif) : la part du bloc qui doit être à l'écran pour qu'il apparaisse.
-// Sans précision, c'est 10 %. Les cartes projet sont hautes et leur apparition se joue en deux
-// temps : on attend d'en voir un bon tiers, sinon tout se passerait sous le bas de l'écran.
+// Sans précision, c'est 10 %. Les cartes projet et le formulaire sont hauts et leur apparition se joue
+// en deux temps : on attend d'en voir un bon tiers, sinon tout se passerait sous le bas de l'écran.
 const DEFAULT_VISIBLE = 0.1;
 
 const TARGETS = [
@@ -24,7 +25,7 @@ const TARGETS = [
   { selector: ".timeline", effect: "unfold" },
   { selector: ".blueprint", effect: "drawers" },
   { selector: ".projects-grid > *", effect: "scan", visible: 0.35 },
-  { selector: ".work-order", effect: "stamp" },
+  { selector: ".work-order", effect: "order", visible: 0.35 },
   { selector: ".contact-divider", effect: "cut" },
   { selector: ".contact-links", effect: "rise" },
   { selector: ".legal-content", effect: "unfold" },
@@ -127,6 +128,22 @@ function weldSeam(section) {
   return stop;
 }
 
+// Note la fin de l'apparition d'un bloc (classe reveal-over), une fois toutes ses animations terminées.
+// Le CSS s'en sert pour ne pas rejouer l'apparition sur ce qui arrive plus tard dans le bloc
+// (ex. : le formulaire, recréé à neuf après un envoi : ses champs ne sont pas ressoudés).
+function markWhenOver(element) {
+  const animations = element
+    // subtree : les animations du bloc ET de tout ce qu'il contient
+    .getAnimations({ subtree: true })
+    // On n'attend pas celles qui tournent sans fin (ex. : la lueur des cartes projet)
+    .filter((animation) => Number.isFinite(animation.effect?.getComputedTiming().endTime));
+
+  // allSettled (et pas all) : une animation interrompue ne doit pas empêcher de noter la fin
+  Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
+    element.classList.add("reveal-over");
+  });
+}
+
 // Fait apparaître chaque bloc la première fois qu'il arrive à l'écran.
 // Comme ScrollToTop, ce composant n'affiche rien : il agit seulement sur la page.
 function ScrollReveal() {
@@ -161,6 +178,7 @@ function ScrollReveal() {
           // Le -0.01 : le navigateur annonce parfois 0.0999 au lieu de 0.1, on ne rate pas le coche pour si peu
           if (entry.intersectionRatio >= visibleNeeded.get(entry.target) - 0.01) {
             entry.target.classList.add("revealed");
+            markWhenOver(entry.target);
             // Une seule fois : on arrête de surveiller ce bloc
             observer.unobserve(entry.target);
           }

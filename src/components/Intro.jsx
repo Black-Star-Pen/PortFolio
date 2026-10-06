@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { createSparks } from "./sparks";
+import { createWeldSound } from "./weldSound";
 
 // GSAP est la bibliothèque d'animation ; ScrollTrigger est son module qui relie une animation
 // au défilement de la page ; useGSAP est le « hook » qui les fait fonctionner proprement avec React.
@@ -145,6 +146,46 @@ const SMOOTHING = 0.5; // le lissage : l'animation rattrape le défilement en un
 const SPARKS_IDLE = 16;
 const SPARKS_MAX = 240;
 
+// Le film : la soudure filmée. C'est une vidéo découpée en images au fond transparent (public/intro),
+// qu'on fait défiler image par image avec la page. Sur un écran large, il remplace la soudure dessinée
+// par le code (lettres, chaleur, torche, étincelles) ; le reste du plan ne change pas.
+// Il suit exactement les mêmes tracés que STROKES, dans le même ordre et au même rythme.
+const FILM = {
+  frames: 152, // le nombre d'images : f-000.webp … f-151.webp (3,8 Mo en tout, 24 images par seconde)
+  start: 0.03, // l'avancement de l'intro où le film commence…
+  end: 0.7, // … et celui où il est terminé : les lettres sont entières et refroidies
+  // Entre ces deux avancements, la lumière de soudure est allumée dans le film (c'est là qu'on entend le son)
+  lightFrom: 0.05,
+  lightTo: 0.665,
+  // Sa place dans le dessin, en unités du dessin. La vidéo fait 1920 × 1080 pixels, à 5,2 pixels par
+  // unité, et le point (0 ; 0) du dessin s'y trouve à (411,7 ; 176).
+  x: -411.7 / 5.2,
+  y: -176 / 5.2,
+  width: 1920 / 5.2,
+  height: 1080 / 5.2,
+  // La taille des images (elles sont plus petites que la vidéo d'origine, pour peser moins lourd)
+  pixelWidth: 864,
+  pixelHeight: 486,
+  // Combien d'images on garde prêtes à dessiner, derrière et devant celle qu'on regarde (voir prepareFilm)
+  keepBehind: 8,
+  keepAhead: 14,
+  // Trop lourd pour un téléphone : en dessous de cette largeur, on garde la soudure dessinée
+  screen: "(min-width: 900px)",
+};
+
+// La frontière entre le « A » et le « B » dans l'image du film (entre le pied droit du A et le fût du B) :
+// elle sert à découper la dernière image en deux lettres, qui partent chacune vers son initiale du logo
+const FILM_SPLIT = 118.5;
+
+// L'adresse d'une image du film. BASE_URL = la racine du site (« / » la plupart du temps).
+const filmUrl = (name) => `${import.meta.env.BASE_URL}intro/${name}.webp`;
+
+// Le son de la soudure : un crépitement (voir weldSound.js). Son niveau va de 0 à 1 :
+// SOUND_IDLE quand la lumière est allumée mais qu'on ne défile pas (un fond discret),
+// et la vitesse de défilement s'y ajoute : plus on défile vite, plus ça crépite fort.
+const SOUND_IDLE = 0.15;
+const SOUND_PER_SPEED = 6;
+
 // Dessine une liste de traits avec la même classe CSS.
 // Le cordon est fait de plusieurs calques identiques : ce composant évite de répéter la boucle.
 function Strokes({ strokes, className }) {
@@ -187,8 +228,17 @@ function Zones({ side, labels }) {
 function Intro() {
   const { pathname } = useLocation();
   const [isEnabled, setIsEnabled] = useState(shouldPlay);
+  // Le film n'est proposé que sur un écran large (décidé une fois, à l'arrivée)
+  const [hasFilm] = useState(() => window.matchMedia(FILM.screen).matches);
+  // Le son est coupé à l'arrivée : c'est au visiteur de l'activer (bouton « Son »)
+  const [isSoundOn, setIsSoundOn] = useState(false);
   const introRef = useRef(null);
   const planRef = useRef(null);
+  const filmRef = useRef(null);
+  // Le son, pour la boucle d'animation (qui ne peut pas lire l'état React) :
+  // le son une fois créé, et le réglage du bouton
+  const soundRef = useRef(null);
+  const soundOnRef = useRef(false);
 
   // Si on quitte l'accueil, l'intro ne revient pas pendant cette visite.
   // (Mettre à jour un état pendant le rendu est permis quand c'est conditionnel comme ici :
@@ -218,6 +268,7 @@ function Intro() {
       let torch = null; // la position de la torche à l'écran quand on soude, sinon null
       let lastProgress = 0; // l'avancement à l'image précédente, pour connaître la vitesse de soudure
       let sparkBudget = 0; // les « fractions d'étincelle » en attente (on ne peut en créer que des entières)
+      let soundLevel = 0; // le niveau du son demandé en dernier
 
       // Le raccord avec la navbar : chaque lettre soudée vient se poser sur son initiale du logo
       // (le « A » de ADAM, le « B » de BOULKHEDERT). On mesure ici, pour chacune, de combien elle doit
@@ -265,16 +316,113 @@ function Intro() {
       // La timeline est créée un peu plus bas : on réserve son nom ici, car syncState en a besoin.
       let timeline = null;
 
+      // Le film (voir FILM). Ses images passent par deux états :
+      // - filmFiles : les fichiers téléchargés, encore compressés (légers : 3,8 Mo pour tout le film) ;
+      // - filmBitmaps : les images « décodées », prêtes à être dessinées d'un coup (lourdes : 1,7 Mo chacune).
+      // Décoder une image au moment de l'afficher fait saccader le défilement, et les garder toutes décodées
+      // prendrait 250 Mo de mémoire : on ne garde donc décodées que celles autour de l'image qu'on regarde,
+      // préparées en avance, en tâche de fond.
+      const filmContext = filmRef.current?.getContext("2d");
+      const filmFiles = [];
+      const filmBitmaps = new Map(); // numéro de l'image → image décodée
+      const filmDecoding = new Set(); // les numéros en cours de décodage
+      let isFilmOn = false; // le film a-t-il pris la place de la soudure dessinée ?
+      let isFilmClosed = false; // l'intro a disparu : on ne garde plus rien
+      let filmTarget = 0; // le numéro de l'image qu'on voudrait afficher
+      let filmShown = -1; // ce qui est affiché en ce moment : le numéro de l'image, et sa part de la suivante
+
+      // Prépare les images autour du numéro donné, et libère celles qui en sont trop loin
+      function prepareFilm(center) {
+        const from = Math.max(0, center - FILM.keepBehind);
+        const to = Math.min(FILM.frames - 1, center + FILM.keepAhead);
+
+        filmBitmaps.forEach((bitmap, index) => {
+          if (index < from - 2 || index > to + 2) {
+            bitmap.close();
+            filmBitmaps.delete(index);
+          }
+        });
+
+        for (let index = from; index <= to; index++) {
+          if (!filmFiles[index] || filmBitmaps.has(index) || filmDecoding.has(index)) continue;
+          filmDecoding.add(index);
+          // createImageBitmap décode en tâche de fond, sans bloquer le défilement
+          createImageBitmap(filmFiles[index])
+            .then((bitmap) => {
+              filmDecoding.delete(index);
+              if (isFilmClosed) {
+                bitmap.close();
+                return;
+              }
+              filmBitmaps.set(index, bitmap);
+
+              // La première image est prête : le film prend la place de la soudure dessinée, mais seulement
+              // si on n'a pas encore commencé à défiler (sinon la soudure changerait d'aspect en cours de route)
+              if (index === 0 && !isFilmOn && timeline.progress() <= FILM.start) {
+                isFilmOn = true;
+                intro.classList.add("film-on");
+              }
+              // Une image qu'on attendait vient d'arriver : on réaffiche
+              if (isFilmOn && Math.abs(index - filmTarget) <= 1) syncState();
+            })
+            .catch(() => filmDecoding.delete(index));
+        }
+      }
+
+      // Affiche l'image du film qui correspond à l'avancement de l'intro.
+      // Entre deux images, on les fond l'une dans l'autre : quand on défile lentement, la lumière glisse
+      // au lieu d'avancer par à-coups.
+      function drawFilm(progress) {
+        const position = gsap.utils.clamp(0, 1, (progress - FILM.start) / (FILM.end - FILM.start));
+        const exact = position * (FILM.frames - 1);
+        const wanted = Math.floor(exact);
+        // mix = la part de l'image suivante, de 0 à 1, arrondie au huitième (inutile de redessiner pour moins)
+        let mix = Math.round((exact - wanted) * 8) / 8;
+
+        filmTarget = wanted;
+        prepareFilm(wanted);
+
+        // L'image voulue n'est pas encore prête : on prend la plus proche qui l'est, d'abord en arrière
+        let index = wanted;
+        while (index > 0 && !filmBitmaps.has(index)) index -= 1;
+        if (!filmBitmaps.has(index)) {
+          index = wanted;
+          while (index < FILM.frames - 1 && !filmBitmaps.has(index)) index += 1;
+        }
+        if (!filmBitmaps.has(index)) return;
+        if (index !== wanted || !filmBitmaps.has(index + 1)) mix = 0;
+        if (index + mix === filmShown) return;
+
+        filmShown = index + mix;
+        filmContext.clearRect(0, 0, FILM.pixelWidth, FILM.pixelHeight);
+        filmContext.globalCompositeOperation = "source-over";
+        filmContext.globalAlpha = 1 - mix;
+        filmContext.drawImage(filmBitmaps.get(index), 0, 0);
+        if (mix > 0) {
+          // « lighter » additionne les deux images : (1 - mix) de la première + mix de la seconde
+          filmContext.globalCompositeOperation = "lighter";
+          filmContext.globalAlpha = mix;
+          filmContext.drawImage(filmBitmaps.get(index + 1), 0, 0);
+        }
+      }
+
       // Appelée à chaque image où la timeline avance : met à jour ce que la timeline ne gère pas elle-même.
       function syncState() {
         if (!timeline) return;
         // Où en est l'intro, de 0 à 1 (c'est l'avancement LISSÉ : celui qu'on voit à l'écran)
         const progress = timeline.progress();
 
+        if (isFilmOn) {
+          drawFilm(progress);
+          // Le film est fini : la toile laisse la place aux deux lettres, qui pourront s'envoler
+          intro.classList.toggle("film-done", progress >= FILM.end);
+        }
+
         // La lueur de la torche sur le quadrillage : on cherche le trait en cours de soudure…
-        const activeIndex = STROKES.findIndex(
-          (stroke) => progress >= stroke.start && progress < stroke.end,
-        );
+        // (avec le film, pas de torche dessinée : la lumière et les étincelles sont dans l'image)
+        const activeIndex = isFilmOn
+          ? -1
+          : STROKES.findIndex((stroke) => progress >= stroke.start && progress < stroke.end);
         if (activeIndex === -1) {
           torch = null;
           intro.style.setProperty("--light", 0);
@@ -365,13 +513,12 @@ function Intro() {
       // depuis l'image précédente, en millisecondes.
       function animateSparks(time, deltaTime) {
         const seconds = Math.min(deltaTime / 1000, 0.05);
+        // La vitesse de soudure : de combien l'intro a avancé depuis l'image précédente
+        const progress = timeline.progress();
+        const speed = seconds > 0 ? Math.abs(progress - lastProgress) / seconds : 0;
+        lastProgress = progress;
 
         if (torch) {
-          // La vitesse de soudure : de combien l'intro a avancé depuis l'image précédente
-          const progress = timeline.progress();
-          const speed = Math.abs(progress - lastProgress) / seconds;
-          lastProgress = progress;
-
           const perSecond = Math.min(SPARKS_IDLE + speed * 1400, SPARKS_MAX);
           sparkBudget += perSecond * seconds;
           const count = Math.floor(sparkBudget);
@@ -380,8 +527,39 @@ function Intro() {
         }
 
         sparks.update(seconds);
+
+        // Le son suit la soudure : silence hors de la soudure, un fond discret quand la lumière est
+        // allumée, plus fort quand on défile. (On ne règle le volume que s'il a vraiment changé.)
+        if (soundRef.current) {
+          const isWelding = isFilmOn
+            ? progress > FILM.lightFrom && progress < FILM.lightTo
+            : torch !== null;
+          const level =
+            soundOnRef.current && isWelding ? Math.min(SOUND_IDLE + speed * SOUND_PER_SPEED, 1) : 0;
+          if (Math.abs(level - soundLevel) > 0.02 || (level === 0 && soundLevel !== 0)) {
+            soundLevel = level;
+            soundRef.current.setLevel(level);
+          }
+        }
       }
       gsap.ticker.add(animateSparks);
+
+      // Le téléchargement du film, image par image (le navigateur les prend quelques-unes à la fois).
+      // Chaque fichier arrivé est gardé tel quel ; prepareFilm décode ceux dont on a besoin.
+      if (filmContext) {
+        for (let index = 0; index < FILM.frames; index++) {
+          fetch(filmUrl(`f-${String(index).padStart(3, "0")}`))
+            .then((response) => (response.ok ? response.blob() : Promise.reject(new Error("image absente"))))
+            .then((file) => {
+              if (isFilmClosed) return;
+              filmFiles[index] = file;
+              prepareFilm(filmTarget);
+            })
+            .catch(() => {
+              // Une image manquante n'empêche rien : le film affichera sa voisine
+            });
+        }
+      }
 
       // Tant que l'intro est là, le Hero « tient » à l'écran après elle (voir has-intro dans le CSS)
       root.classList.add("has-intro");
@@ -389,10 +567,15 @@ function Intro() {
       // La police du logo peut arriver après le premier affichage : on remesure quand elle est prête
       document.fonts.ready.then(measure);
 
-      // Le nettoyage : useGSAP arrête lui-même la timeline, il reste à arrêter les étincelles
-      // et à retirer nos classes
+      // Le nettoyage : useGSAP arrête lui-même la timeline, il reste à arrêter les étincelles et le son,
+      // à libérer les images du film et à retirer nos classes
       return () => {
         gsap.ticker.remove(animateSparks);
+        soundRef.current?.close();
+        soundRef.current = null;
+        isFilmClosed = true;
+        filmBitmaps.forEach((bitmap) => bitmap.close());
+        filmBitmaps.clear();
         root.classList.remove("intro-playing", "has-intro");
       };
     },
@@ -400,6 +583,24 @@ function Intro() {
     // dependencies : on recrée tout si l'intro apparaît ou disparaît.
     { scope: introRef, dependencies: [isVisible] },
   );
+
+  // Le bouton « Son » : active ou coupe le crépitement de la soudure.
+  // Au premier clic, on fabrique le son : ce clic est aussi l'autorisation que le navigateur attend.
+  function toggleSound() {
+    let isOn = !isSoundOn;
+
+    if (isOn && !soundRef.current) {
+      try {
+        soundRef.current = createWeldSound();
+      } catch {
+        // Ce navigateur ne sait pas fabriquer de son : le bouton reste sur « non »
+        isOn = false;
+      }
+    }
+
+    setIsSoundOn(isOn);
+    soundOnRef.current = isOn;
+  }
 
   // Le bouton « Passer » : on descend directement jusqu'à la fin de l'intro
   // (sa hauteur, moins un écran : le site se trouve sous le dernier écran de l'intro)
@@ -411,7 +612,8 @@ function Intro() {
 
   return (
     // --bead : l'épaisseur des lettres, transmise au CSS (voir --w dans index.css)
-    <div className="intro" ref={introRef} style={{ "--bead": BEAD_WIDTH }}>
+    // has-film : sur un écran large, l'intro est plus longue, pour laisser le temps de voir le film (voir le CSS)
+    <div className={`intro ${hasFilm ? "has-film" : ""}`} ref={introRef} style={{ "--bead": BEAD_WIDTH }}>
       <div className="intro-sticky">
         {/* Le cadre du plan : la bordure, ses repères de zones et le cartouche en bas à droite */}
         <div className="intro-frame" aria-hidden="true">
@@ -471,6 +673,19 @@ function Intro() {
                   <stop offset="0.4" stopColor="#e2bf78" />
                   <stop offset="1" stopColor="#b08542" />
                 </linearGradient>
+                {/* Deux emporte-pièces pour la dernière image du film : la moitié gauche (le « A »)
+                    et la moitié droite (le « B »), de part et d'autre de FILM_SPLIT */}
+                <clipPath id="intro-film-A">
+                  <rect x={FILM.x} y={FILM.y} width={FILM_SPLIT - FILM.x} height={FILM.height} />
+                </clipPath>
+                <clipPath id="intro-film-B">
+                  <rect
+                    x={FILM_SPLIT}
+                    y={FILM.y}
+                    width={FILM.x + FILM.width - FILM_SPLIT}
+                    height={FILM.height}
+                  />
+                </clipPath>
               </defs>
 
               {/* Traits de construction (bleu acier, fins) : déjà tracés à l'arrivée */}
@@ -486,6 +701,16 @@ function Intro() {
               <g className="sketch">
                 <Strokes strokes={STROKES} />
               </g>
+
+              {/* Le film de la soudure (voir FILM) : une toile dans laquelle le JavaScript affiche l'image
+                  qui correspond au défilement. foreignObject permet de poser un élément HTML dans le dessin :
+                  la toile suit donc exactement la position et la taille des lettres, à toutes les tailles d'écran.
+                  Placée ici, elle passe au-dessus des traits de construction et sous les annotations. */}
+              {hasFilm && (
+                <foreignObject className="film" x={FILM.x} y={FILM.y} width={FILM.width} height={FILM.height}>
+                  <canvas ref={filmRef} width={FILM.pixelWidth} height={FILM.pixelHeight} />
+                </foreignObject>
+              )}
 
               {/* Les annotations du plan : elles apparaissent au fil de la soudure */}
 
@@ -546,6 +771,20 @@ function Intro() {
                   sur son initiale dans la navbar. --ox = le point fixe de son rétrécissement (son milieu). */}
               {LETTERS.map((letter) => (
                 <g key={letter.name} className="letter" style={{ "--ox": `${letter.center}px` }}>
+                  {/* Avec le film : la lettre telle qu'elle est sur sa dernière image. Elle prend le relais
+                      de la toile quand le film est fini, et c'est elle qui s'envole vers le logo. */}
+                  {hasFilm && (
+                    <image
+                      className="letter-film"
+                      href={filmUrl("final")}
+                      x={FILM.x}
+                      y={FILM.y}
+                      width={FILM.width}
+                      height={FILM.height}
+                      clipPath={`url(#intro-film-${letter.name})`}
+                    />
+                  )}
+
                   {/* Tout ce groupe est coupé net en haut et en bas par l'emporte-pièce */}
                   <g clipPath="url(#intro-clip)">
                     {/* Les traits de la lettre : un trait épais et lisse, peint avec le dégradé doré,
@@ -616,6 +855,12 @@ function Intro() {
 
         {/* La toile des étincelles : elle recouvre tout l'écran, par-dessus le dessin (voir sparks.js) */}
         <canvas className="intro-sparks" aria-hidden="true" />
+
+        {/* Le son de la soudure : coupé au départ, c'est le visiteur qui choisit de l'entendre.
+            aria-pressed dit aux lecteurs d'écran si le bouton est enfoncé. */}
+        <button type="button" className="intro-sound" aria-pressed={isSoundOn} onClick={toggleSound}>
+          Son · {isSoundOn ? "oui" : "non"}
+        </button>
 
         <button type="button" className="intro-skip" onClick={skipIntro}>
           Passer <span aria-hidden="true">›</span>

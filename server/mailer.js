@@ -33,9 +33,6 @@ const TYPE_LABELS = {
 const CONTRACT_LABELS = {
   cdi: "CDI",
   cdd: "CDD",
-  alternance: "Alternance",
-  stage: "Stage",
-  freelance: "Freelance",
 };
 
 const REMOTE_LABELS = {
