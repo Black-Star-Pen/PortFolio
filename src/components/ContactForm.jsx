@@ -1,4 +1,4 @@
-import { useState, useId, useRef, useEffect } from "react";
+import { useState, useId, useRef, useEffect, useLayoutEffect } from "react";
 import Weld from "./Weld";
 import { API_URL } from "../utils/api";
 
@@ -266,6 +266,7 @@ function OptionGroup({ name, legend, options, value, onSelect, error, optional =
 /* ===== Le formulaire ===== */
 function ContactForm() {
   const id = useId();
+  const orderRef = useRef(null);
   const formRef = useRef(null);
   const lookupRef = useRef(null);
   const [form, setForm] = useState(initialForm);
@@ -273,6 +274,18 @@ function ContactForm() {
   const [status, setStatus] = useState("idle");
   const [submitError, setSubmitError] = useState("");
   const [retryIn, setRetryIn] = useState(0);
+
+  // Quand la demande est validée, le long formulaire laisse la place à un petit message : la page
+  // raccourcit d'un coup. Sans rien faire, l'écran resterait où il était (tout en bas du formulaire) :
+  // le message se retrouverait au-dessus, hors de vue, et on verrait le bas de la page remonter.
+  // On recadre donc aussitôt l'écran sur le message, au centre.
+  // useLayoutEffect passe AVANT que le navigateur affiche le changement : on ne voit pas la page sauter.
+  // « instant » passe outre le défilement doux réglé dans le CSS (scroll-behavior).
+  useLayoutEffect(() => {
+    if (status === "success") {
+      orderRef.current.scrollIntoView({ block: "center", behavior: "instant" });
+    }
+  }, [status]);
 
   // Compte à rebours après un refus "trop de messages" (429)
   useEffect(() => {
@@ -500,7 +513,7 @@ function ContactForm() {
   }
 
   return (
-    <div className="work-order">
+    <div className="work-order" ref={orderRef}>
       {/* Le trait bleu qui balaie la feuille à son apparition (voir « ORDER » dans le CSS, section 19 bis) */}
       <span className="work-order-scan" aria-hidden="true" />
 

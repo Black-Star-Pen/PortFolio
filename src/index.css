@@ -310,13 +310,28 @@ main > section.seam-welded::after {
 
 /* ===== 7. Hero ===== */
 .hero {
+  /* La hauteur du Hero : ce qui reste de l'écran sous la navbar (--navbar-h, mesurée par Intro), plus 32px.
+     Le Hero remplit donc l'écran, et le cordon de soudure de la section suivante (voir « section + section »)
+     se retrouve juste SOUS le bas de l'écran : on ne le voit qu'en commençant à défiler.
+     (Avant, le Hero faisait 90vh : sur un grand écran, le cordon apparaissait tout en bas dès l'arrivée.) */
+  --hero-height: calc(100vh - var(--navbar-h, 73px) + 32px);
+
   overflow-x: clip;
 }
 
-/* Le contenu du Hero. 90vh moins les 200px de marges intérieures de la section (100px en haut et en bas) :
-   la section fait donc 90vh en tout, comme avant. */
+/* svh = la hauteur de l'écran quand la barre d'adresse du téléphone est affichée (c'est le cas à l'arrivée).
+   vh compte comme si elle était cachée : le Hero serait un peu trop haut. Les navigateurs qui ne
+   connaissent pas svh gardent la ligne du dessus. */
+@supports (height: 100svh) {
+  .hero {
+    --hero-height: calc(100svh - var(--navbar-h, 73px) + 32px);
+  }
+}
+
+/* Le contenu du Hero. On retire les 200px de marges intérieures de la section (100px en haut et en bas) :
+   la section fait donc --hero-height en tout. */
 .hero-pin {
-  min-height: calc(90vh - 200px);
+  min-height: calc(var(--hero-height) - 200px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -332,7 +347,7 @@ main > section.seam-welded::after {
    que dans la zone de contenu de son parent, pas dans ses marges intérieures.) */
 html.has-intro .hero {
   --hero-hold: 70vh;
-  min-height: calc(90vh + var(--hero-hold));
+  min-height: calc(var(--hero-height) + var(--hero-hold));
 }
 
 html.has-intro .hero-pin {
@@ -1098,8 +1113,8 @@ html.has-intro .hero-pin {
 
 /* Étage 3, le titre : un cartouche de plan, fait de deux cases.
    À gauche, la case du titre, avec un voile doré. À droite, une petite case hachurée, séparée par
-   un trait vertical net : sur une carte elle contient la flèche, dans la modale le bouton de
-   fermeture vient s'y ranger quand le titre reste en haut. Les hachures ont ainsi une raison
+   un trait vertical net : sur une carte elle contient la flèche, dans la modale elle reste vide
+   (le bouton de fermeture est au-dessus, sur la ligne de la plaque). Les hachures ont ainsi une raison
    d'être : elles remplissent une case, elles ne commencent plus au milieu de nulle part.
    Tout est fait avec des fonds superposés (du dessus vers le dessous), sans élément en plus :
    1 et 2. les deux filets, en haut et en bas ;
@@ -2325,9 +2340,42 @@ html.has-intro .hero-pin {
   font-size: 2rem;
 }
 
+/* L'en-tête de la fiche : la plaque de référence et le titre du projet, regroupés (voir ProjectModal.jsx).
+   sticky + top: 0 : quand on fait défiler au-delà, le bloc entier s'arrête en haut de la modale et y
+   reste, par-dessus le visuel : on sait toujours quel projet on est en train de lire, et le texte défile
+   en dessous. Il reçoit un fond plein pour que ce texte ne se voie pas à travers.
+   Il va d'un bord à l'autre de la modale et reprend les coins arrondis du bloc de texte : les marges
+   négatives annulent la marge intérieure de .modal-content (en haut et sur les côtés), et sa propre
+   marge intérieure du haut remet la plaque à sa place. */
+.modal-heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin: calc(var(--modal-padding) * -1) calc(var(--modal-padding) * -1) 0;
+  padding-top: var(--modal-padding);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background-color: var(--color-surface);
+}
+
+/* Sur un écran très bas (un téléphone tenu à l'horizontale), l'en-tête prendrait presque toute la
+   hauteur de la modale : il repart avec le texte, comme un bloc ordinaire. */
+@media (max-height: 560px) {
+  .modal-heading {
+    position: static;
+  }
+}
+
 /* Dans la modale, la référence n'est pas dans un étage comme sur les cartes : elle reçoit sa propre
-   petite plaque d'acier sombre, pour que ses lettres gravées aient un métal dans lequel se creuser. */
-.modal-content > .project-category {
+   petite plaque d'acier sombre, pour que ses lettres gravées aient un métal dans lequel se creuser.
+   La marge de droite, plus large, laisse la place au bouton de fermeture, qui reste en haut à droite
+   lui aussi (ses 44px, à 16px du bord, plus 12px d'écart). */
+.modal-heading > .project-category {
+  margin: 0 72px 0 var(--modal-padding);
   padding: 8px 12px;
   border-radius: 2px;
   background: linear-gradient(180deg, #171c22, #0c0f13);
@@ -2338,21 +2386,12 @@ html.has-intro .hero-pin {
 
 /* Le titre du projet : une bande qui va d'un bord à l'autre de la modale, avec le même fond
    « cartouche » que sur les cartes (voir .project-header) : deux filets dorés, un voile, des hachures.
-   Les marges négatives annulent la marge intérieure de .modal-content, la bande touche donc les deux bords ;
-   la marge intérieure remet le texte à sa place, aligné avec le reste.
-   sticky + top: 0 : quand on fait défiler au-delà du titre, la bande s'arrête en haut de la modale
-   et y reste : on sait toujours quel projet on est en train de lire. Elle reçoit un fond plein
-   (sous ses hachures, en partie transparentes) pour que le texte qui défile ne se voie pas à travers.
-   La marge de droite, plus large, laisse la place au bouton de fermeture, qui reste en haut lui aussi. */
-.modal-content .project-title {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+   La marge intérieure de gauche aligne le texte avec le reste ; celle de droite l'arrête avant la
+   case hachurée (--cell, plus 16px d'écart). */
+.modal-heading > .project-title {
   align-self: stretch;
   width: auto;
-  margin-inline: calc(var(--modal-padding) * -1);
-  padding: 18px calc(var(--modal-padding) + 52px) 18px var(--modal-padding);
-  background-color: var(--color-surface);
+  padding: 18px calc(var(--cell) + 16px) 18px var(--modal-padding);
 }
 
 /* L'accroche du projet, juste sous le titre */
@@ -2429,13 +2468,7 @@ html.has-intro .hero-pin {
   gap: 12px;
 }
 
-/* La précision sous les boutons : sur sa propre ligne, petite et discrète */
-.project-actions-note {
-  flex-basis: 100%;
-  font-size: 0.8rem;
-}
-
-/* Les boutons « Voir le site » et « Voir le code » */
+/* La barre du bas : les boutons « Voir le site » et « Voir le code », et une précision facultative */
 .project-actions {
   /* sticky + bottom: 0 : la barre reste collée en bas de la modale pendant tout le défilement,
      puis se range à sa place, tout en bas, quand on y arrive.
@@ -2444,12 +2477,25 @@ html.has-intro .hero-pin {
   bottom: 0;
   z-index: 2;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 12px;
   padding: 16px var(--modal-padding);
   border-top: 1px solid rgba(214, 191, 148, 0.25);
   background-color: rgba(17, 19, 24, 0.92);
   backdrop-filter: blur(8px);
+}
+
+.project-actions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* La précision : petite et discrète. Dans le code elle est écrite avant les boutons (voir ProjectModal.jsx) ;
+   order: 1 la fait passer après eux (dans une boîte flex, les éléments sans « order » valent 0). */
+.project-actions-note {
+  order: 1;
+  font-size: 0.8rem;
 }
 
 .modal-close {
@@ -2480,7 +2526,7 @@ html.has-intro .hero-pin {
 }
 
 /* Dans la modale d'un projet, le bouton de fermeture reste en haut à droite pendant tout le défilement
-   (sticky), au lieu de partir avec le visuel : il se retrouve dans la bande du titre quand elle s'arrête.
+   (sticky), au lieu de partir avec le visuel : il se retrouve à droite de la plaque quand l'en-tête s'arrête.
    Un élément sticky reste dans le fil de la page, il prendrait donc sa hauteur au-dessus du visuel :
    - margin-left: auto le pousse à droite ;
    - la marge négative du bas (ses 44px + les 16px du haut) annule la place qu'il occupe. */
@@ -2807,17 +2853,92 @@ html.has-intro .hero-pin {
 
 /* ===== 19. Mobile ===== */
 @media (max-width: 768px) {
-  /* Modale projet : moins de marge, boutons pleine largeur */
+  /* À propos : tout est calé à gauche, comme dans la colonne du grand écran. Des paragraphes centrés
+     sur un écran étroit se lisent mal : chaque ligne commence à un endroit différent, l'œil doit la
+     chercher. Calées à gauche, les lignes partent toutes du même bord.
+     Le texte est aussi un peu plus petit et plus aéré entre deux paragraphes. */
+  .about-intro .section-title {
+    margin-bottom: 32px;
+    text-align: left;
+  }
+
+  .about-intro .section-label {
+    justify-content: flex-start;
+  }
+
+  .about-text {
+    gap: 20px;
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  /* Modales : un peu plus de largeur (16px de marge autour au lieu de 24) */
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  /* Modale projet : moins de marge, et un en-tête plus compact. Il reste en haut pendant tout le
+     défilement (voir .modal-heading) : chaque pixel qu'il prend est retiré au texte. */
   .modal {
-    --modal-padding: 24px;
+    --modal-padding: 20px;
+  }
+
+  .modal-heading {
+    gap: 12px;
+  }
+
+  /* La plaque : lettres un peu plus petites et plus serrées, pour tenir sur une ligne à côté du bouton
+     de fermeture sur la plupart des téléphones (sur les plus étroits, elle passe sur deux lignes) */
+  .modal-heading > .project-category {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
   }
 
   .modal-content h3 {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
   }
 
-  .project-actions .btn {
-    flex: 1 1 100%;
+  .modal-heading > .project-title {
+    padding-block: 14px;
+  }
+
+  /* La barre du bas : sur téléphone, seuls les boutons restent collés en bas, côte à côte sur une ligne.
+     Empilés avec la précision en dessous, ils prenaient un tiers de la hauteur de la modale.
+     display: contents fait « disparaître » la boîte .project-actions (pas son contenu) : ses deux enfants
+     se comportent comme s'ils étaient directement dans la modale. La précision se retrouve alors à la fin
+     du texte, et la rangée de boutons devient la barre collée en bas (elle reprend le style de la barre). */
+  .project-actions {
+    display: contents;
+  }
+
+  .project-actions-note {
+    padding: 0 var(--modal-padding) 20px;
+  }
+
+  .project-actions-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 12px var(--modal-padding);
+    border-top: 1px solid rgba(214, 191, 148, 0.25);
+    background-color: rgba(17, 19, 24, 0.92);
+    backdrop-filter: blur(8px);
+  }
+
+  /* flex: 1 1 0 : les boutons se partagent la largeur à parts égales (un seul bouton la prend toute).
+     Texte un peu plus petit et plus serré pour tenir à deux ; sur un écran très étroit, il passe
+     à la ligne au lieu d'être coupé (white-space). */
+  .project-actions-buttons .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+    padding: 13px 6px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    white-space: normal;
+    text-align: center;
   }
 }
 

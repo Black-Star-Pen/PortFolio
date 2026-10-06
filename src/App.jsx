@@ -35,7 +35,7 @@ function App() {
       <ScrollToTop />
       <ScrollReveal />
 
-      {/* L'écran d'intro : le plan qui se trace (une fois par visite) */}
+      {/* L'écran d'intro : le plan qui se soude au défilement, en haut de l'accueil */}
       <Intro />
 
       <Navbar onContactClick={openContact} />

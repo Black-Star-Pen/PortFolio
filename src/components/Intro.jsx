@@ -28,21 +28,14 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    - la timeline ne fait que changer des variables CSS (--t, --u, --land…) : c'est le CSS qui
      décide de l'apparence correspondante (voir la section « 19 ter » de index.css).
 
-   Affichée seulement sur l'accueil, une fois par visite (sessionStorage),
-   jamais avec « réduire les animations ».
-   Pour la REVOIR pendant le développement : localhost:5173/?intro
+   Affichée sur l'accueil à chaque chargement de la page : elle fait partie de la page, tout en haut,
+   au-dessus du Hero, et on peut toujours remonter la revoir. Après une actualisation, le navigateur
+   remet la page là où on l'avait laissée : l'intro est donc là, au-dessus, sans se rejouer d'elle-même.
+   Jamais avec « réduire les animations ».
    ===================================================================== */
 
-const STORAGE_KEY = "intro-seen";
-
 function shouldPlay() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  if (new URLSearchParams(window.location.search).has("intro")) return true;
-  try {
-    return !sessionStorage.getItem(STORAGE_KEY);
-  } catch {
-    return true;
-  }
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 // L'épaisseur des lettres, en unités du dessin : c'est elle qui les rend plus ou moins grasses
@@ -356,17 +349,26 @@ function Intro() {
               }
               filmBitmaps.set(index, bitmap);
 
-              // La première image est prête : le film prend la place de la soudure dessinée, mais seulement
-              // si on n'a pas encore commencé à défiler (sinon la soudure changerait d'aspect en cours de route)
-              if (index === 0 && !isFilmOn && timeline.progress() <= FILM.start) {
-                isFilmOn = true;
-                intro.classList.add("film-on");
-              }
+              // La première image est prête : le film peut prendre la place de la soudure dessinée
+              if (index === 0) startFilm();
               // Une image qu'on attendait vient d'arriver : on réaffiche
               if (isFilmOn && Math.abs(index - filmTarget) <= 1) syncState();
             })
             .catch(() => filmDecoding.delete(index));
         }
+      }
+
+      // Le film prend la place de la soudure dessinée, mais seulement à un moment où ça ne se voit pas
+      // (sinon la soudure changerait d'aspect en cours de route) : tout au début, quand rien n'est encore
+      // soudé, ou tout à la fin, quand le plan est effacé (la page s'est ouverte plus bas, après une
+      // actualisation par exemple : le film est alors prêt si on remonte revoir l'intro).
+      function startFilm() {
+        if (isFilmOn || !filmBitmaps.has(0)) return;
+        const progress = timeline.progress();
+        if (progress > FILM.start && progress < LANDING_END) return;
+
+        isFilmOn = true;
+        intro.classList.add("film-on");
       }
 
       // Affiche l'image du film qui correspond à l'avancement de l'intro.
@@ -406,11 +408,19 @@ function Intro() {
         }
       }
 
+      // L'avancement de l'intro la dernière fois que syncState est passée (voir animateSparks)
+      let syncedProgress = -1;
+
       // Appelée à chaque image où la timeline avance : met à jour ce que la timeline ne gère pas elle-même.
       function syncState() {
         if (!timeline) return;
         // Où en est l'intro, de 0 à 1 (c'est l'avancement LISSÉ : celui qu'on voit à l'écran)
         const progress = timeline.progress();
+        syncedProgress = progress;
+
+        // Le film n'a pas pu démarrer quand sa première image est arrivée (on était en pleine soudure) :
+        // on retente à chaque passage
+        startFilm();
 
         if (isFilmOn) {
           drawFilm(progress);
@@ -446,14 +456,30 @@ function Intro() {
 
         // Les animations du Hero attendent la fin de l'intro
         root.classList.toggle("intro-playing", progress < LANDING_END);
+      }
 
-        if (progress >= LANDING_END) {
-          try {
-            sessionStorage.setItem(STORAGE_KEY, "1");
-          } catch {
-            // Pas grave : l'intro sera simplement rejouée
-          }
-        }
+      // Qui fait défiler la page ? Tant que le visiteur n'a touché à rien (molette, doigt, clavier, clic),
+      // ce n'est pas lui : c'est le navigateur, qui remet la page là où elle était après une actualisation,
+      // ou une ancre dans l'adresse (/#contact). Dans ce cas l'intro se place d'un coup au bon endroit,
+      // sans lissage : sinon on la verrait se rejouer en accéléré par-dessus le site.
+      let hasVisitorMoved = false;
+      const gestures = ["wheel", "touchstart", "keydown", "pointerdown"];
+
+      function noteGesture() {
+        hasVisitorMoved = true;
+        gestures.forEach((type) => window.removeEventListener(type, noteGesture));
+      }
+      // passive : on promet au navigateur de ne pas bloquer ces gestes, il n'a pas à nous attendre
+      gestures.forEach((type) => window.addEventListener(type, noteGesture, { passive: true }));
+
+      // Place l'intro exactement là où en est le défilement, sans attendre le lissage.
+      // getTween() donne l'animation de rattrapage de ScrollTrigger : progress(1) la termine tout de suite.
+      function placeAtOnce(trigger) {
+        if (hasVisitorMoved || !timeline) return;
+
+        const catchUp = trigger.getTween();
+        if (catchUp) catchUp.progress(1);
+        else timeline.progress(trigger.progress);
       }
 
       // La timeline : le déroulé complet de l'intro, sur une durée totale de 1.
@@ -472,9 +498,16 @@ function Intro() {
           scrub: SMOOTHING,
           // --p = l'avancement RÉEL du défilement (non lissé). Le CSS s'en sert pour savoir où se trouve
           // la navbar pendant le raccord (voir --target-y dans .letter).
-          onUpdate: (self) => intro.style.setProperty("--p", self.progress),
-          // ScrollTrigger refait ses calculs quand la fenêtre change de taille : on remesure avec lui
-          onRefresh: measure,
+          onUpdate: (self) => {
+            intro.style.setProperty("--p", self.progress);
+            placeAtOnce(self);
+          },
+          // ScrollTrigger refait ses calculs au chargement et quand la fenêtre change de taille :
+          // on remesure avec lui
+          onRefresh: (self) => {
+            measure();
+            placeAtOnce(self);
+          },
         },
       });
 
@@ -517,6 +550,11 @@ function Intro() {
         const progress = timeline.progress();
         const speed = seconds > 0 ? Math.abs(progress - lastProgress) / seconds : 0;
         lastProgress = progress;
+
+        // Un filet de sécurité : quand la fenêtre change de taille, ScrollTrigger refait ses calculs et peut
+        // déplacer la timeline sans nous prévenir (sans appeler syncState). On rattrape ici : sinon le logo
+        // pouvait rester sans ses initiales, comme si l'intro était encore en cours.
+        if (progress !== syncedProgress) syncState();
 
         if (torch) {
           const perSecond = Math.min(SPARKS_IDLE + speed * 1400, SPARKS_MAX);
@@ -571,6 +609,7 @@ function Intro() {
       // à libérer les images du film et à retirer nos classes
       return () => {
         gsap.ticker.remove(animateSparks);
+        gestures.forEach((type) => window.removeEventListener(type, noteGesture));
         soundRef.current?.close();
         soundRef.current = null;
         isFilmClosed = true;
