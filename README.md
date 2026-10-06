@@ -4,7 +4,7 @@ Développeur full stack · Paris
 
 Mon portfolio, conçu et codé de A à Z : un univers de dessin technique et d'atelier métal, clin d'œil à ma formation en chaudronnerie.
 
-Site en ligne : à venir.
+Site en ligne : https://adam-boulkhedert.onrender.com
 
 ## Ce qu'on y trouve
 
@@ -109,7 +109,7 @@ Le fichier `.env` attend quatre valeurs, et quelques autres pour la mise en lign
 | `RESEND_API_KEY` | en ligne : la clé Resend ; dès qu'elle est remplie, l'envoi passe par Resend au lieu de Gmail |
 | `MAIL_FROM` | en ligne : l'expéditeur des emails envoyés par Resend (facultatif) |
 | `CORS_ORIGIN` | en ligne : l'adresse du site autorisé à appeler l'API (vide en local) |
-| `TRUST_PROXY` | en ligne : le nombre d'intermédiaires devant le serveur, 1 le plus souvent (vide en local) |
+| `TRUST_PROXY` | en ligne : le nombre d'intermédiaires devant le serveur, 3 chez Render (vide en local) |
 
 Sans l'API, le site s'affiche normalement : seul l'envoi du formulaire échoue.
 

@@ -88,9 +88,11 @@ services:
       # Seul ce site a le droit d'appeler l'API
       - key: CORS_ORIGIN
         value: https://adam-boulkhedert.onrender.com
-      # Un intermédiaire (celui de Render) entre les visiteurs et le serveur
+      # Trois intermédiaires entre les visiteurs et le serveur chez Render. Valeur mesurée en ligne :
+      # avec 1, la limite d'envoi comptait l'adresse d'un intermédiaire au lieu de celle du visiteur ;
+      # avec 3, elle compte bien chaque visiteur, et on ne peut pas tricher sur son adresse.
       - key: TRUST_PROXY
-        value: "1"
+        value: "3"
       # Les deux secrets : « sync: false » = leur valeur n'est pas dans ce fichier,
       # Render te la demandera à la création du service.
       # MAIL_TO : l'adresse qui reçoit les demandes (celle de ton compte Resend)
