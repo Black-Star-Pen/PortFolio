@@ -11,6 +11,9 @@ services:
   - type: web
     name: adam-boulkhedert
     runtime: static
+    # Render ne met en ligne une nouvelle version que si les contrôles de GitHub Actions sont au vert
+    # (voir .github/workflows/ci.yml)
+    autoDeployTrigger: checksPass
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     envVars:
@@ -75,6 +78,8 @@ services:
     runtime: node
     plan: free
     region: frankfurt
+    # Comme pour le site : mise en ligne seulement si les contrôles de GitHub Actions sont au vert
+    autoDeployTrigger: checksPass
     rootDir: server
     buildCommand: npm ci
     # « node index.js » et non « npm start » : en ligne il n'y a pas de fichier .env,

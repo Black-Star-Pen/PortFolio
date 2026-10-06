@@ -21,7 +21,7 @@ Site en ligne : https://adam-boulkhedert.onrender.com
 | Front | React 19, Vite, React Router, GSAP (ScrollTrigger), Canvas, Web Audio, CSS sans framework |
 | Back | Node.js, Express 5, Nodemailer en local et Resend en ligne, express-rate-limit, helmet, cors |
 | Hébergement | Render : le site en fichiers statiques, l'API en service Node (configuration dans `render.yaml`) |
-| Qualité | ESLint, une branche Git par fonctionnalité et des Pull Requests |
+| Qualité | ESLint, une branche Git par fonctionnalité et des Pull Requests, contrôlées par GitHub Actions |
 
 ## Quelques choix techniques
 
@@ -57,6 +57,7 @@ Les autres animations du site (apparition des sections, soudures du parcours et 
 PortFolio/
 ├── index.html
 ├── render.yaml         la configuration de l'hébergement : les deux services et les en-têtes de sécurité du site
+├── .github/workflows/  le contrôle automatique : lint, construction du site et démarrage de l'API à chaque Pull Request
 ├── public/             favicon, logos des technologies, captures des projets et images du film de l'intro (en WebP)
 ├── images-source/      les captures d'origine, avant conversion
 ├── scripts/            deux scripts : convertir les captures, télécharger les logos
