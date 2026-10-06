@@ -497,25 +497,40 @@ html.has-intro .hero-pin {
   margin: 0 auto 64px;
 }
 
+/* Le libellé de la section : un onglet posé sur un filet qui traverse le bloc, comme l'onglet d'un
+   tiroir de la boîte à outils. .section-label est le filet (sa bordure du bas), .section-name l'onglet. */
 .section-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(214, 191, 148, 0.4);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--color-accent);
-  margin-bottom: 16px;
 }
 
-.section-label::before,
-.section-label::after {
+/* Pas de bordure en bas : l'onglet est fermé par le filet sur lequel il est posé */
+.section-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 7px;
+  border: 1px solid rgba(214, 191, 148, 0.4);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background-color: var(--color-surface);
+}
+
+/* La poignée de l'onglet */
+.section-name::before {
   content: "";
-  width: 40px;
-  height: 1px;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
   background-color: var(--color-accent);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .section-title h2 {
@@ -590,9 +605,9 @@ html.has-intro .hero-pin {
     font-size: clamp(1.9rem, 2.9vw, 2.3rem);
   }
 
-  /* Aligné à gauche, le libellé perd son trait de gauche : le mot démarre au bord, comme le titre */
-  .about-intro .section-label::before {
-    display: none;
+  /* Aligné à gauche, l'onglet du libellé se cale au bord, comme le titre */
+  .about-intro .section-label {
+    justify-content: flex-start;
   }
 
   .about-intro .about-text {
