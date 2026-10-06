@@ -3,7 +3,7 @@ import technoIcons from "../data/technoIcons";
 
 function TechBadge({ name }) {
   const slug = technoIcons[name];
-  // Si le logo ne se charge pas (nom inconnu, réseau…), on le cache
+  // Si le logo ne se charge pas (fichier absent de public/icons/, réseau…), on le cache
   // au lieu d'afficher une image cassée : il reste le texte.
   const [iconFailed, setIconFailed] = useState(false);
 
@@ -11,7 +11,7 @@ function TechBadge({ name }) {
     <li className="tech-badge">
       {slug && !iconFailed && (
         <img
-          src={`https://cdn.simpleicons.org/${slug}/d6bf94`}
+          src={`/icons/${slug}.svg`}
           alt=""
           width="20"
           height="20"

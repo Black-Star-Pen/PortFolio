@@ -8,16 +8,24 @@
   --color-accent: #d6bf94;
   --color-steel: #8fb3c9;
   --color-error: #e3a08f;
+  --color-required: #f87171; /* rouge de l'astérisque des champs obligatoires */
   --color-available: #4ade80;
   --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
 
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-title: "Space Grotesk", system-ui, sans-serif;
-  --font-serif: "Newsreader", Georgia, serif;
+  /* Les trois premières sont installées dans le projet (voir les imports dans main.jsx).
+     Leur nom se termine par « Variable » : c'est celui que leur donnent les paquets @fontsource. */
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-title: "Space Grotesk Variable", system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", Georgia, serif;
   --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
 
   --radius: 16px;
   --max-width: 1100px;
+
+  /* L'espace au-dessus et au-dessous de chaque section de l'accueil, sauf le Hero (voir section 5).
+     clamp(mini, idéal, maxi) : 100px sur téléphone, 160px à partir de 1280px de large,
+     et entre les deux l'espace suit la largeur de l'écran. Pour aérer plus ou moins : change le 160px. */
+  --section-space: clamp(100px, 12.5vw, 160px);
 }
 
 /* ===== 2. Reset ===== */
@@ -90,8 +98,18 @@ section {
 /* Le cordon de soudure entre deux sections (toutes sauf la première, le Hero).
    « section + section » = une section précédée d'une autre section. */
 main > section + section {
-  --seam-width: min(1000px, 92vw);
+  /* La longueur du cordon : 1500px, plus large que le contenu (1100px), il dépasse donc de chaque côté.
+     Sur un écran plus étroit, il s'arrête à 92 % de la largeur de l'écran. */
+  --seam-width: min(1500px, 92vw);
+  /* Le temps que met le cordon à se souder. Presque deux fois plus court que la découpe du titre
+     juste en dessous (1,3s, voir .reveal-laser) : la soudure est finie quand le texte arrive. */
+  --seam-duration: 0.7s;
   position: relative;
+  /* Plus d'air entre deux sections que les 100px de base. Le Hero n'est pas concerné (il n'est précédé
+     d'aucune section) : sa hauteur est calculée sur ces 100px, voir .hero-pin.
+     Le cordon reste au milieu de l'espace : il en a autant au-dessus (bas de la section d'avant) qu'en dessous,
+     sauf après le Hero, qui garde 100px en bas. */
+  padding-block: var(--section-space);
 }
 
 /* Le cordon : doré et lumineux au centre, il s'estompe vers les bords */
@@ -121,10 +139,11 @@ main > section.seam-pending::before {
 }
 
 main > section.seam-welded::before {
-  animation: seam-weld 1.8s cubic-bezier(0.6, 0, 0.3, 1) both;
+  animation: seam-weld var(--seam-duration) cubic-bezier(0.6, 0, 0.3, 1) both;
 }
 
-/* L'étincelle qui avance en tête du cordon */
+/* La pointe lumineuse qui avance en tête du cordon. ScrollReveal lit sa position à chaque image
+   pour en faire jaillir les étincelles (voir weldSeam) : c'est elle qui donne le rythme. */
 main > section.seam-welded::after {
   content: "";
   position: absolute;
@@ -140,8 +159,20 @@ main > section.seam-welded::after {
     0 0 32px 12px rgba(214, 150, 60, 0.4);
   pointer-events: none;
   animation:
-    seam-spark 1.8s cubic-bezier(0.6, 0, 0.3, 1) both,
+    seam-spark var(--seam-duration) cubic-bezier(0.6, 0, 0.3, 1) both,
     weld-flicker 0.08s steps(2) infinite;
+}
+
+/* La toile des étincelles du cordon, posée par ScrollReveal le temps de la soudure.
+   Elle suit le cordon sur toute sa longueur, avec 40px de marge à chaque bout. Elle dépasse au-dessus
+   (les étincelles montent un peu) et surtout en dessous (elles retombent). */
+.seam-sparks {
+  position: absolute;
+  top: -80px;
+  left: calc(50% - var(--seam-width) / 2 - 40px);
+  width: calc(var(--seam-width) + 80px);
+  height: 300px;
+  pointer-events: none;
 }
 
 @keyframes seam-weld {
@@ -310,6 +341,16 @@ html.has-intro .hero-pin {
   top: calc(var(--navbar-h, 73px) + 100px);
 }
 
+/* Sur téléphone, le Hero tient deux fois moins longtemps. Au doigt, 70vh d'arrêt, c'est un à deux gestes
+   pendant lesquels rien ne bouge : on a l'impression d'être bloqué. Avec 35vh, un seul geste suffit à repartir.
+   On ne descend pas à 0 : l'intro suit le défilement avec un léger retard (voir SMOOTHING dans Intro.jsx),
+   et sans arrêt le Hero serait déjà parti avant qu'elle ait fini de s'effacer. */
+@media (max-width: 768px) {
+  html.has-intro .hero {
+    --hero-hold: 35vh;
+  }
+}
+
 /* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
 .hero-intro {
   display: grid;
@@ -457,25 +498,40 @@ html.has-intro .hero-pin {
   margin: 0 auto 64px;
 }
 
+/* Le libellé de la section : un onglet posé sur un filet qui traverse le bloc, comme l'onglet d'un
+   tiroir de la boîte à outils. .section-label est le filet (sa bordure du bas), .section-name l'onglet. */
 .section-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(214, 191, 148, 0.4);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--color-accent);
-  margin-bottom: 16px;
 }
 
-.section-label::before,
-.section-label::after {
+/* Pas de bordure en bas : l'onglet est fermé par le filet sur lequel il est posé */
+.section-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 7px;
+  border: 1px solid rgba(214, 191, 148, 0.4);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background-color: var(--color-surface);
+}
+
+/* La poignée de l'onglet */
+.section-name::before {
   content: "";
-  width: 40px;
-  height: 1px;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
   background-color: var(--color-accent);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .section-title h2 {
@@ -500,6 +556,100 @@ html.has-intro .hero-pin {
   margin: 0 auto;
   text-align: center;
   font-size: 1.1rem;
+}
+
+/* Sur grand écran, l'À propos se lit en deux colonnes : la présentation à gauche, le parcours à droite.
+   Les deux s'arrêtent sous la navbar et restent en place pendant que le cordon du parcours se soude
+   au défilement (voir Timeline.jsx), puis repartent ensemble.
+   Sur un écran trop étroit ou trop bas pour ça, les deux blocs s'empilent, centrés, avec les styles de base.
+   (La même condition est écrite dans Timeline.jsx : PINNED_SCREEN.)
+   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre. */
+@media (min-width: 1000px) and (min-height: 820px) {
+  .about-layout {
+    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran */
+    --frame-top: calc(var(--navbar-h, 73px) + 40px);
+    --frame-height: calc(100vh - var(--frame-top) - 40px);
+    /* La distance de défilement pendant laquelle elles restent en place, le temps de souder le cordon.
+       Pour que ça dure plus ou moins longtemps, change cette valeur. */
+    --about-hold: 110vh;
+
+    display: grid;
+    /* La présentation a un peu plus de place que le parcours : ses paragraphes s'étalent en largeur
+       et prennent moins de lignes. Le parcours, lui, est repoussé vers la droite.
+       minmax(0, …) : une colonne garde sa part, elle ne s'élargit pas pour un mot trop long. */
+    grid-template-columns: minmax(0, 10fr) minmax(0, 9fr);
+    /* Une seule rangée, plus haute que le cadre : c'est dans cette hauteur en plus que les colonnes
+       « tiennent » (un élément sticky ne peut se déplacer que dans la place que lui laisse son parent) */
+    grid-template-rows: calc(var(--frame-height) + var(--about-hold));
+    /* L'écart entre les deux colonnes : assez large pour qu'on lise deux blocs distincts */
+    column-gap: 104px;
+    align-items: start;
+  }
+
+  /* Même arrêt et même hauteur pour les deux colonnes : elles s'arrêtent et repartent au même moment */
+  .about-intro,
+  .about-layout .timeline {
+    position: sticky;
+    top: var(--frame-top);
+    height: var(--frame-height);
+  }
+
+  .about-intro .section-title {
+    max-width: none;
+    margin: 0 0 32px;
+    text-align: left;
+  }
+
+  /* Un titre un peu plus petit que dans les autres sections : dans une demi-largeur,
+     « le goût du travail bien fait. » doit tenir sur une seule ligne */
+  .about-intro .section-title h2 {
+    font-size: clamp(1.9rem, 2.9vw, 2.3rem);
+  }
+
+  /* Aligné à gauche, l'onglet du libellé se cale au bord, comme le titre */
+  .about-intro .section-label {
+    justify-content: flex-start;
+  }
+
+  .about-intro .about-text {
+    max-width: none;
+    margin: 0;
+    text-align: left;
+  }
+
+  /* Le parcours : son titre en haut, et en dessous une fenêtre qui prend toute la hauteur restante */
+  .about-layout .timeline {
+    display: flex;
+    flex-direction: column;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* Il se déplie un peu après l'arrivée du texte de gauche : on lit d'abord la présentation */
+  .about-layout .timeline.revealed {
+    animation-delay: 0.4s;
+  }
+
+  .about-layout .timeline-heading {
+    margin-bottom: 0;
+  }
+
+  /* La fenêtre : la gamme est plus haute qu'elle et glisse derrière (--shift, calculé par Timeline.jsx).
+     Le masque la fait disparaître en fondu en haut et en bas, au lieu d'une coupure nette.
+     Les marges intérieures du haut (40px) et du bas (72px) ont la hauteur des deux fondus : au début
+     comme à la fin, la gamme s'arrête donc juste avant, et sa première et sa dernière étape restent nettes.
+     La marge négative à gauche élargit la fenêtre : la lueur de la pointe déborde de ce côté. */
+  .about-layout .timeline-window {
+    flex: 1;
+    min-height: 0;
+    margin-left: -40px;
+    padding: 40px 0 72px 40px;
+    mask-image: linear-gradient(to bottom, transparent, #000 40px, #000 calc(100% - 72px), transparent);
+  }
+
+  .about-layout .timeline-body {
+    transform: translateY(calc(var(--shift, 0) * -1px));
+  }
 }
 
 /* ===== 10. Parcours : la gamme de fabrication ===== */
@@ -684,27 +834,131 @@ html.has-intro .hero-pin {
   gap: 24px;
 }
 
+/* La carte se lit en quatre étages : le visuel, la référence, le titre, puis la description et les technos.
+   Un filet doré les sépare (--project-line).
+   subgrid : la carte n'a pas ses propres rangées, elle emprunte celles de la grille des projets
+   (« span 4 » = elle en occupe quatre). Les cartes d'une même ligne partagent donc les mêmes rangées :
+   si un titre passe sur deux lignes, son étage grandit sur toutes les cartes, et les filets restent alignés. */
 .project-card {
+  --project-line: rgba(214, 191, 148, 0.2);
+  /* Le métal de la bordure : un dégradé en biais qui alterne reflets clairs et creux sombres,
+     comme une baguette de laiton poli. Ce sont les ors de l'intro (#fbe8b6, #e2bf78, #b08542). */
+  --project-metal: linear-gradient(
+    135deg,
+    #b08542 0%,
+    #fbe8b6 14%,
+    #d6bf94 28%,
+    #8f6c33 46%,
+    #e2bf78 62%,
+    #fbe8b6 76%,
+    #a57c3c 100%
+  );
+
+  /* L'épaisseur de la bordure métallique, et l'arrondi qui reste à l'intérieur d'elle */
+  --project-border: 3px;
+  --project-inner-radius: calc(var(--radius) - var(--project-border));
+
   position: relative;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-border);
+  /* isolate : les deux calques ci-dessous (z-index: -1) restent dans la carte, derrière son contenu */
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 4;
+  /* Pas d'écart entre les étages : sans ça, la carte reprendrait les 24px d'écart de la grille */
+  row-gap: 0;
+  /* La bordure métallique n'est pas une vraie bordure : la carte entière est en métal, et sa marge
+     intérieure (padding) laisse dépasser ce métal tout autour d'un fond sombre (::after).
+     Trois calques, du fond vers le dessus : le métal, les lueurs qui tournent (::before), le fond sombre. */
+  padding: var(--project-border);
   border-radius: var(--radius);
+  background: var(--project-metal);
+  /* Le métal est deux fois plus grand que la carte : au survol, on le fait glisser (voir plus bas) */
+  background-size: 200% 200%;
+  background-position: 0% 0%;
   overflow: hidden;
   cursor: pointer;
   transition:
     transform 0.4s,
-    border-color 0.3s;
+    background-position 0.8s ease;
 }
 
+/* Le fond sombre de la carte, en retrait de l'épaisseur de la bordure */
+.project-card::after {
+  content: "";
+  position: absolute;
+  inset: var(--project-border);
+  z-index: -1;
+  border-radius: var(--project-inner-radius);
+  background-color: var(--color-surface);
+}
+
+/* Les deux lueurs qui parcourent le contour : un dégradé « en cône », transparent sur presque tout le tour,
+   avec deux traînes qui s'éclaircissent jusqu'à une tête presque blanche. La principale, dorée, finit à
+   98,5 % du tour ; la seconde est en face (elle finit à 48,5 %) et elle est bleue, comme l'arc TIG :
+   il y a toujours de la lumière quelque part, et les deux couleurs du site se répondent.
+   On fait tourner l'angle de départ du dégradé (--spark-angle) : les deux têtes font le tour de la carte.
+   Seule la partie sous la bordure se voit, le reste est caché par le fond sombre (::after), posé juste au-dessus. */
+.project-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: conic-gradient(
+    from var(--spark-angle),
+    transparent 0 32%,
+    rgba(120, 190, 255, 0.45) 44%,
+    #e8f4ff 48.5%,
+    transparent 50% 80%,
+    rgba(251, 232, 182, 0.55) 93%,
+    #fffdf2 98.5%,
+    transparent 100%
+  );
+  /* Un tour en 15 secondes, et un scintillement sur 4,5 secondes : les lueurs se promènent, elles ne courent pas */
+  animation:
+    spark-orbit 15s linear infinite,
+    spark-twinkle 4.5s ease-in-out infinite;
+}
+
+/* Chaque carte a ses lueurs à un endroit différent du tour (un délai négatif = une animation déjà entamée) */
+.project-card:nth-child(3n + 2)::before {
+  animation-delay: -5s, -1.5s;
+}
+
+.project-card:nth-child(3n)::before {
+  animation-delay: -10s, -3s;
+}
+
+/* @property déclare --spark-angle comme un angle : sans ça, le navigateur ne saurait pas l'animer
+   progressivement de 0 à 360 degrés, il sauterait d'une valeur à l'autre */
+@property --spark-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes spark-orbit {
+  to {
+    --spark-angle: 360deg;
+  }
+}
+
+/* Le scintillement, doux : les lueurs faiblissent un peu puis reprennent, lentement */
+@keyframes spark-twinkle {
+  50% {
+    opacity: 0.72;
+  }
+}
+
+/* Au survol, la carte se soulève et les reflets du métal glissent le long de la bordure */
 .project-card:hover {
   transform: translateY(-7px);
-  border-color: rgba(214, 191, 148, 0.35);
+  background-position: 100% 100%;
 }
 
+/* Les coins du haut suivent l'arrondi intérieur de la bordure */
 .project-image {
   aspect-ratio: 16 / 10;
+  border-radius: var(--project-inner-radius) var(--project-inner-radius) 0 0;
   overflow: hidden;
 }
 
@@ -743,7 +997,6 @@ html.has-intro .hero-pin {
 .project-card:has(.project-open:focus-visible) {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
-  border-color: rgba(214, 191, 148, 0.35);
 }
 
 /* Le visuel de remplacement : un plan quadrillé, en attendant les captures */
@@ -805,12 +1058,80 @@ html.has-intro .hero-pin {
   color: var(--color-muted);
 }
 
+/* Étage 2, la référence : le numéro à gauche, le type de projet à droite.
+   C'est le haut du bloc de texte : il remonte de 16px sur le visuel, avec deux coins arrondis,
+   comme une fiche posée par-dessus la photo.
+   Le filet du haut est une ombre décalée d'1px vers le haut (box-shadow) et pas une bordure :
+   une ombre suit l'arrondi des coins, une bordure posée sur un seul côté s'y arrêterait net. */
+.project-meta {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: calc(var(--radius) * -1);
+  padding: 14px 24px 12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  /* La plaque d'acier sombre dans laquelle la référence est gravée (voir .project-category) :
+     un peu plus claire en haut qu'en bas, avec un filet de lumière sous son bord haut et une ombre
+     au-dessus de son bord bas (les deux ombres « inset », à l'intérieur de la plaque). */
+  background: linear-gradient(180deg, #171c22, #0c0f13);
+  box-shadow:
+    0 -1px 0 var(--project-line),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Sur la carte, le type est un peu plus petit et plus serré que dans la modale :
+   il doit tenir sur une ligne à côté du numéro, même dans une carte étroite */
+.project-meta .project-category {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-align: right;
+}
+
+.project-meta .project-ref {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+/* Étage 3, le titre : un cartouche de plan, fait de deux cases.
+   À gauche, la case du titre, avec un voile doré. À droite, une petite case hachurée, séparée par
+   un trait vertical net : sur une carte elle contient la flèche, dans la modale le bouton de
+   fermeture vient s'y ranger quand le titre reste en haut. Les hachures ont ainsi une raison
+   d'être : elles remplissent une case, elles ne commencent plus au milieu de nulle part.
+   Tout est fait avec des fonds superposés (du dessus vers le dessous), sans élément en plus :
+   1 et 2. les deux filets, en haut et en bas ;
+   3. le trait vertical, à --cell du bord droit (la largeur de la case) ;
+   4. les hachures en bleu acier, limitées à la case : calées à droite, larges de --cell ;
+   5. le voile doré, qui part du bord gauche et s'éteint avant la case.
+   (Pas de position: relative ici : la zone cliquable du titre doit continuer de recouvrir toute la carte.)
+   Ce fond sert à deux endroits : l'étage du titre d'une carte, et le titre dans la modale du projet.
+   ESSAI en cours : les deux versions précédentes sont notées dans feuille-de-route.md. */
+.project-header,
+.modal-content .project-title {
+  --title-line: linear-gradient(rgba(214, 191, 148, 0.35), rgba(214, 191, 148, 0.35));
+  /* La case fait la largeur de ce qu'elle contient (44px : la flèche, ou le bouton de fermeture)
+     plus 16px de chaque côté */
+  --cell: 76px;
+
+  background:
+    var(--title-line) top / 100% 1px no-repeat,
+    var(--title-line) bottom / 100% 1px no-repeat,
+    var(--title-line) calc(100% - var(--cell)) 0 / 1px 100% no-repeat,
+    repeating-linear-gradient(135deg, rgba(143, 179, 201, 0.3) 0 1px, transparent 1px 7px) right / var(--cell)
+      100% no-repeat,
+    linear-gradient(90deg, rgba(214, 191, 148, 0.1), rgba(214, 191, 148, 0) 70%);
+}
+
+/* 16px à droite (et non 24) : la flèche est ainsi au milieu de sa case de 76px */
 .project-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 24px 24px 0;
+  padding: 18px 16px 18px 24px;
 }
 
 .project-category {
@@ -823,11 +1144,19 @@ html.has-intro .hero-pin {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--color-muted);
+  /* La référence (le type et le numéro) est gravée dans une plaque d'acier sombre, et la gravure
+     est remplie d'or, comme les lettres dorées d'une plaque d'atelier : le doré se lit bien sur
+     l'acier, là où des lettres simplement en creux (sombres sur sombre) étaient trop difficiles à lire.
+     Deux ombres nettes, sans flou, décalées d'1px, donnent le creux : une ombre noire au-dessus des
+     lettres (le bord de la gravure, à l'ombre) et un filet clair en dessous (le bord d'en face,
+     qui prend la lumière). */
+  color: var(--color-accent);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .project-header h3 {
-  margin-top: 8px;
   font-size: 1.4rem;
 }
 
@@ -836,10 +1165,20 @@ html.has-intro .hero-pin {
   display: inline-block;
   margin-right: 10px;
   padding: 1px 8px;
-  border: 1px solid rgba(214, 191, 148, 0.4);
+  /* Le numéro est gravé et doré comme le type (voir .project-category). Son cadre est une petite
+     cuvette dans la plaque : un fond plus sombre, une ombre à l'intérieur sous le bord du haut (inset),
+     et un filet clair sous le bord du bas. */
+  border: 1px solid rgba(214, 191, 148, 0.55);
   font-family: var(--font-mono);
   letter-spacing: 0.1em;
   color: var(--color-accent);
+  background-color: rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* Le titre d'un projet */
@@ -860,8 +1199,10 @@ html.has-intro .hero-pin {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(214, 191, 148, 0.35);
   border-radius: 50%;
+  /* Un fond plein : les hachures de l'étage du titre ne traversent pas la pastille */
+  background-color: var(--color-surface);
   color: var(--color-text);
   transition:
     background-color 0.3s,
@@ -873,12 +1214,12 @@ html.has-intro .hero-pin {
   color: var(--color-bg);
 }
 
+/* Étage 4 : la description, et les technos poussées tout en bas de la carte */
 .project-body {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 16px 24px 24px;
+  padding: 20px 24px 24px;
 }
 
 .project-technos {
@@ -887,6 +1228,14 @@ html.has-intro .hero-pin {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: auto;
+}
+
+/* Sur une carte, les technos passent au-dessus de la zone cliquable du titre, qui recouvre toute la carte
+   (voir .project-open::after) : sans ça, la souris ne les « touche » jamais et leur survol ne se voit pas.
+   Cliquer sur une techno ouvre quand même le projet : le clic remonte jusqu'à la carte (ProjectCard.jsx). */
+.project-card .project-technos {
+  position: relative;
+  z-index: 2;
 }
 
 .project-technos li {
@@ -1010,7 +1359,25 @@ html.has-intro .hero-pin {
   gap: 24px;
   border: 1px solid rgba(214, 191, 148, 0.3);
   background-color: rgba(10, 11, 15, 0.7);
-  animation: pop-in 0.3s ease-out;
+
+  /* L'apparition du panneau, à chaque tiroir qu'on ouvre : le cadre arrive en fondu, puis son en-tête
+     et sa description, puis les outils se posent un par un (voir .tool-tile).
+     --panel-start : le moment où tout ça commence. 0s ici ; plus tard à l'arrivée de la boîte à outils,
+     pour laisser passer les tiroirs d'abord (voir reveal-drawers). Les enfants en héritent.
+     « backwards » : l'élément reste dans son état de départ (invisible) pendant qu'il attend son tour. */
+  --panel-start: 0s;
+  animation: panel-fade 0.25s ease-out var(--panel-start) backwards;
+}
+
+.skill-panel .cartouche-header,
+.skill-panel-description {
+  animation: panel-fade 0.3s ease-out calc(var(--panel-start) + 0.15s) backwards;
+}
+
+@keyframes panel-fade {
+  from {
+    opacity: 0;
+  }
 }
 
 .cartouche-header {
@@ -1057,6 +1424,18 @@ html.has-intro .hero-pin {
   transition:
     border-color 0.3s,
     transform 0.3s;
+  /* Chaque outil tombe à sa place, 0,11s après le précédent (--i est son rang, voir SkillPanel.jsx).
+     La courbe dépasse 1 : il descend un peu trop bas puis remonte, comme un outil qu'on pose.
+     min(…, 6) : à partir du 7e, les outils arrivent ensemble, pour qu'un tiroir bien rempli ne traîne pas. */
+  animation: tool-drop 0.45s cubic-bezier(0.3, 1.5, 0.5, 1)
+    calc(var(--panel-start) + 0.25s + min(var(--i, 0), 6) * 0.11s) backwards;
+}
+
+@keyframes tool-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.95);
+  }
 }
 
 .tool-tile:hover {
@@ -1204,6 +1583,19 @@ html.has-intro .hero-pin {
     weld-flicker 0.08s steps(2) var(--weld-start) infinite;
 }
 
+/* Soudure déjà faite (voir Weld.jsx, isDone) : le cordon est en place et refroidi,
+   sans animation ni étincelle. C'est l'état où l'animation s'arrête d'habitude. */
+.weld-done .weld-line {
+  animation: none;
+  transform: none;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.weld-done .weld-spark {
+  display: none;
+}
+
 @keyframes weld-grow-x {
   to {
     transform: scaleX(1);
@@ -1335,6 +1727,29 @@ html.has-intro .hero-pin {
 
 .form-field legend {
   margin-bottom: 8px;
+}
+
+/* L'astérisque des champs obligatoires : rouge partout, le code que tout le monde connaît.
+   La marge négative le rapproche du mot : sans elle, il serait à 8px, l'écart prévu pour le petit trait. */
+.form-required {
+  margin-left: -5px;
+  color: var(--color-required);
+}
+
+/* La légende de l'astérisque, en haut à droite du formulaire.
+   La marge négative la rapproche du premier champ (l'écart normal entre deux blocs est de 28px). */
+.form-required-note {
+  align-self: flex-end;
+  margin-bottom: -12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.form-required-note .form-required {
+  margin-left: 0;
 }
 
 /* Quand on remplit le champ : le libellé s'allume et le trait s'allonge */
@@ -1578,6 +1993,26 @@ html.has-intro .hero-pin {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+}
+
+/* Un choix affiché mais pas proposé pour le moment (ex. : Freelance) : gris, en pointillés, comme
+   le badge « titre non obtenu » du parcours. Le bouton est désactivé (voir ContactForm.jsx).
+   opacity: 1 : un bouton désactivé est à 60 % d'opacité (.btn:disabled) ; ici le gris suffit, et le mot
+   « indisponible » doit rester lisible. */
+.type-option-unavailable:disabled {
+  border-style: dashed;
+  border-color: rgba(154, 156, 165, 0.45);
+  background-color: transparent;
+  color: var(--color-muted);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* La mention « indisponible », à côté du nom : en minuscules et plus légère */
+.type-option-note {
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: none;
 }
 
 .work-order-submit {
@@ -1832,7 +2267,8 @@ html.has-intro .hero-pin {
 
   position: relative;
   width: 100%;
-  max-width: 860px;
+  /* La largeur maximale, sur grand écran. En dessous, la modale prend toute la largeur disponible. */
+  max-width: 960px;
   max-height: 90vh;
   overflow-y: auto;
   background-color: var(--color-surface);
@@ -1843,22 +2279,65 @@ html.has-intro .hero-pin {
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
+/* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
+   Le bloc de texte, posé au-dessus de lui, remonte et le recouvre peu à peu, comme une fiche
+   qu'on fait glisser sur une photo. */
 .modal-image {
+  position: sticky;
+  top: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
+/* Le bloc de texte de la modale. Comme sur les cartes, il remonte de 16px sur le visuel avec deux
+   coins arrondis : une fiche posée par-dessus la photo. Son filet du haut est une ombre décalée d'1px
+   (box-shadow) : contrairement à une bordure posée sur un seul côté, elle suit l'arrondi des coins. */
 .modal-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
+  margin-top: calc(var(--radius) * -1);
   padding: var(--modal-padding);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background-color: var(--color-surface);
+  box-shadow: 0 -1px 0 rgba(214, 191, 148, 0.35);
 }
 
 .modal-content h3 {
   font-size: 2rem;
+}
+
+/* Dans la modale, la référence n'est pas dans un étage comme sur les cartes : elle reçoit sa propre
+   petite plaque d'acier sombre, pour que ses lettres gravées aient un métal dans lequel se creuser. */
+.modal-content > .project-category {
+  padding: 8px 12px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #171c22, #0c0f13);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Le titre du projet : une bande qui va d'un bord à l'autre de la modale, avec le même fond
+   « cartouche » que sur les cartes (voir .project-header) : deux filets dorés, un voile, des hachures.
+   Les marges négatives annulent la marge intérieure de .modal-content, la bande touche donc les deux bords ;
+   la marge intérieure remet le texte à sa place, aligné avec le reste.
+   sticky + top: 0 : quand on fait défiler au-delà du titre, la bande s'arrête en haut de la modale
+   et y reste : on sait toujours quel projet on est en train de lire. Elle reçoit un fond plein
+   (sous ses hachures, en partie transparentes) pour que le texte qui défile ne se voie pas à travers.
+   La marge de droite, plus large, laisse la place au bouton de fermeture, qui reste en haut lui aussi. */
+.modal-content .project-title {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-self: stretch;
+  width: auto;
+  margin-inline: calc(var(--modal-padding) * -1);
+  padding: 18px calc(var(--modal-padding) + 52px) 18px var(--modal-padding);
+  background-color: var(--color-surface);
 }
 
 /* L'accroche du projet, juste sous le titre */
@@ -1985,6 +2464,17 @@ html.has-intro .hero-pin {
   transform: rotate(90deg);
 }
 
+/* Dans la modale d'un projet, le bouton de fermeture reste en haut à droite pendant tout le défilement
+   (sticky), au lieu de partir avec le visuel : il se retrouve dans la bande du titre quand elle s'arrête.
+   Un élément sticky reste dans le fil de la page, il prendrait donc sa hauteur au-dessus du visuel :
+   - margin-left: auto le pousse à droite ;
+   - la marge négative du bas (ses 44px + les 16px du haut) annule la place qu'il occupe. */
+.modal > .modal-close {
+  position: sticky;
+  z-index: 3;
+  margin: 16px 16px -60px auto;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -2045,6 +2535,59 @@ html.has-intro .hero-pin {
 
 .navbar-links a:hover {
   color: var(--color-text);
+}
+
+/* Sur ordinateur seulement : au survol, le lien réagit comme un bouton (.btn-primary, section 6) :
+   un contour doré, puis un remplissage doré de gauche à droite, comme un cordon de soudure.
+   En dessous de 900px, les liens deviennent le menu plein écran (voir plus bas) : pas de survol au doigt. */
+@media (min-width: 901px) {
+  .navbar-links {
+    /* Toujours 32px entre deux mots : 4px ici + 14px de chaque côté (13px de marge intérieure + 1px de bordure) */
+    gap: 4px;
+  }
+
+  .navbar-links a {
+    position: relative;
+    /* isolate : le remplissage (z-index: -1) passe derrière le texte du lien, pas derrière la navbar */
+    isolation: isolate;
+    padding: 7px 13px;
+    /* Bordure transparente au repos : elle réserve sa place, le lien ne bouge pas quand elle se colore */
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition:
+      color 0.35s,
+      border-color 0.35s;
+  }
+
+  .navbar-links a::before {
+    content: "";
+    position: absolute;
+    /* -1px : le remplissage déborde sur la bordure et la recouvre. Avec inset: 0, il s'arrêtait pile contre elle :
+       le lien a une taille à virgule (40,3px de haut), et pendant l'animation le navigateur n'arrondit pas
+       le remplissage et la bordure de la même façon. Un filet sombre restait entre les deux jusqu'à la fin. */
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+  }
+
+  .navbar-links a:hover {
+    border-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .navbar-links a:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Au clavier (touche Tab) : le même contour que les boutons */
+  .navbar-links a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
 }
 
 .navbar-link-number {
@@ -2640,7 +3183,203 @@ html.has-intro .hero-pin {
   }
 }
 
-/* 5. STAMP : le formulaire est frappé à la presse, avec un éclat doré à l'impact */
+/* 4 bis. SCAN : les cartes projet. Un trait doré balaie la carte de haut en bas et la révèle sur
+      son passage, comme un scanner ; chaque étage (le visuel, la référence, le titre, la description)
+      monte à sa place au moment où le trait arrive sur lui.
+      Trois animations de même durée et de même courbe, qui restent donc ensemble :
+      - la carte se découvre de haut en bas (clip-path) ;
+      - le trait (.project-scan, voir ProjectCard.jsx) descend avec le bord de la découpe ;
+      - les étages montent, chacun à son heure (--tier-at).
+      Les trois cartes partent l'une après l'autre (--reveal-delay, posé par ScrollReveal). */
+.reveal-scan.revealed {
+  animation-name: card-scan;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* inset(haut droite bas gauche) : ce qu'on retire de chaque côté. Au départ, on retire toute la
+   hauteur par le bas : la carte est entièrement cachée. À l'arrivée, -16px : la découpe prend peu à peu
+   16px d'avance sur le trait, pour que sa lueur, qui déborde en dessous de lui, ne soit pas coupée. */
+@keyframes card-scan {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 -16px 0);
+  }
+}
+
+/* Le trait : invisible en temps normal, il ne se montre que pendant le balayage.
+   Il est bleu, pas doré : c'est le blanc bleuté de l'arc TIG, les mêmes teintes que la soudure
+   bleue du pied de page (voir .weld-blue). Le bleu « fabrique » la carte, le doré est la pièce finie.
+   Le formulaire a le même trait (.work-order-scan, voir ContactForm.jsx et l'effet ORDER plus bas). */
+.project-scan,
+.work-order-scan {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 2px;
+  background-color: #f2f9ff;
+  box-shadow:
+    0 0 8px 2px #d6ecff,
+    0 0 22px 6px rgba(120, 190, 255, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reveal-scan.revealed .project-scan {
+  animation: scan-line 0.9s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+@keyframes scan-line {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Les étages : chacun monte quand le trait l'atteint. --tier-at est ce moment, compté depuis le
+   début du balayage (le trait va lentement au départ et à l'arrivée, vite au milieu : les trois
+   derniers étages se suivent donc de près).
+   « backwards » : l'étage reste à son point de départ tant que son tour n'est pas venu. */
+.reveal-scan.revealed > .project-image,
+.reveal-scan.revealed > .project-meta,
+.reveal-scan.revealed > .project-header,
+.reveal-scan.revealed > .project-body {
+  animation: tier-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + var(--tier-at, 0s));
+}
+
+.reveal-scan > .project-image {
+  --tier-at: 0.05s;
+}
+
+.reveal-scan > .project-meta {
+  --tier-at: 0.36s;
+}
+
+.reveal-scan > .project-header {
+  --tier-at: 0.44s;
+}
+
+.reveal-scan > .project-body {
+  --tier-at: 0.52s;
+}
+
+@keyframes tier-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* 4 ter. ORDER : l'ordre de fabrication (le formulaire). Deux temps, l'un après l'autre :
+      0s      le trait bleu des cartes projet balaie la feuille de haut en bas et la révèle, encore vide
+              (mêmes animations que SCAN : card-scan pour la découpe, scan-line pour le trait) ;
+      0,8s    les champs sont soudés un par un, de haut en bas, un toutes les 0,12s : le libellé
+              s'allume, puis le champ s'étire depuis la gauche avec un éclat doré.
+   :not(.reveal-over) : ces règles ne valent que pendant l'apparition. ScrollReveal pose la classe
+   reveal-over quand tout est fini ; sans ça, un formulaire recréé à neuf (après un envoi) rejouerait
+   la soudure de ses champs.
+   Les « > » : seuls les champs présents à l'apparition sont concernés, pas ceux de la fiche de poste. */
+.reveal-order.revealed {
+  animation-name: card-scan;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.reveal-order.revealed .work-order-scan {
+  animation: scan-line 0.9s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+/* Le rang de chaque champ dans la soudure (data-field est posé par ContactForm.jsx).
+   Sans rang, c'est 0 : la légende de l'astérisque arrive avec le premier champ. */
+.reveal-order [data-field="firstName"] {
+  --field: 1;
+}
+
+.reveal-order [data-field="lastName"] {
+  --field: 2;
+}
+
+.reveal-order [data-field="email"] {
+  --field: 3;
+}
+
+.reveal-order [data-field="message"] {
+  --field: 4;
+}
+
+.reveal-order .form-privacy,
+.reveal-order .work-order-submit {
+  --field: 5;
+}
+
+/* Les textes : ils s'allument */
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-required-note,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > label,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > legend,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-row > .form-field > label,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-privacy {
+  animation: field-label 0.3s ease-out backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + 0.8s + var(--field, 0) * 0.12s);
+}
+
+/* Les champs et les boutons : ils s'étirent depuis la gauche, juste après leur libellé */
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > input,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > textarea,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-row > .form-field > input,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field .type-option,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .work-order-submit {
+  transform-origin: left;
+  animation: field-weld 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + 0.88s + var(--field, 0) * 0.12s);
+}
+
+/* Un bouton a un texte : étiré avec le bouton, il serait écrasé. Il reste donc invisible le temps
+   de l'étirement (button-text), et n'apparaît qu'à la fin. */
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field .type-option,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .work-order-submit {
+  animation-name: field-weld, button-text;
+}
+
+@keyframes field-label {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Pas d'étape « to » : l'animation finit sur le style normal du champ (sa bordure, son ombre) */
+@keyframes field-weld {
+  from {
+    transform: scaleX(0);
+    border-color: #fffbe8;
+    box-shadow: 0 0 14px rgba(214, 191, 148, 0.9);
+  }
+  60% {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 14px rgba(214, 191, 148, 0.5);
+  }
+}
+
+@keyframes button-text {
+  from,
+  70% {
+    color: transparent;
+  }
+}
+
+/* 5. STAMP : frappé à la presse, avec un éclat doré à l'impact.
+      C'était l'apparition du formulaire, remplacée par ORDER : plus utilisé pour l'instant. */
 .reveal-stamp.revealed {
   animation-name: press-stamp;
   animation-duration: 1.1s;
@@ -2687,6 +3426,57 @@ html.has-intro .hero-pin {
   }
 }
 
+/* 7. DRAWERS : la boîte à outils. Quatre temps, l'un après l'autre :
+      0s      l'encadré apparaît
+      0,15s   les tiroirs glissent à leur place, un toutes les 0,12s (--i est leur rang, voir Skills.jsx)
+      0,7s    le panneau apparaît et ses outils se posent un par un (voir .skill-panel, section 12)
+      1,7s    la soudure fait le tour du panneau */
+.reveal-drawers.revealed {
+  animation-name: drawers-box;
+  animation-duration: 0.35s;
+}
+
+.reveal-drawers.revealed .skills-tab {
+  animation: drawer-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) calc(0.15s + var(--i, 0) * 0.12s) backwards;
+}
+
+/* Le panneau présent à l'arrivée (.skill-panel-first) joue la même apparition que les autres, mais
+   0,7s plus tard : il laisse passer les tiroirs. Ceux qu'on ouvre ensuite apparaissent tout de suite. */
+.reveal-drawers.revealed .skill-panel-first {
+  --panel-start: 0.7s;
+}
+
+/* Sa soudure attend que le dernier outil soit posé. Les soudures suivantes gardent leur départ normal. */
+.reveal-drawers.revealed .skill-panel-first .weld {
+  --weld-start: 1.7s;
+}
+
+/* Tant que la boîte n'est pas arrivée à l'écran, rien ne part à l'intérieur : ni l'apparition du panneau
+   et de ses outils, ni les soudures. Sans ça, tout se jouerait au chargement de la page, bien avant
+   qu'on arrive ici, et on ne le verrait jamais.
+   (.reveal est posée par ScrollReveal ; avec « animations réduites », elle n'existe pas et rien n'attend.) */
+.reveal-drawers:not(.revealed) .skill-panel,
+.reveal-drawers:not(.revealed) .cartouche-header,
+.reveal-drawers:not(.revealed) .skill-panel-description,
+.reveal-drawers:not(.revealed) .tool-tile,
+.reveal-drawers:not(.revealed) .weld-line,
+.reveal-drawers:not(.revealed) .weld-spark {
+  animation: none;
+}
+
+@keyframes drawers-box {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(-64px);
+  }
+}
+
 /* ===== 19 ter. L'intro : le plan qui se soude au défilement (composant Intro) ===== */
 
 /* Pendant l'intro, les animations du Hero attendent (elles partent quand on arrive dessus) */
@@ -2698,17 +3488,17 @@ html.intro-playing .hero *::after {
 
 /* Très haut : c'est la distance de défilement pendant laquelle le plan se dessine */
 .intro {
-  --p: 0; /* l'avancement, de 0 à 1, écrit par le JavaScript */
-  /* Le raccord final (de 80 % à 100 %) : 0 = le plan plein écran, 1 = « AB » rangé dans la navbar */
-  --land: clamp(0, (var(--p) - 0.8) / 0.2, 1);
+  /* Les variables ci-dessous valent 0 au départ. C'est la timeline GSAP (dans Intro.jsx) qui les fait
+     passer de 0 à 1 au fil du défilement ; ce fichier dit seulement à quoi ressemble chaque valeur. */
+  --p: 0; /* l'avancement réel du défilement, de 0 à 1 */
+  /* Le raccord final : 0 = le plan plein écran, 1 = le plan effacé, « AB » rangé dans la navbar */
+  --land: 0;
   /* Tout ce qui n'est pas « AB » s'efface dans le premier tiers du raccord */
   --clear: calc(1 - clamp(0, var(--land) * 3, 1));
-  /* Le vol des lettres vers le logo : il se termine un peu avant la fin du raccord (à 85 %),
-     pour qu'on les voie bien posées à leur place avant que les vraies lettres prennent le relais */
-  --fly: clamp(0, var(--land) / 0.85, 1);
-  /* L'épaisseur du cordon. Elle augmente pendant le raccord (de 4 à 22) : une fois rétrécies,
-     les lettres ont ainsi la même graisse que le logo. (22 = LANDED_WIDTH dans Intro.jsx) */
-  --w: calc(4px + var(--fly) * 18px);
+  /* Le vol des lettres vers le logo : 0 = à leur place sur le plan, 1 = posées sur le logo */
+  --fly: 0;
+  /* L'épaisseur des lettres : --bead (BEAD_WIDTH dans Intro.jsx, transmis par le JSX) */
+  --w: calc(var(--bead, 14) * 1px);
   /* Le cadre du plan : sa distance au bord de l'écran, et la largeur de la bande des repères */
   --frame-edge: 12px;
   --frame-band: 22px;
@@ -2718,12 +3508,23 @@ html.intro-playing .hero *::after {
   z-index: 60; /* au-dessus de la navbar (50) */
   /* L'intro recouvre le haut du site : sans ça, elle intercepterait les clics sur la navbar */
   pointer-events: none;
+  /* La hauteur règle la vitesse de l'intro : plus elle est grande, plus il faut défiler pour tout voir,
+     donc plus la soudure avance lentement. 240 = 1,4 écran de défilement (240 moins l'écran lui-même). */
   height: 240vh;
   height: 240svh;
   /* Marge négative d'un écran : le site (navbar + Hero) remonte SOUS le dernier écran de l'intro.
      Quand l'intro se termine, la navbar est donc déjà en place, pile derrière le plan. */
   margin-bottom: -100vh;
   margin-bottom: -100svh;
+}
+
+/* Avec le film (écran large, voir FILM dans Intro.jsx), l'intro a sa propre longueur, pour laisser le
+   temps de regarder la soudure. POUR RÉGLER LA VITESSE : change ce nombre. Plus il est grand, plus il
+   faut défiler, donc plus c'est lent (240 = la vitesse d'origine, 380 = deux fois plus lent,
+   520 = trois fois plus lent). Le défilement à parcourir vaut ce nombre moins 100 : 280 = 1,8 écran. */
+.intro.has-film {
+  height: 280vh;
+  height: 280svh;
 }
 
 /* Le plan reste collé à l'écran pendant tout ce temps */
@@ -2897,9 +3698,9 @@ html.intro-playing .hero *::after {
 }
 
 /* La case « Contrôle » : ses deux valeurs sont posées l'une sur l'autre (même case de la grille),
-   et on passe de l'une à l'autre quand la soudure est terminée (entre 72 % et 78 % du défilement) */
+   et on passe de l'une à l'autre quand la soudure est terminée (--done passe de 0 à 1, animée par GSAP) */
 .intro-cartouche .intro-cartouche-check {
-  --done: clamp(0, (var(--p) - 0.72) / 0.06, 1);
+  --done: 0;
   display: grid;
 }
 
@@ -2968,11 +3769,12 @@ html.intro-playing .hero *::after {
   overflow: visible;
 }
 
-/* Chaque trait a son début (--s) et sa fin (--e), dans le JSX.
-   Son propre avancement = (--p - début) / (fin - début), limité entre 0 et 1 par clamp(). */
+/* --t = l'avancement propre à chaque élément : 0 = pas commencé, 1 = terminé.
+   La timeline GSAP l'anime au bon moment pour chacun (voir STROKES et FADES dans Intro.jsx). */
 .intro .draw,
-.intro .fade {
-  --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
+.intro .fade,
+.intro .torch {
+  --t: 0;
 }
 
 /* Le trait qui « se dessine ». --len = sa longueur (donnée dans le JSX).
@@ -2981,7 +3783,10 @@ html.intro-playing .hero *::after {
 .intro .draw {
   fill: none;
   stroke-dasharray: var(--len) calc(var(--len) * 2);
-  stroke-dashoffset: calc(var(--len) * (1 - var(--t)));
+  /* Le premier terme dévoile le trait jusqu'à la torche. Le second concerne le bout carré du trait,
+     qui dépasse de --cap : on le retient presque jusqu'à la fin (pow(t, 6) reste proche de 0, puis
+     monte d'un coup vers 1), sinon la lettre apparaîtrait en avance sur la torche. */
+  stroke-dashoffset: calc(var(--len) * (1 - var(--t)) + var(--cap, 0) * (1 - pow(var(--t), 6)));
 }
 
 .intro .fade {
@@ -3005,13 +3810,70 @@ html.intro-playing .hero *::after {
   opacity: var(--clear);
 }
 
+/* Le film de la soudure (voir FILM dans Intro.jsx) : des images au fond transparent, affichées dans
+   une toile posée dans le dessin. Tant que sa première image n'est pas chargée, il reste caché et c'est
+   la soudure dessinée par le code qui joue. Dès qu'il est prêt, la classe film-on inverse les rôles. */
+.intro .film,
+.intro .letter-film {
+  visibility: hidden;
+}
+
+.intro .film canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.intro.film-on .film {
+  visibility: visible;
+}
+
+/* Tout ce que le film remplace : l'esquisse en pointillés (elle est dans l'image), les lettres dessinées,
+   leur chaleur et la torche */
+.intro.film-on .sketch,
+.intro.film-on .letter-solid,
+.intro.film-on .heat,
+.intro.film-on .torch {
+  visibility: hidden;
+}
+
+/* Le film est fini (classe film-done) : la toile s'efface et les deux lettres de sa dernière image
+   prennent sa place, au pixel près. Ce sont elles qui s'envolent vers le logo, une par une. */
+.intro.film-on.film-done .film {
+  visibility: hidden;
+}
+
+.intro.film-on.film-done .letter-film {
+  visibility: visible;
+}
+
+/* Le raccord avec le logo, avec le film. La lettre en relief du film et la vraie initiale du logo n'ont
+   pas tout à fait la même forme : superposées, on voit un liseré doré dépasser. Deux précautions :
+   1. pendant la seconde moitié du vol (--fly de 0,5 à 1), quand elle est déjà petite, la lettre en relief
+      se fond dans la lettre dessinée par le code, lisse, plus proche de celle du logo ;
+   2. la lettre finit de s'effacer au moment précis où elle se pose (--land = 0,85, quand --fly arrive
+      à 1), juste avant que l'initiale du logo n'apparaisse, au lieu de s'effacer par-dessus elle. */
+.intro.film-on.film-done .letter-film {
+  opacity: clamp(0, (1 - var(--fly)) * 2, 1);
+}
+
+.intro.film-on.film-done .letter-solid {
+  visibility: visible;
+  opacity: clamp(0, (var(--fly) - 0.5) * 2, 1);
+}
+
+/* (Pas de lueur ajoutée autour des lettres du film : elle apparaîtrait d'un coup au passage de relais.) */
+.intro.film-on .letter {
+  filter: none;
+  opacity: clamp(0, (0.85 - var(--land)) / 0.03, 1);
+}
+
 /* Une lettre (« A » ou « B »), en cordon de soudure.
    Pendant le raccord, elle se déplace (--mx, --my) et rétrécit (--sx, --sy) jusqu'à son initiale
    dans le logo : ces 4 valeurs sont mesurées par le JavaScript (fonction measure).
    Elle reste visible jusqu'au logo, puis s'efface juste à l'arrivée : la vraie lettre prend le relais. */
 .intro .letter {
   fill: none;
-  stroke-linejoin: round; /* des angles arrondis, comme les écailles (sinon une pointe dépasse au sommet du A) */
   /* Visible pendant tout le vol, elle s'efface ensuite (les 15 derniers % du raccord) */
   opacity: clamp(0, (1 - var(--land)) / 0.15, 1);
   filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.45));
@@ -3026,63 +3888,37 @@ html.intro-playing .hero *::after {
     scale(pow(var(--sx, 1), var(--fly)), pow(var(--sy, 1), var(--fly)));
 }
 
-/* Le masque : en blanc, la partie du cordon déjà soudée (un peu plus large que lui, pour ne rien rogner) */
+/* Le masque : en blanc, la partie de la lettre déjà soudée.
+   (Sa largeur est donnée dans le JSX : MASK_WIDTH, plus large que la lettre pour ne rien rogner.) */
 .intro mask .draw {
   stroke: #fff;
-  stroke-width: calc(var(--w) + 1px);
   stroke-linecap: square;
+  stroke-linejoin: miter;
 }
 
-/* Les 4 calques du cordon, du dessous vers le dessus */
-/* Le cœur : un trait continu, un peu plus sombre et plus étroit, qui remplit le dessous */
-.intro .bead-core {
-  stroke: #b89f70;
-  stroke-width: calc(var(--w) - 1.4px);
-  stroke-linecap: round;
-}
-
-/* Les écailles : le même trait, découpé en points ronds qui se chevauchent
-   (un tiret presque nul + des bouts arrondis = un rond, tous les 2 unités).
-   C'est ce qui donne au cordon son bord bosselé, comme une vraie soudure.
-   Pour des écailles plus serrées ou plus espacées, change le 2 ici ET dans les deux calques suivants
-   (le tiret + le vide doivent toujours faire le même total). */
-.intro .bead-scales {
-  stroke: var(--color-accent);
+/* Les traits d'une lettre : lisses, sans aucune texture. Leur couleur est le dégradé doré
+   « intro-gold », défini dans le JSX. Bouts carrés et angles vifs : des lettres grasses et nettes. */
+.intro .letter-solid {
   stroke-width: var(--w);
-  stroke-linecap: round;
-  stroke-dasharray: 0.01 1.99;
-}
-
-/* Le relief des écailles : un trait sombre entre deux écailles (ce calque)
-   et un reflet clair sur le dessus de chacune (le calque suivant) */
-.intro .bead-ripples {
-  stroke: rgba(70, 46, 14, 0.36);
-  stroke-width: calc(var(--w) - 1px);
-  stroke-dasharray: 0.4 1.6;
-  stroke-dashoffset: -0.8; /* décalé pour tomber pile entre deux écailles */
-  opacity: var(--clear);
-}
-
-.intro .bead-ripples-light {
-  stroke: rgba(255, 250, 235, 0.4);
-  stroke-width: calc(var(--w) - 1.8px);
-  stroke-dasharray: 0.5 1.5;
-  stroke-dashoffset: 0.25; /* centré sur l'écaille */
+  stroke-linecap: square;
+  stroke-linejoin: miter;
 }
 
 /* La chaleur. --u = l'avancement du trait, comme --t, mais il continue après 1 :
-   une fois le trait fini, la zone chaude continue d'avancer et sort du trait (le cordon refroidit). */
+   une fois le trait fini, la zone chaude continue d'avancer et sort du trait (le métal refroidit). */
 .intro .heat {
-  --u: max(0, (var(--p) - var(--s)) / (var(--e) - var(--s)));
+  --u: 0; /* animée par GSAP, de 0 jusqu'un peu au-delà de 1 */
   opacity: clamp(0, var(--u) * 40, 1);
-  /* un léger flou fond les couleurs entre elles, puis un halo orange autour */
-  filter: blur(0.8px) drop-shadow(0 0 5px rgba(255, 130, 40, 0.75));
+  /* un léger flou gomme les dernières marches entre les calques */
+  filter: blur(1px);
 }
 
-/* Chaque calque est un tiret de longueur --hot, dont le bout avant est au niveau de la torche */
+/* Chaque calque est un tiret de longueur --hot, dont le bout avant est au niveau de la torche.
+   Même épaisseur et mêmes angles que la lettre : la couleur chaude la recouvre exactement. */
 .intro .heat path {
-  stroke-width: calc(var(--w) + 0.4px);
-  stroke-linecap: round;
+  stroke-width: var(--w);
+  stroke-linecap: square;
+  stroke-linejoin: miter;
   stroke-dasharray: var(--hot) 9999;
   stroke-dashoffset: calc(var(--hot) - var(--u) * var(--len));
 }
@@ -3090,34 +3926,27 @@ html.intro-playing .hero *::after {
 /* La torche : elle suit le chemin du trait (offset-path, donné dans le JSX).
    offset-distance la place le long du chemin : 0 % au début, 100 % à la fin. */
 .intro .torch {
-  --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
   offset-distance: calc(var(--t) * 100%);
-  offset-rotate: 0deg; /* la torche ne tourne pas avec le trait : les étincelles tombent toujours vers le bas */
+  offset-rotate: 0deg; /* la torche ne tourne pas avec le trait */
   /* Visible seulement pendant que SON trait se soude : min() vaut 0 au début (t = 0) et à la fin (t = 1) */
   opacity: clamp(0, min(var(--t), 1 - var(--t)) * 40, 1);
 }
 
+/* Le bain de métal en fusion, au bout du trait */
 .intro .torch-core {
   fill: #fffdf2;
-  filter: drop-shadow(0 0 2px #fff1c1) drop-shadow(0 0 7px rgba(255, 200, 120, 0.95))
-    drop-shadow(0 0 16px rgba(255, 140, 50, 0.7));
+  filter: drop-shadow(0 0 2px #fff1c1) drop-shadow(0 0 8px rgba(255, 200, 120, 0.95))
+    drop-shadow(0 0 18px rgba(255, 140, 50, 0.7));
 }
 
-/* Les étincelles : elles partent de la torche (--dx, --dy donnés dans le JSX) et s'éteignent */
-.intro .torch-spark {
-  fill: #ffe9b0;
-  animation: torch-spark 0.6s linear infinite;
-}
-
-@keyframes torch-spark {
-  from {
-    transform: translate(0, 0);
-    opacity: 1;
-  }
-  to {
-    transform: translate(var(--dx), var(--dy));
-    opacity: 0;
-  }
+/* La toile des étincelles : elle recouvre tout l'écran de l'intro, par-dessus le dessin
+   (le JavaScript de sparks.js dessine dedans) */
+.intro-sparks {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .intro .dimension {
@@ -3169,7 +3998,7 @@ html.intro-playing .hero *::after {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--color-muted);
-  opacity: calc(1 - clamp(0, var(--p) / 0.05, 1));
+  /* son effacement est animé par GSAP (étape 1 de la timeline) */
 }
 
 .intro-hint span {
@@ -3184,12 +4013,20 @@ html.intro-playing .hero *::after {
   }
 }
 
-/* Le bouton « Passer », en haut à droite, à l'intérieur du cadre
-   (le coin en bas à droite est pris par le cartouche) */
+/* Les deux boutons de l'intro, à l'intérieur du cadre : « Passer » en haut à droite
+   (le coin en bas à droite est pris par le cartouche) et « Son » en haut à gauche */
 .intro-skip {
+  right: calc(var(--frame-edge) + var(--frame-band) + 14px);
+}
+
+.intro-sound {
+  left: calc(var(--frame-edge) + var(--frame-band) + 14px);
+}
+
+.intro-skip,
+.intro-sound {
   position: absolute;
   top: calc(var(--frame-edge) + var(--frame-band) + 14px);
-  right: calc(var(--frame-edge) + var(--frame-band) + 14px);
   z-index: 2;
   padding: 8px 14px;
   border: 1px solid rgba(214, 191, 148, 0.3);
@@ -3205,16 +4042,25 @@ html.intro-playing .hero *::after {
     border-color 0.3s;
 }
 
-/* Pendant le raccord final (classe posée par le JavaScript), le bouton n'existe plus pour la souris ni le clavier */
-.intro.is-landing .intro-skip {
+/* Pendant le raccord final (classe posée par le JavaScript), les boutons n'existent plus pour la souris ni le clavier */
+.intro.is-landing .intro-skip,
+.intro.is-landing .intro-sound {
   visibility: hidden;
 }
 
 .intro-skip:hover,
-.intro-skip:focus-visible {
+.intro-skip:focus-visible,
+.intro-sound:hover,
+.intro-sound:focus-visible {
   color: var(--color-accent);
   border-color: var(--color-accent);
   outline: none;
+}
+
+/* Le son est activé : le bouton reste doré */
+.intro-sound[aria-pressed="true"] {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 /* --- Le logo de la navbar, à l'arrivée de l'intro ---
@@ -3320,6 +4166,19 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
 
   .form-error,
   .recruit-block {
+    animation: none;
+  }
+
+  /* Les lueurs qui tournent autour des cartes projet sont retirées : il reste la bordure métallique, fixe */
+  .project-card::before {
+    display: none;
+  }
+
+  /* Le panneau d'un tiroir et ses outils s'affichent directement, sans fondu ni chute */
+  .skill-panel,
+  .skill-panel .cartouche-header,
+  .skill-panel-description,
+  .tool-tile {
     animation: none;
   }
 }

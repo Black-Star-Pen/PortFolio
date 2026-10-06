@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import Weld from "./Weld";
+import { scrollToSiteTop } from "../utils/siteTop";
 
 const navLinks = [
   { href: "/#about", label: "À propos" },
@@ -42,7 +43,8 @@ function Footer() {
         <div className="footer-grid">
           {/* La signature */}
           <div className="footer-brand">
-            <Link to="/" className="navbar-logo">
+            {/* Comme le logo de la navbar : il ramène au Hero, même quand l'adresse ne change pas */}
+            <Link to="/" className="navbar-logo" onClick={scrollToSiteTop}>
               ADAM <span className="accent">BOULKHEDERT</span>
             </Link>
             <p>Développeur full stack. Du métal au code, le goût du travail bien fait.</p>

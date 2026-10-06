@@ -16,7 +16,7 @@ function Hero({ onContactClick }) {
           <h1 className="hero-reveal" style={{ "--reveal-delay": "0.9s" }}>
             Je transforme des idées en{" "}
             <span className="accent">
-              <WeldText text="applications web" delay={1.5} />
+              <WeldText text="Applications Web" delay={1.5} />
             </span>{" "}
             concrètes.
           </h1>

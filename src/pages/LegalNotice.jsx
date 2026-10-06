@@ -1,7 +1,10 @@
 import { Link } from "react-router";
 import SectionTitle from "../components/SectionTitle";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function LegalNotice() {
+  usePageTitle("Mentions légales");
+
   return (
     <section className="legal-page">
       <SectionTitle label="Informations" title="Mentions" accent="légales." />

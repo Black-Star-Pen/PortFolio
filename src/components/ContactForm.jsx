@@ -27,12 +27,13 @@ const requestTypes = [
   { value: "autre", label: "Autre" },
 ];
 
+// Cette liste doit rester la même que CONTRACT_TYPES dans server/validation.js : le serveur refuse
+// tout contrat qui n'y est pas.
 const contractTypes = [
   { value: "cdi", label: "CDI" },
   { value: "cdd", label: "CDD" },
-  { value: "alternance", label: "Alternance" },
-  { value: "stage", label: "Stage" },
-  { value: "freelance", label: "Freelance" },
+  // unavailable : affiché, mais grisé et non cliquable, avec la mention « indisponible »
+  { value: "freelance", label: "Freelance", unavailable: true },
 ];
 
 const remoteOptions = [
@@ -186,14 +187,30 @@ function validate(form, cityLookup) {
   return errors;
 }
 
+/* ===== L'astérisque des champs obligatoires ===== */
+// aria-hidden : un lecteur d'écran ne lit pas « astérisque ». Il annonce « obligatoire » grâce à
+// l'attribut aria-required posé sur le champ (ou au texte caché « obligatoire », pour un groupe de boutons).
+function RequiredMark() {
+  return (
+    <span className="form-required" aria-hidden="true">
+      *
+    </span>
+  );
+}
+
 /* ===== Un champ de saisie réutilisable ===== */
+// Tous les champs de saisie du formulaire sont obligatoires : chacun porte l'astérisque
 function TextField({ id, name, label, error, children, ...inputProps }) {
   return (
     <div className={`form-field ${error ? "has-error" : ""}`} data-field={name}>
-      <label htmlFor={`${id}-${name}`}>{label}</label>
+      <label htmlFor={`${id}-${name}`}>
+        {label}
+        <RequiredMark />
+      </label>
       <input
         id={`${id}-${name}`}
         name={name}
+        aria-required="true"
         aria-invalid={Boolean(error)}
         aria-describedby={`${id}-${name}-error`}
         {...inputProps}
@@ -214,7 +231,14 @@ function OptionGroup({ name, legend, options, value, onSelect, error, optional =
     <fieldset className={`form-field ${error ? "has-error" : ""}`} data-field={name}>
       <legend>
         {legend}
-        {optional && <span className="form-optional"> (facultatif)</span>}
+        {optional ? (
+          <span className="form-optional"> (facultatif)</span>
+        ) : (
+          <>
+            <RequiredMark />
+            <span className="sr-only"> (obligatoire)</span>
+          </>
+        )}
       </legend>
       <div className="type-options">
         {options.map((option) => (
@@ -223,12 +247,16 @@ function OptionGroup({ name, legend, options, value, onSelect, error, optional =
             type="button"
             className={`btn btn-primary btn-small type-option ${
               option.variant ? `type-option-${option.variant}` : ""
-            } ${value === option.value ? "selected" : ""}`}
+            } ${option.unavailable ? "type-option-unavailable" : ""} ${
+              value === option.value ? "selected" : ""
+            }`}
             aria-pressed={value === option.value}
+            disabled={option.unavailable}
             onClick={() => onSelect(name, option.value)}
           >
             {option.icon}
             {option.label}
+            {option.unavailable && <span className="type-option-note">indisponible</span>}
           </button>
         ))}
       </div>
@@ -426,6 +454,7 @@ function ContactForm() {
       name: "city",
       value: form.city,
       onChange: handleChange,
+      "aria-required": true,
       "aria-invalid": Boolean(errors.city),
       "aria-describedby": describedBy || undefined,
     };
@@ -453,7 +482,10 @@ function ContactForm() {
 
     return (
       <div className={`form-field ${errors.city ? "has-error" : ""}`} data-field="city">
-        <label htmlFor={fieldId}>Ville</label>
+        <label htmlFor={fieldId}>
+          Ville
+          <RequiredMark />
+        </label>
         {control}
         {statusText && (
           <p className="form-status" id={statusId}>
@@ -471,6 +503,9 @@ function ContactForm() {
 
   return (
     <div className="work-order">
+      {/* Le trait bleu qui balaie la feuille à son apparition (voir « ORDER » dans le CSS, section 19 bis) */}
+      <span className="work-order-scan" aria-hidden="true" />
+
       {status === "success" && <Weld />}
 
       <div className="work-order-header">
@@ -505,6 +540,12 @@ function ContactForm() {
               autoComplete="off"
             />
           </div>
+
+          {/* La légende de l'astérisque, avant les champs. aria-hidden : un lecteur d'écran n'en a pas
+              besoin, il annonce déjà « obligatoire » sur chaque champ */}
+          <p className="form-required-note" aria-hidden="true">
+            <RequiredMark /> Champs obligatoires
+          </p>
 
           {/* 1. Le type de demande, en premier : il adapte la suite du formulaire */}
           <OptionGroup
@@ -638,6 +679,7 @@ function ContactForm() {
           <div className={`form-field ${errors.message ? "has-error" : ""}`} data-field="message">
             <label htmlFor={`${id}-message`}>
               {isRecruitment ? "Description du poste" : "Cahier des charges"}
+              <RequiredMark />
             </label>
             <textarea
               id={`${id}-message`}
@@ -646,6 +688,7 @@ function ContactForm() {
               maxLength={5000}
               value={form.message}
               onChange={handleChange}
+              aria-required="true"
               placeholder={
                 isRecruitment
                   ? "Missions, stack technique, équipe, date de démarrage..."

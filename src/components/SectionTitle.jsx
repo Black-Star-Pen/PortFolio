@@ -1,7 +1,10 @@
 function SectionTitle({ label, title, accent, subtitle }) {
   return (
     <div className="section-title">
-      <span className="section-label">{label}</span>
+      {/* Le libellé a deux balises : le filet (section-label) et l'onglet posé dessus (section-name) */}
+      <span className="section-label">
+        <span className="section-name">{label}</span>
+      </span>
       <h2>
         {title}
         {accent && <em>{accent}</em>}

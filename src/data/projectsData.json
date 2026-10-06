@@ -59,9 +59,10 @@
       "Zod",
       "Drizzle",
       "Vitest",
-      "GitHub Actions"
+      "GitHub Actions",
+      "Claude Code"
     ],
-    "image": "/projects/hero-experience.png",
+    "image": "/projects/hero-experience.webp",
     "links": [
       {
         "type": "site",
@@ -83,17 +84,17 @@
     "category": "Application full stack",
     "description": "Mon portfolio, conçu et codé **de A à Z** : un univers de dessin technique et d'atelier métal, clin d'œil à ma formation en chaudronnerie.",
     "details": {
-      "context": "Projet personnel, **réalisé seul**, pour me présenter et reprendre les bases du développement en profondeur.",
+      "context": "Projet personnel, **réalisé seul**, pour présenter mon parcours et mon travail.",
       "role": [
         "Front en React (Vite) : composants réutilisables, navigation avec React Router, pages légales et page 404.",
         "Direction artistique inspirée des plans techniques, avec des **animations de soudure** au scroll (parcours, onglets, footer).",
         "Formulaire de contact adaptatif : les champs changent selon le type de demande, vérification en direct de la ville (API publique geo.api.gouv.fr) et suggestion en cas de faute de frappe dans l'email.",
         "API Express qui **revérifie tout côté serveur**, contrôle que le domaine de l'email existe vraiment (DNS), puis envoie le message par email (Nodemailer).",
-        "Protection anti-spam : limite de 5 messages par 5 minutes et champ piège invisible pour les robots.",
+        "Protection anti-spam : limite de 3 messages par 5 minutes et champ piège invisible pour les robots.",
         "Accessibilité : navigation complète au clavier, modales qui gardent le focus, respect du réglage « réduire les animations »."
       ],
       "challenge": "**Ne jamais faire confiance au navigateur**. Tout ce que vérifie le formulaire peut être contourné, donc le serveur refait chaque contrôle lui-même : liste blanche des champs, longueurs maximales, email, ville. Il limite aussi le nombre d'envois et renvoie des erreurs claires que le formulaire affiche champ par champ.",
-      "learned": "Reprendre les fondamentaux (état, effets, formulaires contrôlés, API REST, codes HTTP) en les appliquant sur un vrai projet, **avec une IA comme assistant pour apprendre** : je sais expliquer chaque partie du code. Travailler proprement avec Git (une branche par fonctionnalité, Pull Requests) et penser sécurité et vie privée dès la conception."
+      "learned": "Concevoir des **animations pilotées par le défilement** avec GSAP et ScrollTrigger, dessinées en CSS et en SVG (tracés, masques, variables CSS). Construire une API qui se défend seule, en pensant **sécurité et vie privée dès la conception**. Et mener un projet de bout en bout avec un flux Git propre : une branche par fonctionnalité et des Pull Requests."
     },
     "technos": [
       "React",
@@ -101,6 +102,7 @@
       "Express",
       "Vite",
       "React Router",
+      "GSAP",
       "Nodemailer",
       "CSS"
     ],

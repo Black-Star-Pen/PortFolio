@@ -1,6 +1,9 @@
 import { Link } from "react-router";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function NotFound() {
+  usePageTitle("Page introuvable");
+
   return (
     <section className="not-found">
       <p className="not-found-code">ERREUR 404</p>

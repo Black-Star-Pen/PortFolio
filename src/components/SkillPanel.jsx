@@ -2,12 +2,15 @@ import technoIcons from "../data/technoIcons";
 import projectsData from "../data/projectsData.json";
 import Weld from "./Weld";
 
-function SkillPanel({ skill, reference }) {
+// isWelded : ce tiroir a déjà été ouvert, son encadré est donc déjà soudé (voir Skills.jsx)
+// isFirst : c'est le panneau affiché quand la boîte à outils apparaît. Lui seul joue l'animation
+//           d'arrivée (voir reveal-drawers dans le CSS) ; les suivants s'affichent normalement.
+function SkillPanel({ skill, reference, isWelded, isFirst }) {
   const refNumber = String(reference).padStart(2, "0");
 
   return (
-    <div className="skill-panel" role="tabpanel">
-      <Weld />
+    <div className={`skill-panel ${isFirst ? "skill-panel-first" : ""}`} role="tabpanel">
+      <Weld isDone={isWelded} />
       <div className="cartouche-header">
         <span>REF. {refNumber}</span>
         <h3>{skill.title}</h3>
@@ -16,17 +19,18 @@ function SkillPanel({ skill, reference }) {
       <p className="skill-panel-description">{skill.description}</p>
 
       <ul className="tool-grid">
-        {skill.technos.map((techno) => {
+        {skill.technos.map((techno, index) => {
           const slug = technoIcons[techno];
           const usedIn = projectsData.filter((project) =>
             project.technos.includes(techno),
           );
 
           return (
-            <li key={techno} className="tool-tile">
+            // --i : le rang de l'outil, pour qu'ils se posent l'un après l'autre (voir tool-drop dans le CSS)
+            <li key={techno} className="tool-tile" style={{ "--i": index }}>
               {slug && (
                 <img
-                  src={`https://cdn.simpleicons.org/${slug}/d6bf94`}
+                  src={`/icons/${slug}.svg`}
                   alt=""
                   width="32"
                   height="32"

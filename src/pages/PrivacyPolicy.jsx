@@ -1,13 +1,16 @@
 import { Link } from "react-router";
 import SectionTitle from "../components/SectionTitle";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function PrivacyPolicy() {
+  usePageTitle("Politique de confidentialité");
+
   return (
     <section className="legal-page">
       <SectionTitle label="Vos données" title="Politique de" accent="confidentialité." />
 
       <article className="legal-content">
-        <p className="legal-updated">Dernière mise à jour : septembre 2026</p>
+        <p className="legal-updated">Dernière mise à jour : octobre 2026</p>
 
         <h3>Responsable du traitement</h3>
         <p>
@@ -43,9 +46,8 @@ function PrivacyPolicy() {
             <strong>geo.api.gouv.fr</strong> (État français).
           </li>
           <li>
-            Les polices d'écriture (Google Fonts) et les logos des technologies (Simple Icons) sont
-            chargés depuis des serveurs externes, qui reçoivent à cette occasion l'adresse IP de
-            votre appareil.
+            Les polices d'écriture et les logos des technologies sont hébergés sur ce site : leur
+            affichage n'envoie aucune information à un service extérieur.
           </li>
         </ul>
 
