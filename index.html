@@ -18,8 +18,7 @@
          que les moteurs de recherche retiennent -->
     <link rel="canonical" href="https://adam-boulkhedert.onrender.com/" />
 
-    <!-- Open Graph : l'aperçu affiché quand on partage le lien (LinkedIn, WhatsApp, Discord…).
-         Il manque og:image : l'image d'aperçu reste à fabriquer (voir scripts/og-image.js). -->
+    <!-- Open Graph : l'aperçu affiché quand on partage le lien (LinkedIn, WhatsApp, Discord…) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://adam-boulkhedert.onrender.com/" />
     <meta property="og:locale" content="fr_FR" />
@@ -29,7 +28,19 @@
       property="og:description"
       content="Du métal au code : je conçois des applications web complètes avec React, Node.js et PostgreSQL, de la maquette à la mise en ligne."
     />
-
+    <!-- L'image de l'aperçu : public/og-image.jpg, fabriquée avec l'outil scripts/og-image.js.
+         Son adresse doit être complète (avec https://) : les services de partage ne savent pas lire
+         une adresse relative. La largeur et la hauteur leur évitent de devoir la mesurer eux-mêmes. -->
+    <meta property="og:image" content="https://adam-boulkhedert.onrender.com/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Le monogramme AB en cours de soudure, à côté du nom Adam Boulkhedert, développeur full stack"
+    />
+    <!-- Pour X (Twitter) et les services qui lisent ses balises : afficher l'image en grand -->
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>
