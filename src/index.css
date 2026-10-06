@@ -562,6 +562,42 @@ html.has-intro .hero-pin {
   color: var(--color-accent);
 }
 
+/* Un mot du titre souligné à la main : deux coups de crayon, de la couleur du mot (voir Contact.jsx).
+   Le dessin (un SVG) est en position absolue : il ne prend pas de place dans la ligne, il se cale sous
+   le mot en dépassant un peu de chaque côté (112 % de sa largeur). Sa hauteur et son décalage sont
+   en em : ils suivent la taille du titre, sur ordinateur comme sur téléphone.
+   padding-bottom : le mot réserve de la place sous lui pour son soulignage. La ligne où il se trouve
+   devient un peu plus haute, et la ligne suivante du titre descend d'autant : le dessin a ainsi toute
+   sa place, sans toucher ni les lettres du mot ni le texte du dessous. */
+.title-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.22em;
+}
+
+.title-underline svg {
+  position: absolute;
+  left: -6%;
+  bottom: 0;
+  width: 112%;
+  height: 0.4em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* stroke-dasharray: 1 = un seul tiret, aussi long que le trait entier (sa longueur vaut 1, voir pathLength).
+   En décalant ce tiret (stroke-dashoffset), on cache le trait, puis on le fait apparaître peu à peu :
+   c'est ce que fait l'animation d'apparition (voir « underline-draw », section 19 bis). */
+/* Le soulignage est bleu (le bleu clair des mots « sécurité » et « qualité » du Hero) sous un mot doré :
+   il se détache du mot, comme tracé avec un autre crayon. */
+.title-underline path {
+  fill: none;
+  stroke: var(--color-tig);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+
 /* ===== 9. À propos ===== */
 .about-text {
   display: flex;
@@ -3269,6 +3305,28 @@ html.has-intro .hero-pin {
   to {
     left: 100%;
     opacity: 0;
+  }
+}
+
+/* Le soulignage d'un mot du titre (voir .title-underline, section 8) se trace une fois le laser passé
+   sur le mot : il est caché tant que le titre n'est pas apparu, puis ses deux traits partent l'un après
+   l'autre, comme deux coups de crayon.
+   « backwards » : pendant le délai, le trait garde l'état de départ de l'animation (caché). */
+.reveal-laser:not(.revealed) .title-underline path {
+  stroke-dashoffset: 1;
+}
+
+.reveal-laser.revealed .title-underline path {
+  animation: underline-draw 0.45s ease-out 0.8s backwards;
+}
+
+.reveal-laser.revealed .title-underline path + path {
+  animation-delay: 1.15s;
+}
+
+@keyframes underline-draw {
+  from {
+    stroke-dashoffset: 1;
   }
 }
 

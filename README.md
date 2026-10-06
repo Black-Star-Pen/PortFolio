@@ -2,6 +2,8 @@
 
 Développeur full stack · Paris
 
+[![Le monogramme « AB » en cours de soudure sur un plan technique, à côté du nom Adam Boulkhedert, développeur full stack](public/og-image.jpg)](https://adam-boulkhedert.onrender.com)
+
 Mon portfolio, conçu et codé de A à Z : un univers de dessin technique et d'atelier métal, clin d'œil à ma formation en chaudronnerie.
 
 Site en ligne : https://adam-boulkhedert.onrender.com
@@ -58,9 +60,9 @@ PortFolio/
 ├── index.html
 ├── render.yaml         la configuration de l'hébergement : les deux services et les en-têtes de sécurité du site
 ├── .github/workflows/  le contrôle automatique : lint, construction du site et démarrage de l'API à chaque Pull Request
-├── public/             favicon, logos des technologies, captures des projets et images du film de l'intro (en WebP)
+├── public/             favicon, logos des technologies, captures des projets, images du film de l'intro (en WebP) et image de partage
 ├── images-source/      les captures d'origine, avant conversion
-├── scripts/            deux scripts : convertir les captures, télécharger les logos
+├── scripts/            trois outils : convertir les captures, télécharger les logos, dessiner l'image de partage
 ├── src/
 │   ├── components/     les composants React (Intro, Hero, Navbar, ContactForm…)
 │   ├── pages/          accueil, mentions légales, confidentialité, 404
