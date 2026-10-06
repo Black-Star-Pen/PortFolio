@@ -2,11 +2,12 @@
 // (LinkedIn, WhatsApp, Discord…). Format standard : 1200 × 630 pixels.
 //
 // Le dessin se fait sur un <canvas> (une « toile » sur laquelle le JavaScript peint),
-// avec les mêmes polices, les mêmes couleurs et les mêmes tracés que l'intro du site.
+// avec les mêmes polices et les mêmes couleurs que le site. Le « AB » n'est pas dessiné :
+// c'est une vraie image du film de l'intro (public/intro), prise en pleine soudure.
 //
 // Comment s'en servir : avec « npm run dev » lancé, ouvre
 // http://localhost:5173/scripts/og-image.html, clique sur « Enregistrer l'image »,
-// puis range le fichier dans public/ sous le nom og-image.png.
+// puis range le fichier dans public/ sous le nom og-image.jpg.
 import "@fontsource-variable/inter";
 import "@fontsource-variable/space-grotesk";
 
@@ -16,7 +17,6 @@ const HEIGHT = 630;
 const COLORS = {
   background: "#0a0b0f",
   text: "#f2efe9",
-  muted: "#b4b6be",
   accent: "#d6bf94",
 };
 
@@ -31,27 +31,32 @@ const TEXTS = {
   lastName: "BOULKHEDERT",
   job: "Développeur full stack",
   stack: "React · Node.js · PostgreSQL",
-  cartouche: ["PLAN N° 01", "ÉCH. 1:1", "CONTRÔLE : VALIDÉ ✓"],
+  // « En cours » : sur l'image, la torche est encore en train de souder
+  cartouche: ["PLAN N° 01", "ÉCH. 1:1", "CONTRÔLE : EN COURS"],
 };
 
-// Les tracés de « AB » : les mêmes que dans src/components/Intro.jsx
-const STROKES = [
-  "M10 130 L55 10 L100 130",
-  "M28 86 L82 86",
-  "M130 130 L130 10 L168 10 Q198 10 198 39 Q198 68 168 68 L130 68",
-  "M168 68 Q204 68 204 99 Q204 130 168 130 L130 130",
-];
+// Le film de l'intro : la même géométrie que dans src/components/Intro.jsx (voir FILM).
+// Ses images font 864 × 486 pixels ; x, y, width et height disent où elles se placent dans le dessin,
+// en unités du dessin (les lettres vont de 10 à 204 en largeur, et de 10 à 130 en hauteur).
+const FILM = {
+  // L'image choisie parmi les 152 du film : les deux lettres sont entières, la torche finit le
+  // dernier trait du B. Pour en essayer une autre, change ce numéro (de 0 à 151).
+  frame: 131,
+  x: -411.7 / 5.2,
+  y: -176 / 5.2,
+  width: 1920 / 5.2,
+  height: 1080 / 5.2,
+};
 
 // Le cadre : sa distance au bord de l'image, et la largeur de la bande des repères
 const FRAME_EDGE = 20;
 const FRAME_BAND = 24;
 const INNER = FRAME_EDGE + FRAME_BAND; // le bord du cadre intérieur
 
-// Le monogramme : son agrandissement, et la position de son coin haut gauche
+// Le monogramme : son agrandissement, et la position du coin haut gauche des lettres dans l'image
 const MONOGRAM_SCALE = 2.15;
-const MONOGRAM_X = 112;
+const MONOGRAM_X = 132;
 const MONOGRAM_Y = 172;
-const BEAD = 5; // l'épaisseur du cordon, en unités du dessin
 
 const canvas = document.querySelector("#og");
 const ctx = canvas.getContext("2d");
@@ -95,7 +100,10 @@ function drawBackground() {
   ctx.fillStyle = COLORS.background;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-  const glow = ctx.createRadialGradient(340, 300, 0, 340, 300, 460);
+  // Le centre de la lueur : le milieu des lettres (97 et 60 unités après leur coin haut gauche)
+  const glowX = MONOGRAM_X + 97 * MONOGRAM_SCALE;
+  const glowY = MONOGRAM_Y + 60 * MONOGRAM_SCALE;
+  const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, 460);
   glow.addColorStop(0, "rgba(214, 191, 148, 0.11)");
   glow.addColorStop(1, "rgba(214, 191, 148, 0)");
   ctx.fillStyle = glow;
@@ -143,21 +151,9 @@ function drawFrame() {
   });
 }
 
-// 3. Le monogramme « AB », soudé, avec la torche qui vient de finir le dernier trait
-function drawMonogram() {
-  const paths = STROKES.map((d) => new Path2D(d));
-
-  // Trace les 4 traits de « AB » avec le même style (comme les calques du cordon dans le CSS de l'intro)
-  function strokeAll({ color, width, cap = "round", dash = [], offset = 0 }) {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = cap;
-    ctx.setLineDash(dash);
-    ctx.lineDashOffset = offset;
-    paths.forEach((path) => ctx.stroke(path));
-  }
-
-  // save / restore : tout ce qui est réglé entre les deux (déplacement, agrandissement, ombres…)
+// 3. Le monogramme « AB » : les traits de construction du plan, puis l'image du film par-dessus
+function drawMonogram(film) {
+  // save / restore : tout ce qui est réglé entre les deux (déplacement, agrandissement…)
   // est annulé à la fin. Ici, on travaille dans les unités du dessin de l'intro.
   ctx.save();
   ctx.translate(MONOGRAM_X - 10 * MONOGRAM_SCALE, MONOGRAM_Y - 10 * MONOGRAM_SCALE);
@@ -185,54 +181,10 @@ function drawMonogram() {
   write("141", -11, -8, { font: `8px ${MONO_FONT}`, color: steel(0.9), align: "right" });
   write("194", 107, 176, { font: `9px ${MONO_FONT}`, color: steel(0.9), align: "center" });
 
-  // Le cordon : le cœur (avec son halo doré), les écailles, puis leur relief
-  ctx.shadowColor = "rgba(214, 191, 148, 0.55)";
-  ctx.shadowBlur = 22;
-  strokeAll({ color: "#b89f70", width: BEAD - 1.4 });
-  ctx.shadowColor = "transparent";
-  ctx.shadowBlur = 0;
-  strokeAll({ color: COLORS.accent, width: BEAD, dash: [0.01, 1.99] });
-  strokeAll({ color: "rgba(70, 46, 14, 0.36)", width: BEAD - 1, cap: "butt", dash: [0.4, 1.6], offset: -0.8 });
-  strokeAll({ color: "rgba(255, 250, 235, 0.4)", width: BEAD - 1.8, cap: "butt", dash: [0.5, 1.5], offset: 0.25 });
-
-  // La fin du dernier trait est encore chaude : du doré au blanc, en passant par l'orange
-  const heat = ctx.createLinearGradient(204, 99, 130, 130);
-  heat.addColorStop(0, "rgba(176, 96, 47, 0)");
-  heat.addColorStop(0.3, "#b0602f");
-  heat.addColorStop(0.55, "#de6e28");
-  heat.addColorStop(0.75, "#f58f2e");
-  heat.addColorStop(0.9, "#ffc356");
-  heat.addColorStop(1, "#fff5d6");
-  ctx.setLineDash([]);
-  ctx.lineCap = "round";
-  ctx.shadowColor = "rgba(255, 130, 40, 0.85)";
-  ctx.shadowBlur = 24;
-  ctx.strokeStyle = heat;
-  ctx.lineWidth = BEAD + 0.4;
-  ctx.stroke(new Path2D("M204 99 Q204 130 168 130 L130 130"));
-
-  // La torche, au bout du trait, et quelques étincelles qui tombent
-  ctx.fillStyle = "#fffdf2";
-  ctx.shadowColor = "rgba(255, 200, 120, 1)";
-  ctx.shadowBlur = 30;
-  ctx.beginPath();
-  ctx.arc(130, 130, 3.4, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#ffe9b0";
-  ctx.shadowBlur = 8;
-  const sparks = [
-    [-8, 9, 1.1],
-    [-14, 4, 0.9],
-    [-3, 15, 1],
-    [6, 12, 0.8],
-    [-11, 18, 0.7],
-  ];
-  sparks.forEach(([dx, dy, radius]) => {
-    ctx.beginPath();
-    ctx.arc(130 + dx, 130 + dy, radius, 0, Math.PI * 2);
-    ctx.fill();
-  });
+  // L'image du film : les lettres en métal, la lumière de la torche et ses étincelles.
+  // Son fond est transparent : le quadrillage et les traits de construction restent visibles autour.
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(film, FILM.x, FILM.y, FILM.width, FILM.height);
 
   ctx.restore();
 }
@@ -284,30 +236,48 @@ function drawCartouche() {
   });
 }
 
-function draw() {
+function draw(film) {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   drawBackground();
   drawFrame();
-  drawMonogram();
+  drawMonogram(film);
   drawTexts();
   drawCartouche();
 }
 
-// Le bouton : transforme la toile en fichier PNG et le fait télécharger par le navigateur
+// Charge une image du film. La promesse se termine quand l'image est arrivée (événement « load »),
+// ou échoue si le fichier n'existe pas.
+function loadFilmFrame(number) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Image du film introuvable : ${image.src}`));
+    image.src = `/intro/f-${String(number).padStart(3, "0")}.webp`;
+  });
+}
+
+// Le bouton : transforme la toile en fichier JPEG et le fait télécharger par le navigateur.
+// JPEG et pas PNG : pour une image pleine de dégradés comme celle-ci, le fichier est bien plus léger,
+// et tous les services de partage le lisent (ce n'est pas le cas du WebP).
 document.querySelector("#save").addEventListener("click", () => {
-  canvas.toBlob((blob) => {
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "og-image.png";
-    link.click();
-    URL.revokeObjectURL(link.href);
-  }, "image/png");
+  canvas.toBlob(
+    (blob) => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "og-image.jpg";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    },
+    "image/jpeg",
+    0.92,
+  );
 });
 
-// On attend que les polices soient chargées avant de dessiner : sinon le texte sortirait
-// dans une police de secours.
-await Promise.all([
+// On attend que les polices et l'image du film soient chargées avant de dessiner :
+// sinon le texte sortirait dans une police de secours.
+const [film] = await Promise.all([
+  loadFilmFrame(FILM.frame),
   document.fonts.load(`700 80px ${TITLE_FONT}`),
   document.fonts.load(`500 34px ${BODY_FONT}`),
 ]);
-draw();
+draw(film);
