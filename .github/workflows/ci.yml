@@ -1,0 +1,54 @@
+# Le contrôle automatique du code (« intégration continue »), par GitHub Actions.
+# À chaque pull request, et à chaque arrivée de code sur main, GitHub lance les deux vérifications
+# ci-dessous sur une de ses machines. Une coche verte = tout va bien ; une croix rouge = quelque chose
+# casse, à corriger avant de fusionner.
+# Render attend ces coches pour mettre le site en ligne (voir autoDeployTrigger dans render.yaml).
+
+name: Contrôle du code
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # ----- Le site : le code respecte-t-il les règles d'ESLint, et la construction passe-t-elle ? -----
+  site:
+    name: Site (lint et construction)
+    runs-on: ubuntu-latest
+    steps:
+      # Récupère le code du dépôt sur la machine de GitHub
+      - uses: actions/checkout@v7
+      # Installe Node, la même version que chez Render
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # « npm ci » installe exactement les versions notées dans package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  # ----- L'API : s'installe-t-elle, démarre-t-elle, répond-elle ? -----
+  api:
+    name: API (installation et démarrage)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      # On démarre le serveur, on lui laisse 3 secondes, puis on appelle sa route de santé.
+      # « curl --fail » échoue si la réponse n'est pas un succès : l'étape passe alors au rouge.
+      # La fausse clé RESEND_API_KEY met le serveur en mode « envoi par Resend » : il ne tente ainsi
+      # aucune connexion à Gmail. Aucun email n'est envoyé pendant ce contrôle.
+      - name: Démarrage du serveur et route de santé
+        env:
+          RESEND_API_KEY: cle-factice-pour-le-controle
+        run: |
+          node index.js &
+          sleep 3
+          curl --fail --silent --show-error http://localhost:3001/api/health
