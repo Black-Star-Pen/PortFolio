@@ -49,6 +49,34 @@ html.lenis {
   scroll-behavior: auto;
 }
 
+/* La barre de défilement : un fil doré, fin, sur le fond du site.
+   scrollbar-width et scrollbar-color sont les deux propriétés officielles : la première amincit la barre,
+   la seconde donne sa couleur (le curseur, puis le rail derrière lui).
+   Les zones qui défilent à l'intérieur de la page (les modales) règlent la leur de la même façon. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(214, 191, 148, 0.75) var(--color-bg);
+}
+
+/* Safari ne connaît pas encore scrollbar-color : pour lui, on passe par les anciens sélecteurs ::-webkit-.
+   (@supports not : ce bloc n'est lu que par les navigateurs qui n'ont PAS la propriété officielle ;
+   sinon Chrome appliquerait les deux réglages à la fois.) */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(214, 191, 148, 0.75);
+  }
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
@@ -2351,8 +2379,9 @@ html.has-intro .hero-pin {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   animation: pop-in 0.3s ease-out;
+  /* Le même fil doré que la barre de défilement de la page (voir section 3), un peu plus discret */
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: rgba(214, 191, 148, 0.5) transparent;
 }
 
 /* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
@@ -2591,6 +2620,132 @@ html.has-intro .hero-pin {
   position: sticky;
   z-index: 3;
   margin: 16px 16px -60px auto;
+}
+
+/* ----- Passer d'un projet à l'autre sans fermer la modale (voir ProjectModal.jsx) ----- */
+
+/* Les deux flèches sont posées sur le fond, EN DEHORS de la fiche, de chaque côté.
+   .modal-nav est une boîte invisible, centrée, un peu plus large que la fiche : la fiche (960px) plus,
+   de chaque côté, 24px d'écart et les 44px d'une flèche. Les flèches se placent à ses deux bouts
+   (space-between), à mi-hauteur de l'écran.
+   pointer-events: none : cette boîte recouvre l'écran, elle ne doit pas intercepter les clics
+   (un clic à côté de la fiche doit toujours la fermer). Seules les flèches sont cliquables. */
+.modal-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(100%, 960px + 136px);
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.modal-nav-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(214, 191, 148, 0.6);
+  border-radius: 50%;
+  background-color: rgba(10, 11, 15, 0.85);
+  color: var(--color-accent);
+  pointer-events: auto;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    transform 0.3s;
+}
+
+.modal-nav-button svg {
+  width: 22px;
+  height: 22px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Au survol : la flèche se remplit de doré et avance d'un rien dans son sens */
+.modal-nav-button:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.modal-nav-button:first-child:hover {
+  transform: translateX(-3px);
+}
+
+.modal-nav-button:last-child:hover {
+  transform: translateX(3px);
+}
+
+.modal-nav-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Le compteur « Projet 02 / 03 » : sur grand écran, il est centré sous la fiche, dans la marge du bas */
+.modal-nav-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.4vh;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Quand l'écran n'a pas la place pour les flèches de chaque côté de la fiche (moins de 1150px de large),
+   elles passent SOUS la fiche, sur une ligne, avec le compteur entre les deux.
+   Le fond devient une grille de deux rangées : la fiche, qui prend toute la hauteur restante
+   (minmax(0, 1fr)), puis cette ligne. La fiche ne dépasse pas sa rangée (max-height: 100%). */
+@media (max-width: 1149px) {
+  .project-overlay {
+    grid-template-rows: minmax(0, 1fr) auto;
+    row-gap: 10px;
+  }
+
+  .project-overlay > .modal {
+    max-height: 100%;
+  }
+
+  .modal-nav {
+    position: static;
+    justify-content: center;
+    gap: 18px;
+    width: auto;
+    margin: 0;
+  }
+
+  .modal-nav-count {
+    position: static;
+  }
+}
+
+/* La fiche d'un autre projet arrive du côté où on est allé la chercher : par la droite pour le projet
+   suivant, par la gauche pour le précédent. (À l'ouverture, c'est l'animation « pop-in » de .modal.) */
+.modal-from-next {
+  animation: modal-from-right 0.3s ease-out;
+}
+
+.modal-from-previous {
+  animation: modal-from-left 0.3s ease-out;
+}
+
+@keyframes modal-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+
+@keyframes modal-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
 }
 
 @keyframes fade-in {
@@ -4397,6 +4552,12 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   }
 
   .stamp {
+    animation: none;
+  }
+
+  /* D'un projet à l'autre, la fiche s'affiche directement, sans glisser */
+  .modal-from-next,
+  .modal-from-previous {
     animation: none;
   }
 

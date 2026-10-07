@@ -1,25 +1,73 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
 import RichText from "./RichText";
 import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
 
-function ProjectModal({ project, number, onClose }) {
-  const { title, category, description, details, technos, image, links, linksNote } = project;
+// Le glissement du doigt qui fait changer de projet (sur téléphone) :
+// il doit parcourir au moins SWIPE_DISTANCE pixels à l'horizontale, et être nettement plus horizontal
+// que vertical (SWIPE_RATIO fois plus). Sinon, c'est un défilement normal de la fiche : on ne fait rien.
+const SWIPE_DISTANCE = 60;
+const SWIPE_RATIO = 2;
+
+// Les deux chevrons des flèches. direction = "previous" (‹) ou "next" (›).
+function Chevron({ direction }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d={direction === "previous" ? "m15 5-7 7 7 7" : "m9 5 7 7-7 7"} />
+    </svg>
+  );
+}
+
+function ProjectModal({
+  project,
+  number,
+  total,
+  previousTitle,
+  nextTitle,
+  onPrevious,
+  onNext,
+  onClose,
+}) {
+  const { slug, title, category, description, details, technos, image, links, linksNote } = project;
   const titleId = useId();
+  const overlayRef = useRef(null);
   const closeButtonRef = useRef(null);
+  // De quel côté arrive la fiche : "next" (par la droite), "previous" (par la gauche),
+  // ou null à l'ouverture (elle apparaît alors normalement). Voir .modal-from-… dans le CSS.
+  const [direction, setDirection] = useState(null);
+  // On ne propose de changer de projet que s'il y en a plusieurs
+  const hasNavigation = total > 1;
+
+  function goPrevious() {
+    setDirection("previous");
+    onPrevious();
+  }
+
+  function goNext() {
+    setDirection("next");
+    onNext();
+  }
 
   useEffect(() => {
     // On retient l'élément qui avait le focus (la carte cliquée)...
     const previousFocus = document.activeElement;
-    // ...et on place le focus dans la modale
-    closeButtonRef.current.focus();
+    // ...et on place le focus dans la modale (preventScroll : sans faire défiler la fiche,
+    // sinon le navigateur la décale de quelques pixels pour « montrer » le bouton)
+    closeButtonRef.current.focus({ preventScroll: true });
     // La page derrière ne défile plus tant que la modale est ouverte
     lockPageScroll();
 
+    // Au clavier : Échap ferme, les flèches gauche et droite changent de projet
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         onClose();
+      } else if (hasNavigation && event.key === "ArrowLeft") {
+        setDirection("previous");
+        onPrevious();
+      } else if (hasNavigation && event.key === "ArrowRight") {
+        setDirection("next");
+        onNext();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -30,18 +78,69 @@ function ProjectModal({ project, number, onClose }) {
       // À la fermeture, le focus revient sur la carte
       previousFocus?.focus();
     };
-  }, [onClose]);
+  }, [onClose, onPrevious, onNext, hasNavigation]);
+
+  // Au doigt : glisser vers la gauche montre le projet suivant, vers la droite le précédent.
+  // On note où le doigt se pose, puis où il se lève, et on compare.
+  // passive : on promet au navigateur de ne pas bloquer le geste, le défilement de la fiche reste fluide.
+  useEffect(() => {
+    if (!hasNavigation) return;
+
+    const overlay = overlayRef.current;
+    let start = null;
+
+    function handleTouchStart(event) {
+      // Un seul doigt : avec deux, c'est un zoom
+      start = event.touches.length === 1 ? event.touches[0] : null;
+    }
+
+    function handleTouchEnd(event) {
+      if (!start) return;
+
+      const end = event.changedTouches[0];
+      const moveX = end.clientX - start.clientX;
+      const moveY = end.clientY - start.clientY;
+      start = null;
+
+      if (Math.abs(moveX) < SWIPE_DISTANCE || Math.abs(moveX) < Math.abs(moveY) * SWIPE_RATIO) return;
+
+      if (moveX < 0) {
+        setDirection("next");
+        onNext();
+      } else {
+        setDirection("previous");
+        onPrevious();
+      }
+    }
+
+    overlay.addEventListener("touchstart", handleTouchStart, { passive: true });
+    overlay.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      overlay.removeEventListener("touchstart", handleTouchStart);
+      overlay.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [onPrevious, onNext, hasNavigation]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      {/* data-lenis-prevent : à l'intérieur de la modale, la molette fait défiler la modale elle-même,
+    // role="dialog" est posé sur le fond (et pas sur la fiche) : la fenêtre de dialogue comprend la fiche
+    // ET les deux flèches, qui sont en dehors de la fiche. Un lecteur d'écran y a ainsi accès.
+    <div
+      className="modal-overlay project-overlay"
+      ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onClick={onClose}
+    >
+      {/* key={slug} : quand on change de projet, React remplace la fiche par une nouvelle au lieu de
+          modifier l'ancienne. Elle repart donc du haut, et son animation d'arrivée se rejoue.
+          data-lenis-prevent : à l'intérieur de la modale, la molette fait défiler la modale elle-même,
           normalement. Sans cet attribut, le défilement fluide de la page (smoothScroll.js) prendrait
           la molette pour lui, et la modale ne bougerait pas. */}
       <div
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
+        key={slug}
+        className={`modal ${direction ? `modal-from-${direction}` : ""}`}
         data-lenis-prevent
         onClick={(event) => event.stopPropagation()}
       >
@@ -153,6 +252,43 @@ function ProjectModal({ project, number, onClose }) {
           </div>
         )}
       </div>
+
+      {/* Les flèches pour passer d'un projet à l'autre, posées sur le fond, en dehors de la fiche :
+          de chaque côté sur grand écran, sous la fiche avec le compteur sur petit écran (voir .modal-nav).
+          stopPropagation : sans lui, le clic remonterait jusqu'au fond, qui fermerait la modale.
+          Le compteur est un décor (aria-hidden) : le nom du projet visé est déjà dans l'étiquette
+          de chaque flèche, lue par les lecteurs d'écran. */}
+      {hasNavigation && (
+        <div className="modal-nav">
+          <button
+            type="button"
+            className="modal-nav-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              goPrevious();
+            }}
+            aria-label={`Projet précédent : ${previousTitle}`}
+          >
+            <Chevron direction="previous" />
+          </button>
+
+          <span className="modal-nav-count" aria-hidden="true">
+            Projet {String(number).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          </span>
+
+          <button
+            type="button"
+            className="modal-nav-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              goNext();
+            }}
+            aria-label={`Projet suivant : ${nextTitle}`}
+          >
+            <Chevron direction="next" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
