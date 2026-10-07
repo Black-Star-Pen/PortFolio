@@ -2693,6 +2693,22 @@ html.has-intro .hero-pin {
   color: var(--color-bg);
 }
 
+/* La flèche qui vient de servir reste allumée un instant, puis s'éteint doucement : 0,9 seconde en tout,
+   dont la première moitié pleinement dorée. Sur téléphone, un appui est trop bref pour qu'on voie l'état
+   « :active » ci-dessus ; cette animation prend le relais. (Classe posée par ProjectModal.jsx.)
+   Pas d'étape « to » : l'animation finit sur l'apparence normale du bouton. */
+.modal-nav-button.is-lit {
+  animation: nav-lit 0.9s ease-out;
+}
+
+@keyframes nav-lit {
+  0%,
+  50% {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+}
+
 .modal-nav-button:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
@@ -2761,6 +2777,30 @@ html.has-intro .hero-pin {
     opacity: 0;
     transform: translateX(-48px);
   }
+}
+
+/* Le glissement du doigt entre deux fiches (voir ProjectModal.jsx).
+   - grid-area: 1 / 1 : la fiche ouverte et celle du projet voisin occupent la même case de la grille du
+     fond. Elles sont donc exactement superposées, l'une derrière l'autre.
+   - touch-action : dans une fiche, le navigateur ne s'occupe que du défilement vertical et du zoom à
+     deux doigts ; les glissements horizontaux nous reviennent. */
+.project-overlay > .modal {
+  z-index: 1;
+  grid-area: 1 / 1;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* La fiche du projet voisin, derrière : sous l'autre, sans animation d'arrivée, et on ne peut pas y toucher.
+   Sa taille et sa transparence sont réglées par le JavaScript pendant le geste. */
+.project-overlay > .modal-behind {
+  z-index: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+/* La fiche qui était derrière et qui devient la fiche ouverte : elle est déjà en place, aucune animation */
+.modal-swiped {
+  animation: none;
 }
 
 @keyframes fade-in {
