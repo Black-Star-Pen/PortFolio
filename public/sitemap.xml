@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Le plan du site, pour les moteurs de recherche : la liste des pages à visiter.
+     Si une page est ajoutée au site (voir les routes dans src/App.jsx), ajoute-la ici.
+     lastmod = la date de la dernière modification importante de la page. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://adam-boulkhedert.onrender.com/</loc>
+    <lastmod>2026-10-07</lastmod>
+  </url>
+  <url>
+    <loc>https://adam-boulkhedert.onrender.com/mentions-legales</loc>
+    <lastmod>2026-10-06</lastmod>
+  </url>
+  <url>
+    <loc>https://adam-boulkhedert.onrender.com/confidentialite</loc>
+    <lastmod>2026-10-06</lastmod>
+  </url>
+</urlset>
