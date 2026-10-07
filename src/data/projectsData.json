@@ -32,6 +32,11 @@
         "type": "site",
         "label": "Voir le site",
         "url": "https://front-on-vera.vercel.app/"
+      },
+      {
+        "type": "code",
+        "label": "Voir le code",
+        "url": "https://github.com/Black-Star-Pen/AskVera"
       }
     ]
   },

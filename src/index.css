@@ -2276,7 +2276,7 @@ html.has-intro .hero-pin {
   height: 22px;
 }
 
-/* La précision sous les liens (« code source sur demande ») : discrète, dans la police des annotations.
+/* La précision sous les liens (le lien vers le code source) : discrète, dans la police des annotations.
    Le petit « </> » devant est doré, comme un repère. */
 .contact-links-note {
   font-family: var(--font-mono);
@@ -2286,9 +2286,23 @@ html.has-intro .hero-pin {
   color: var(--color-muted);
 }
 
-.contact-links-note span {
+/* « > span » : seulement le « </> » du début, pas la flèche du lien */
+.contact-links-note > span {
   margin-right: 4px;
   color: var(--color-accent);
+}
+
+/* Le lien vers le dépôt : discret comme le reste de la ligne, doré et souligné au survol */
+.contact-links-note a {
+  color: inherit;
+  text-underline-offset: 4px;
+  transition: color 0.3s;
+}
+
+.contact-links-note a:hover,
+.contact-links-note a:focus-visible {
+  color: var(--color-accent);
+  text-decoration: underline;
 }
 
 /* Liens en version compacte (dans la modale) */
