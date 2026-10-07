@@ -20,7 +20,7 @@ Site en ligne : https://adam-boulkhedert.onrender.com
 
 | Partie | Technologies |
 | --- | --- |
-| Front | React 19, Vite, React Router, GSAP (ScrollTrigger), Canvas, Web Audio, CSS sans framework |
+| Front | React 19, Vite, React Router, GSAP (ScrollTrigger), Lenis (défilement fluide), Canvas, Web Audio, CSS sans framework |
 | Back | Node.js, Express 5, Nodemailer en local et Resend en ligne, express-rate-limit, helmet, cors |
 | Hébergement | Render : le site en fichiers statiques, l'API en service Node (configuration dans `render.yaml`) |
 | Qualité | ESLint, une branche Git par fonctionnalité et des Pull Requests, contrôlées par GitHub Actions |

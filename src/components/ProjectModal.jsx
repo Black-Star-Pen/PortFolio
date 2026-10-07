@@ -2,6 +2,7 @@ import { useEffect, useId, useRef } from "react";
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
 import RichText from "./RichText";
+import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
 
 function ProjectModal({ project, number, onClose }) {
   const { title, category, description, details, technos, image, links, linksNote } = project;
@@ -13,7 +14,8 @@ function ProjectModal({ project, number, onClose }) {
     const previousFocus = document.activeElement;
     // ...et on place le focus dans la modale
     closeButtonRef.current.focus();
-    document.body.style.overflow = "hidden";
+    // La page derrière ne défile plus tant que la modale est ouverte
+    lockPageScroll();
 
     function handleKeyDown(event) {
       if (event.key === "Escape") {
@@ -23,7 +25,7 @@ function ProjectModal({ project, number, onClose }) {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = "";
+      unlockPageScroll();
       window.removeEventListener("keydown", handleKeyDown);
       // À la fermeture, le focus revient sur la carte
       previousFocus?.focus();
@@ -32,11 +34,15 @@ function ProjectModal({ project, number, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
+      {/* data-lenis-prevent : à l'intérieur de la modale, la molette fait défiler la modale elle-même,
+          normalement. Sans cet attribut, le défilement fluide de la page (smoothScroll.js) prendrait
+          la molette pour lui, et la modale ne bougerait pas. */}
       <div
         className="modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        data-lenis-prevent
         onClick={(event) => event.stopPropagation()}
       >
         <button ref={closeButtonRef} className="modal-close" onClick={onClose} aria-label="Fermer">

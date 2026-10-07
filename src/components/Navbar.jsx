@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { scrollToSiteTop } from "../utils/siteTop";
+import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
 
 const links = [
   { href: "/#about", label: "À propos" },
@@ -12,8 +13,13 @@ const links = [
 function Navbar({ onContactClick }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Menu ouvert (petit écran) : la page derrière ne défile plus. On ne débloque qu'à la fermeture
+  // du menu, pas à l'arrivée sur la page : une modale peut déjà être ouverte, et c'est elle qui bloque.
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
+    if (!isOpen) return;
+
+    lockPageScroll();
+    return unlockPageScroll;
   }, [isOpen]);
 
   function closeMenu() {

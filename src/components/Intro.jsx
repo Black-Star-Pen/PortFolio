@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { createSparks } from "./sparks";
 import { createWeldSound } from "./weldSound";
+import { scrollToPosition, wantsSmoothScroll } from "../utils/smoothScroll";
 
 // GSAP est la bibliothèque d'animation ; ScrollTrigger est son module qui relie une animation
 // au défilement de la page ; useGSAP est le « hook » qui les fait fonctionner proprement avec React.
@@ -133,6 +134,10 @@ const FADES = [
 const LANDING_START = 0.8; // le plan commence à s'effacer et les lettres décollent
 const LANDING_END = 0.97; // les lettres sont posées sur le logo : le site prend le relais
 const SMOOTHING = 0.5; // le lissage : l'animation rattrape le défilement en une demi-seconde
+// Quand le défilement fluide est actif (souris ou pavé tactile, voir smoothScroll.js), la page glisse
+// déjà d'elle-même : on ne garde qu'un léger lissage. Avec les deux à plein, les retards s'additionnent
+// et la soudure traîne derrière la molette.
+const SMOOTHING_WITH_GLIDE = 0.2;
 
 // Les étincelles : combien en jaillit par seconde quand la torche est à l'arrêt, et au maximum
 // quand on défile vite (plus on défile, plus on « soude » vite, plus il y en a)
@@ -495,7 +500,7 @@ function Intro() {
           trigger: intro,
           start: "top top",
           end: "bottom bottom",
-          scrub: SMOOTHING,
+          scrub: wantsSmoothScroll() ? SMOOTHING_WITH_GLIDE : SMOOTHING,
           // --p = l'avancement RÉEL du défilement (non lissé). Le CSS s'en sert pour savoir où se trouve
           // la navbar pendant le raccord (voir --target-y dans .letter).
           onUpdate: (self) => {
@@ -644,7 +649,7 @@ function Intro() {
   // Le bouton « Passer » : on descend directement jusqu'à la fin de l'intro
   // (sa hauteur, moins un écran : le site se trouve sous le dernier écran de l'intro)
   function skipIntro() {
-    window.scrollTo({ top: introRef.current.offsetHeight - window.innerHeight, behavior: "smooth" });
+    scrollToPosition(introRef.current.offsetHeight - window.innerHeight);
   }
 
   if (!isVisible) return null;

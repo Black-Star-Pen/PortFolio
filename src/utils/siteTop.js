@@ -1,3 +1,5 @@
+import { stopGlide } from "./smoothScroll";
+
 // Le « haut du site » : la position de défilement où la navbar et le Hero sont en place.
 //
 // D'habitude, c'est tout en haut de la page (0). Mais lors de la première visite, l'intro occupe
@@ -53,6 +55,8 @@ export function scrollToSiteTop() {
   // Déjà en route vers cette destination (le logo et ScrollToTop peuvent le demander tous les deux)
   if (stopCurrent && currentTarget === target) return;
   stopCurrent?.();
+  // Si la page glissait encore sur son élan (défilement fluide), on le coupe : c'est nous qui la déplaçons
+  stopGlide();
 
   const start = window.scrollY;
   const prefersLessMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

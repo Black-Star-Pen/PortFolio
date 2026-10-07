@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import timelineData from "../data/timelineData.json";
+import { wantsSmoothScroll } from "../utils/smoothScroll";
 
 // Mêmes outils que l'intro : GSAP, son module ScrollTrigger (qui relie une animation au défilement)
 // et le hook useGSAP (qui range tout proprement quand le composant disparaît).
@@ -14,6 +15,8 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 const PINNED_SCREEN = "(min-width: 1000px) and (min-height: 820px)";
 
 const SMOOTHING = 0.5; // en secondes : le retard du cordon sur le défilement, pour qu'il glisse (comme l'intro)
+// Avec le défilement fluide (voir smoothScroll.js), la page glisse déjà : un léger lissage suffit (comme l'intro)
+const SMOOTHING_WITH_GLIDE = 0.2;
 const TIP_PLACE = 0.45; // où se tient la pointe du cordon dans la fenêtre : 0 = tout en haut, 1 = tout en bas
 const FIRST_STEP = 16; // en pixels : de quoi allumer la première étape d'entrée, avant que le cordon parte
 
@@ -87,7 +90,7 @@ function Timeline() {
           start: () => `top ${parseFloat(getComputedStyle(root).top)}px`,
           // … à celui où elles repartent : la distance qu'elles peuvent parcourir dans leur rangée
           end: () => `+=${layout.offsetHeight - root.offsetHeight}`,
-          scrub: SMOOTHING,
+          scrub: wantsSmoothScroll() ? SMOOTHING_WITH_GLIDE : SMOOTHING,
           invalidateOnRefresh: true, // au changement de taille de la fenêtre, refaire ces deux calculs
         },
         true

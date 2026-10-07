@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import ContactForm from "./ContactForm";
 import ContactLinks from "./ContactLinks";
+import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
 
 function ContactModal({ onClose }) {
   const dialogRef = useRef(null);
@@ -10,7 +11,7 @@ function ContactModal({ onClose }) {
     const previousFocus = document.activeElement;
 
     // 2. On bloque le scroll de la page
-    document.body.style.overflow = "hidden";
+    lockPageScroll();
 
     // 3. On place le curseur dans le premier champ
     dialogRef.current.querySelector("input")?.focus();
@@ -25,7 +26,7 @@ function ContactModal({ onClose }) {
 
     // Nettoyage : on remet tout comme avant
     return () => {
-      document.body.style.overflow = "";
+      unlockPageScroll();
       window.removeEventListener("keydown", handleKeyDown);
       previousFocus?.focus();
     };
@@ -33,12 +34,14 @@ function ContactModal({ onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
+      {/* data-lenis-prevent : dans la modale, la molette fait défiler la modale (voir ProjectModal.jsx) */}
       <div
         className="contact-modal"
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-modal-title"
+        data-lenis-prevent
         onClick={(event) => event.stopPropagation()}
       >
         <div className="contact-modal-bar">
