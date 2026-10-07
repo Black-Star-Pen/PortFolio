@@ -59,8 +59,8 @@ function Projects() {
           project={selectedProject}
           number={selectedIndex + 1}
           total={total}
-          previousTitle={previousProject.title}
-          nextTitle={nextProject.title}
+          previousProject={previousProject}
+          nextProject={nextProject}
           onPrevious={() => changeProject(previousProject.slug)}
           onNext={() => changeProject(nextProject.slug)}
           onClose={() => changeProject(null)}
