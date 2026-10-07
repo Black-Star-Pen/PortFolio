@@ -1,9 +1,13 @@
+import Epure from "./Epure";
 import SectionTitle from "./SectionTitle";
 import Timeline from "./Timeline";
 
 function About() {
   return (
     <section id="about">
+      {/* Le fond de la section : une épure technique qui se trace (voir Epure.jsx) */}
+      <Epure />
+
       {/* Sur grand écran, .about-layout met ses deux enfants côte à côte : la présentation à gauche
           (.about-intro), le parcours à droite (Timeline). Sur petit écran, ils s'empilent. Voir le CSS. */}
       <div className="about-layout">

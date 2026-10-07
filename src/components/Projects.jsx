@@ -32,6 +32,10 @@ function Projects() {
 
   return (
     <section id="projects">
+      {/* La lampe d'atelier : sa lumière tombe du cordon de soudure, en haut de la section, sur le titre
+          et les cartes (voir .section-lamp dans le CSS). aria-hidden : un décor, les lecteurs d'écran l'ignorent. */}
+      <span className="section-lamp" aria-hidden="true" />
+
       <SectionTitle
         label="Réalisations"
         title="Des idées devenues"

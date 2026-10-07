@@ -12,7 +12,7 @@
   --color-available: #4ade80;
   --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
 
-  /* Le métal des bordures (cartes projet, bouton « Me contacter » de la navbar) : un dégradé en biais
+  /* Le métal des bordures (cartes projet, boutons au contour en laiton) : un dégradé en biais
      qui alterne reflets clairs et creux sombres, comme une baguette de laiton poli.
      Ce sont les ors de l'intro (#fbe8b6, #e2bf78, #b08542). */
   --metal-gold: linear-gradient(
@@ -24,6 +24,20 @@
     #e2bf78 62%,
     #fbe8b6 76%,
     #a57c3c 100%
+  );
+
+  /* Le même métal en bleu : l'acier bleui par l'arc TIG (bouton « Me contacter » du Hero).
+     Les reflets et les creux tombent aux mêmes endroits que sur le laiton : seules les teintes changent,
+     autour du bleu clair du site (--color-tig, #a8d4f5). */
+  --metal-steel: linear-gradient(
+    135deg,
+    #4a7fa8 0%,
+    #e3f2ff 14%,
+    #a8d4f5 28%,
+    #2f5f85 46%,
+    #8fc1e8 62%,
+    #e3f2ff 76%,
+    #44779f 100%
   );
 
   /* Les trois premières sont installées dans le projet (voir les imports dans main.jsx).
@@ -357,6 +371,96 @@ main > section.seam-welded::after {
   font-size: 0.72rem;
 }
 
+/* Le contour en laiton poli : pour les boutons qui comptent le plus, « Me contacter » dans la navbar,
+   « Voir mes projets » dans le Hero et « Lancer la fabrication » dans le formulaire.
+   C'est le contour des cartes projet, en plus fin :
+   une bordure en laiton (--metal-gold) sur laquelle deux lueurs font le tour, l'une dorée,
+   l'autre bleue comme l'arc TIG (voir .project-card::before).
+   Ici, pas de calques séparés comme sur les cartes : tout tient dans trois fonds superposés,
+   du dessus vers le dessous :
+   1. le fond sombre du bouton, limité à l'intérieur de la bordure (padding-box) ;
+   2. les deux lueurs, sur toute la surface, bordure comprise (border-box) ;
+   3. le métal, lui aussi jusqu'au bord.
+   La bordure elle-même est transparente : c'est à travers elle qu'on voit les fonds 2 et 3.
+   --metal-fill est la teinte d'un bouton principal (8 % de doré sur le fond du site), mais opaque,
+   pour cacher le métal au centre (et, dans le Hero, le quadrillage du sol derrière le bouton).
+   Le remplissage doré au survol (.btn-primary::before) ne change pas : il passe par-dessus ces fonds.
+   Cette règle doit rester APRÈS .btn-primary : à égalité, c'est la dernière écrite qui l'emporte. */
+.btn-metal {
+  --metal-fill: #1a191a;
+
+  /* 2px de bordure au lieu d'1 : on retire 1px de marge intérieure, le bouton garde sa taille */
+  padding: 13px 23px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--metal-fill), var(--metal-fill)) padding-box,
+    conic-gradient(
+        from var(--spark-angle),
+        transparent 0 32%,
+        rgba(120, 190, 255, 0.45) 44%,
+        #e8f4ff 48.5%,
+        transparent 50% 80%,
+        rgba(251, 232, 182, 0.55) 93%,
+        #fffdf2 98.5%,
+        transparent 100%
+      )
+      border-box,
+    var(--metal-gold) border-box;
+  /* Un tour en 8 secondes. Un bouton est bien plus petit qu'une carte : à leur rythme (15 secondes),
+     ses lueurs sembleraient presque immobiles. */
+  animation: spark-orbit 8s linear infinite;
+}
+
+/* Le petit bouton (celui de la navbar) : même calcul, 1px de moins que .btn-small */
+.btn-small.btn-metal {
+  padding: 9px 15px;
+}
+
+/* La variante bleue du contour (à ajouter à .btn-metal) : l'acier bleui, pour « Me contacter » dans le
+   Hero et le choix « Recrutement » du formulaire. Tout fonctionne comme sur le laiton, dans le bleu de l'arc TIG : la bordure (--metal-steel),
+   les deux lueurs (une bleu vif, une presque blanche), le texte, et le remplissage au survol.
+   Le fond du bouton est le bleu clair du site à 8 % posé sur le noir du site, opaque lui aussi.
+   Cette règle doit rester APRÈS .btn-metal : c'est elle qui remplace ses trois fonds. */
+.btn-metal-blue {
+  --metal-fill: #171b21;
+
+  color: var(--color-tig);
+  background:
+    linear-gradient(var(--metal-fill), var(--metal-fill)) padding-box,
+    conic-gradient(
+        from var(--spark-angle),
+        transparent 0 32%,
+        rgba(60, 130, 255, 0.55) 44%,
+        #d6ecff 48.5%,
+        transparent 50% 80%,
+        rgba(168, 212, 245, 0.6) 93%,
+        #ffffff 98.5%,
+        transparent 100%
+      )
+      border-box,
+    var(--metal-steel) border-box;
+}
+
+/* Remplissage bleu au survol, de gauche à droite : le même geste que le remplissage doré de .btn-primary */
+.btn-metal-blue::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-tig);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.btn-metal-blue:hover:not(:disabled) {
+  color: var(--color-bg);
+}
+
+.btn-metal-blue:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}
+
 /* ===== 7. Hero ===== */
 .hero {
   /* La hauteur du Hero : ce qui reste de l'écran sous la navbar (--navbar-h, mesurée par Intro), plus 32px.
@@ -413,6 +517,104 @@ html.has-intro .hero-pin {
   html.has-intro .hero {
     --hero-hold: 35vh;
   }
+}
+
+/* ----- Le fond du Hero : le plan en perspective (voir HeroBackground.jsx) ----- */
+
+/* Le fond est posé juste avant la section du Hero, sans prendre de place (hauteur 0) : son coin en haut
+   à gauche est donc celui du Hero, et il fait toute la largeur de l'écran. */
+.hero-bg {
+  position: relative;
+  height: 0;
+}
+
+/* Le cadre du fond : exactement la hauteur du Hero (--hero-bg-height, mesurée par HeroBackground.jsx).
+   Tout ce qui en dépasse est coupé : le fond s'arrête net au cordon de soudure de la section suivante,
+   il ne « bave » pas dessous.
+   « clip » et pas « hidden » : avec hidden, la vue ci-dessous ne pourrait plus rester épinglée à l'écran.
+   z-index: -1 : derrière tout le contenu de la page. */
+.hero-bg-clip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  overflow: clip;
+  height: var(--hero-bg-height, 100vh);
+  pointer-events: none;
+}
+
+/* La « vue » : un écran de haut, qui reste en place sous la navbar pendant que le Hero est épinglé
+   (comme .hero-pin). Quand le bas du Hero remonte, elle repart avec lui : le cordon de soudure
+   devient le bord du sol. */
+.hero-bg-view {
+  position: sticky;
+  top: var(--navbar-h, 73px);
+  height: calc(100vh - var(--navbar-h, 73px));
+}
+
+/* Le quadrillage du plan, couché comme un sol qui fuit vers l'horizon.
+   .hero-floor donne la perspective : on regarde depuis le haut du bloc (perspective-origin), c'est
+   donc là que se trouve l'horizon. Le <span> à l'intérieur est le quadrillage : il pivote autour de
+   son bord du bas (transform-origin) et son haut bascule vers l'arrière (rotateX), très loin.
+   Il avance d'une case (64px) en boucle : comme toutes les cases sont pareilles, on ne voit pas
+   le retour au départ, et le sol semble défiler sans fin vers nous.
+   Seul « transform » est animé : la carte graphique s'en charge, le défilement reste fluide. */
+.hero-floor {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  height: 56%;
+  perspective: 320px;
+  perspective-origin: 50% 0;
+  /* Le sol s'allume en douceur à l'arrivée */
+  animation: floor-on 1.6s ease-out both;
+}
+
+@keyframes floor-on {
+  from {
+    opacity: 0;
+  }
+}
+
+.hero-floor span {
+  position: absolute;
+  bottom: 0;
+  /* Bien plus large et plus haut que le bloc : au loin, la perspective le rétrécit beaucoup */
+  left: -150%;
+  width: 400%;
+  height: 300%;
+  /* L'inclinaison au repos (avec « réduire les animations », le sol reste couché mais ne défile pas) */
+  transform: rotateX(64deg);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(to right, rgba(214, 191, 148, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(214, 191, 148, 0.5) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: 50% 100%;
+  animation: floor-roll 2.6s linear infinite;
+}
+
+@keyframes floor-roll {
+  from {
+    transform: rotateX(64deg) translateY(0);
+  }
+  to {
+    transform: rotateX(64deg) translateY(64px);
+  }
+}
+
+/* L'horizon se perd dans le noir (en haut, pour que le texte du Hero reste lisible),
+   et une lueur dorée monte du sol (en bas, au milieu) */
+.hero-floor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 60% at 50% 100%, rgba(214, 191, 148, 0.14), transparent),
+    linear-gradient(to bottom, var(--color-bg) 2%, rgba(10, 11, 15, 0.55) 45%, transparent 82%);
 }
 
 /* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
@@ -500,6 +702,31 @@ html.has-intro .hero-pin {
   }
 }
 
+/* Sur un écran tactile, pas de flou : les mots montent et s'éclaircissent, c'est tout.
+   Safari sur iPhone garde parfois l'image floutée d'un mot une fois son animation finie
+   (« React » ou « sécurité » restaient flous à l'écran). Sans filtre, il n'a plus rien à garder.
+   On ne change que le nom de la première animation : l'éclat de soudure des mots dorés et bleus reste. */
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .reveal-word {
+    animation-name: word-rise;
+  }
+
+  .reveal-word-highlight {
+    animation-name: word-rise, word-weld;
+  }
+
+  .reveal-word-steel {
+    animation-name: word-rise, word-weld-blue;
+  }
+}
+
 /* ----- La soudure des lettres ----- */
 
 /* Avant d'être soudée, la lettre n'est qu'un contour, comme dessinée sur le plan.
@@ -554,6 +781,10 @@ html.has-intro .hero-pin {
   flex-wrap: wrap;
   gap: 16px;
 }
+
+/* Les deux boutons du Hero sont posés sur le plan en perspective. Ils portent le contour en métal des
+   boutons (section 6), qui leur donne un fond plein : sans ça, le quadrillage se verrait à travers.
+   « Voir mes projets » est en laiton (.btn-metal), « Me contacter » en acier bleui (.btn-metal-blue). */
 
 /* ===== 8. En-tête de section ===== */
 .section-title {
@@ -648,6 +879,108 @@ html.has-intro .hero-pin {
 }
 
 /* ===== 9. À propos ===== */
+
+/* ----- Le fond d'une section (À propos, Compétences) ----- */
+
+/* Un fond reste dans sa section : il commence à son cordon de soudure (top: 0) et s'arrête à celui de
+   la section suivante (bottom: 0). Il fait toute la largeur de l'écran (100vw, recentré sur la section
+   qui, elle, est plus étroite). overflow: clip coupe tout ce qui dépasserait ; « clip » et pas « hidden »,
+   sinon la vue ci-dessous ne pourrait plus rester à l'écran. z-index: -1 : derrière le contenu. */
+.section-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: -1;
+  overflow: clip;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* La « vue » : un écran de haut, qui reste en place sous la navbar pendant qu'on parcourt la section.
+   Le dessin qu'elle contient ne défile donc pas avec le texte : il reste derrière, comme un calque. */
+.section-bg-view {
+  position: sticky;
+  top: var(--navbar-h, 73px);
+  height: calc(100vh - var(--navbar-h, 73px));
+}
+
+/* ----- L'épure : le fond de l'À propos (voir Epure.jsx) ----- */
+
+.epure {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+}
+
+/* Les formes, en doré ; les axes, plus fins, en « trait mixte » (un long tiret, un point) ;
+   les cotes, en bleu clair. Tout est très transparent : le texte de la section reste le premier lu. */
+.epure-shape {
+  stroke: rgba(214, 191, 148, 0.26);
+  stroke-width: 1.2;
+}
+
+.epure-axis {
+  stroke: rgba(214, 191, 148, 0.2);
+  stroke-width: 0.8;
+  stroke-dasharray: 26 6 4 6;
+}
+
+.epure-dim {
+  stroke: rgba(168, 212, 245, 0.3);
+  stroke-width: 0.8;
+}
+
+.epure text {
+  fill: rgba(168, 212, 245, 0.45);
+  stroke: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.epure-arrow {
+  fill: rgba(168, 212, 245, 0.5);
+  stroke: none;
+}
+
+/* Un trait qui se trace : sa longueur vaut 1 (pathLength dans le SVG), son tiret aussi. En décalant
+   ce tiret de 1, le trait est entièrement caché ; l'animation ramène le décalage à 0. */
+.epure-line {
+  stroke-dasharray: 1;
+}
+
+/* L'épure se trace une fois le cordon de la section soudé (classes posées par ScrollReveal, voir
+   « section + section ») : cachée tant que le cordon attend, puis les formes se tracent l'une après
+   l'autre (--i = leur ordre de passage), et les axes et les cotes arrivent en fondu, comme on cote
+   un dessin une fois qu'il est tracé.
+   Sans ces classes (réglage « réduire les animations »), l'épure est simplement dessinée. */
+main > section.seam-pending .epure {
+  opacity: 0;
+}
+
+main > section.seam-welded .epure-line {
+  animation: epure-draw 2.4s cubic-bezier(0.6, 0, 0.3, 1) calc(0.5s + var(--i, 0) * 0.18s) both;
+}
+
+main > section.seam-welded .epure-fade {
+  animation: epure-fade 1.2s ease-out calc(2.4s + var(--i, 0) * 0.2s) both;
+}
+
+@keyframes epure-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes epure-fade {
+  from {
+    opacity: 0;
+  }
+}
 .about-text {
   display: flex;
   flex-direction: column;
@@ -663,12 +996,18 @@ html.has-intro .hero-pin {
    au défilement (voir Timeline.jsx), puis repartent ensemble.
    Sur un écran trop étroit ou trop bas pour ça, les deux blocs s'empilent, centrés, avec les styles de base.
    (La même condition est écrite dans Timeline.jsx : PINNED_SCREEN.)
-   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre. */
-@media (min-width: 1000px) and (min-height: 820px) {
+   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre.
+   Deuxième condition, après la virgule (« ou ») : un écran d'ordinateur portable, large mais moins haut.
+   La présentation y tient aussi, parce que ses marges et son texte se resserrent avec la hauteur :
+   voir les valeurs en vh plus bas (1vh = 1 % de la hauteur de l'écran). Elles sont calculées pour
+   redonner exactement les tailles d'origine à partir de 820px de haut : rien ne change sur grand écran. */
+@media (min-width: 1000px) and (min-height: 820px), (min-width: 1100px) and (min-height: 640px) {
   .about-layout {
-    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran */
-    --frame-top: calc(var(--navbar-h, 73px) + 40px);
-    --frame-height: calc(100vh - var(--frame-top) - 40px);
+    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran
+       (moins sur un écran bas : 4.9vh valent 40px à 820px de haut) */
+    --frame-gap: min(40px, 4.9vh);
+    --frame-top: calc(var(--navbar-h, 73px) + var(--frame-gap));
+    --frame-height: calc(100vh - var(--frame-top) - var(--frame-gap));
     /* La distance de défilement pendant laquelle elles restent en place, le temps de souder le cordon.
        Pour que ça dure plus ou moins longtemps, change cette valeur. */
     --about-hold: 110vh;
@@ -696,25 +1035,30 @@ html.has-intro .hero-pin {
 
   .about-intro .section-title {
     max-width: none;
-    margin: 0 0 32px;
+    margin: 0 0 min(32px, 3.9vh);
     text-align: left;
   }
 
   /* Un titre un peu plus petit que dans les autres sections : dans une demi-largeur,
-     « le goût du travail bien fait. » doit tenir sur une seule ligne */
+     « le goût du travail bien fait. » doit tenir sur une seule ligne.
+     Le min(…, 4.5vh) le réduit encore sur un écran bas. */
   .about-intro .section-title h2 {
-    font-size: clamp(1.9rem, 2.9vw, 2.3rem);
+    font-size: min(clamp(1.9rem, 2.9vw, 2.3rem), 4.5vh);
   }
 
   /* Aligné à gauche, l'onglet du libellé se cale au bord, comme le titre */
   .about-intro .section-label {
     justify-content: flex-start;
+    margin-bottom: min(24px, 2.95vh);
   }
 
+  /* Le texte rétrécit avec la hauteur de l'écran, sans descendre sous 0.92rem pour rester lisible */
   .about-intro .about-text {
+    gap: min(16px, 1.95vh);
     max-width: none;
     margin: 0;
     text-align: left;
+    font-size: clamp(0.92rem, 2.15vh, 1.1rem);
   }
 
   /* Le parcours : son titre en haut, et en dessous une fenêtre qui prend toute la hauteur restante */
@@ -928,6 +1272,134 @@ html.has-intro .hero-pin {
 }
 
 /* ===== 11. Projets ===== */
+
+/* ----- La lampe d'atelier de la section (voir Projects.jsx) -----
+   La lumière tombe du cordon de soudure, tout en haut de la section, sur le titre et le haut des cartes :
+   le cordon sert de tube à la lampe.
+   z-index: -1 : la lumière passe derrière le contenu (on la voit derrière le titre et entre les cartes).
+   overflow: clip : rien ne dépasse au-dessus du cordon, la lumière reste dans sa section. */
+.section-lamp {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -1;
+  overflow: clip;
+  /* Aussi large que le cordon (il dépasse donc de la section, plus étroite), et haut d'un écran environ :
+     la lumière descend jusqu'aux cartes. */
+  width: min(1500px, 96vw);
+  height: min(900px, 115vh);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Le cœur de la lampe : le milieu du cordon chauffé à blanc, avec un halo serré autour de lui
+   (pas plus large : un grand halo dessinait une bande rectangulaire sous le cordon) */
+.section-lamp::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: min(700px, 64%);
+  height: 2px;
+  margin-inline: auto;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-accent) 18%,
+    #fff6dc 50%,
+    var(--color-accent) 82%,
+    transparent
+  );
+  box-shadow: 0 0 14px 2px rgba(214, 191, 148, 0.7);
+}
+
+/* La lumière. Cinq dégradés superposés lui donnent sa profondeur, du plus proche au plus lointain :
+   1. le point chaud, presque blanc, juste sous le cordon ;
+   2. le cœur du faisceau, étroit et clair ;
+   3. un cône moyen ;
+   4. un cône large et pâle : les trois cônes s'additionnent, la lumière est donc de plus en plus
+      dense vers le centre, comme dans un vrai faisceau ;
+   5. la flaque de lumière, là où le faisceau « touche » le titre.
+   Les cônes sont des dégradés « coniques » : ils tournent autour du milieu du cordon (0deg = vers la
+   droite, 90deg = droit vers le bas, 180deg = vers la gauche) et ne sont colorés qu'autour de la verticale.
+   Le masque efface le tout avec la distance, lentement : la lumière porte loin avant de s'éteindre,
+   et elle est à zéro avant d'atteindre les bords du bloc (pas de coupure visible). */
+.section-lamp::after {
+  content: "";
+  position: absolute;
+  inset: 1px 0 0;
+  background:
+    radial-gradient(ellipse 24% 13% at 50% 0, rgba(255, 246, 220, 0.42), transparent 72%),
+    conic-gradient(
+      from 90deg at 50% 0,
+      transparent 72deg,
+      rgba(255, 240, 205, 0.17) 85deg,
+      rgba(255, 240, 205, 0.17) 95deg,
+      transparent 108deg
+    ),
+    conic-gradient(
+      from 90deg at 50% 0,
+      transparent 48deg,
+      rgba(214, 191, 148, 0.15) 74deg,
+      rgba(214, 191, 148, 0.15) 106deg,
+      transparent 132deg
+    ),
+    conic-gradient(
+      from 90deg at 50% 0,
+      transparent 18deg,
+      rgba(214, 191, 148, 0.08) 56deg,
+      rgba(214, 191, 148, 0.08) 124deg,
+      transparent 162deg
+    ),
+    radial-gradient(ellipse 30% 15% at 50% 34%, rgba(214, 191, 148, 0.14), transparent 72%);
+  mask-image: radial-gradient(
+    ellipse 50% 100% at 50% 0,
+    #000 6%,
+    rgba(0, 0, 0, 0.62) 38%,
+    transparent 96%
+  );
+}
+
+/* La lampe s'allume une fois le cordon soudé (classes posées par ScrollReveal, voir « section + section ») :
+   éteinte tant que le cordon attend, puis le cœur s'étire depuis son milieu et la lumière s'ouvre.
+   Ensuite elle « respire » à peine, comme un néon.
+   Sans ces classes (réglage « réduire les animations »), la lampe est simplement allumée. */
+main > section.seam-pending .section-lamp {
+  opacity: 0;
+}
+
+main > section.seam-welded .section-lamp::before {
+  animation: lamp-on 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+}
+
+main > section.seam-welded .section-lamp::after {
+  animation:
+    lamp-glow 1.8s ease-out 0.6s both,
+    lamp-breathe 7s ease-in-out 2.4s infinite alternate;
+}
+
+@keyframes lamp-on {
+  from {
+    opacity: 0;
+    transform: scaleX(0.25);
+  }
+}
+
+@keyframes lamp-glow {
+  from {
+    opacity: 0;
+    transform: scaleX(0.5);
+  }
+}
+
+@keyframes lamp-breathe {
+  to {
+    opacity: 0.8;
+  }
+}
+
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -1363,6 +1835,46 @@ html.has-intro .hero-pin {
 }
 
 /* ===== 12. Compétences : l'établi ===== */
+
+/* ----- Le panneau perforé : le fond de la section (voir Pegboard.jsx et .section-bg, section 9) ----- */
+
+/* Le panneau couvre toute la section. Ses trous sont un seul petit motif répété : un point doré
+   au centre d'une case de 24px (--peg), d'où la grille. */
+.pegboard {
+  --peg: 24px;
+
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(214, 191, 148, 0.17) 1.4px, transparent 2px) 0 0 /
+    var(--peg) var(--peg);
+}
+
+/* La lumière : un bloc rond de 440px, posé sous le curseur (--light-x et --light-y, donnés par
+   Pegboard.jsx). Il porte la même grille, en plus clair, et une lueur chaude. Deux précautions :
+   - il se déplace avec « transform » : la carte graphique s'en charge, sans redessiner le panneau ;
+   - sa grille est décalée à l'envers de son déplacement (background-position) : ses points restent
+     exactement sur ceux du panneau, on ne les voit pas glisser.
+   Le masque l'efface vers ses bords. Tant que le curseur n'a pas bougé (ou sur un écran tactile),
+   il reste hors du panneau : -999px. */
+.pegboard-light {
+  --half: 220px;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--half) * 2);
+  height: calc(var(--half) * 2);
+  transform: translate(
+    calc(var(--light-x, -999px) - var(--half)),
+    calc(var(--light-y, -999px) - var(--half))
+  );
+  background:
+    radial-gradient(circle, rgba(255, 236, 190, 0.95) 1.5px, transparent 2.1px)
+      calc(var(--half) - var(--light-x, 0px)) calc(var(--half) - var(--light-y, 0px)) / var(--peg)
+      var(--peg),
+    radial-gradient(closest-side, rgba(214, 191, 148, 0.09), transparent);
+  mask-image: radial-gradient(closest-side, #000 20%, transparent);
+}
 .blueprint {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -1743,6 +2255,32 @@ html.has-intro .hero-pin {
 
 /* ===== 13. Contact ===== */
 
+/* ----- Le fond de la section : la poussière d'or (voir GoldDust.jsx) ----- */
+
+/* Le fond reste dans sa section : il commence au cordon de soudure (top: 0) et s'arrête au trait du
+   pied de page (les -40px du bas rattrapent la marge qui sépare la section du pied de page, voir .footer).
+   Il fait toute la largeur de l'écran (100vw, recentré sur la section qui, elle, est plus étroite).
+   overflow: clip coupe tout ce qui dépasserait ; z-index: -1 le fait passer derrière le contenu. */
+.gold-dust {
+  position: absolute;
+  top: 0;
+  bottom: -40px;
+  left: 50%;
+  z-index: -1;
+  overflow: clip;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* La toile où sont dessinés les grains : elle remplit le fond */
+.gold-dust canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 /* L'ordre de fabrication (en premier) */
 .work-order {
   position: relative;
@@ -2066,17 +2604,11 @@ html.has-intro .hero-pin {
   transform: scaleX(1);
 }
 
-/* « Recrutement » ressort : bleu acier (la couleur de la fiche de poste), léger halo et une mallette */
+/* « Recrutement » ressort : il porte le contour en acier bleui des boutons (.btn-metal-blue, section 6,
+   ajouté dans ContactForm.jsx), qui lui donne sa bordure, ses lueurs, son texte bleu et son remplissage
+   bleu au survol et à la sélection. Ici, seulement un léger halo bleu en plus (et sa mallette). */
 .type-option-steel {
-  border-color: var(--color-steel);
-  background-color: rgba(143, 179, 201, 0.1);
-  color: var(--color-steel);
-  box-shadow: 0 0 18px -4px rgba(143, 179, 201, 0.45);
-}
-
-/* Le remplissage au survol et à la sélection passe aussi en bleu acier */
-.type-option-steel::before {
-  background-color: var(--color-steel);
+  box-shadow: 0 0 18px -4px rgba(120, 190, 255, 0.5);
 }
 
 .type-option-icon {
@@ -2086,7 +2618,7 @@ html.has-intro .hero-pin {
 }
 
 /* Un choix affiché mais pas proposé pour le moment (ex. : Freelance) : gris, en pointillés, comme
-   le badge « titre non obtenu » du parcours. Le bouton est désactivé (voir ContactForm.jsx).
+   le badge « formation suivie » du parcours. Le bouton est désactivé (voir ContactForm.jsx).
    opacity: 1 : un bouton désactivé est à 60 % d'opacité (.btn:disabled) ; ici le gris suffit, et le mot
    « indisponible » doit rester lisible. */
 .type-option-unavailable:disabled {
@@ -2936,42 +3468,8 @@ html.has-intro .hero-pin {
   display: none;
 }
 
-/* Le bouton « Me contacter » de la navbar : le même contour que les cartes projet, en plus fin.
-   Une bordure en laiton poli (--metal-gold) sur laquelle deux lueurs font le tour, l'une dorée,
-   l'autre bleue comme l'arc TIG (voir .project-card::before).
-   Ici, pas de calques séparés comme sur les cartes : tout tient dans trois fonds superposés,
-   du dessus vers le dessous :
-   1. le fond sombre du bouton, limité à l'intérieur de la bordure (padding-box) ;
-   2. les deux lueurs, sur toute la surface, bordure comprise (border-box) ;
-   3. le métal, lui aussi jusqu'au bord.
-   La bordure elle-même est transparente : c'est à travers elle qu'on voit les fonds 2 et 3.
-   --cta-fill est la teinte qu'avait déjà le bouton (8 % de doré sur le fond du site), mais opaque,
-   pour cacher le métal au centre.
-   Le remplissage doré au survol (.btn-primary::before) ne change pas : il passe par-dessus ces fonds. */
-.navbar-cta {
-  --cta-fill: #1a191a;
-
-  /* 2px de bordure au lieu d'1 : on retire 1px de marge intérieure, le bouton garde sa taille */
-  padding: 9px 15px;
-  border: 2px solid transparent;
-  background:
-    linear-gradient(var(--cta-fill), var(--cta-fill)) padding-box,
-    conic-gradient(
-        from var(--spark-angle),
-        transparent 0 32%,
-        rgba(120, 190, 255, 0.45) 44%,
-        #e8f4ff 48.5%,
-        transparent 50% 80%,
-        rgba(251, 232, 182, 0.55) 93%,
-        #fffdf2 98.5%,
-        transparent 100%
-      )
-      border-box,
-    var(--metal-gold) border-box;
-  /* Un tour en 8 secondes. Le bouton est bien plus petit qu'une carte : à leur rythme (15 secondes),
-     ses lueurs sembleraient presque immobiles. */
-  animation: spark-orbit 8s linear infinite;
-}
+/* Le bouton « Me contacter » de la navbar (.navbar-cta) porte le contour en laiton poli des boutons :
+   voir .btn-metal, section 6. Il n'a pas d'autre style ici ; sur téléphone, il est masqué (section 19). */
 
 /* ===== 16. Burger ===== */
 .navbar-burger {
@@ -3012,6 +3510,8 @@ html.has-intro .hero-pin {
 
 /* ===== 17. Footer ===== */
 .footer {
+  /* relative : le bord découpé (.footer-edge) se place par rapport au pied de page */
+  position: relative;
   margin-top: 40px;
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface);
@@ -3019,6 +3519,47 @@ html.has-intro .hero-pin {
     linear-gradient(rgba(214, 191, 148, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(214, 191, 148, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+/* ----- Le bord découpé du pied de page : la tôle et sa languette (voir FooterEdge.jsx) ----- */
+
+/* La forme est posée juste AU-DESSUS du pied de page (bottom: 100%) et le prolonge vers le haut :
+   elle a sa couleur, et recouvre son trait droit (border-top). Sa hauteur est fixée ici ; le dessin
+   s'y adapte (voir preserveAspectRatio dans FooterEdge.jsx). */
+.footer-edge {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 30px;
+  pointer-events: none;
+}
+
+.footer-edge-fill {
+  fill: var(--color-surface);
+}
+
+/* Le trait doré qui suit le bord. non-scaling-stroke : il garde son épaisseur même quand le dessin
+   est réduit (sur téléphone). */
+.footer-edge-line {
+  fill: none;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Le trou de fixation de la languette : on voit le fond du site à travers */
+.footer-edge-hole {
+  fill: var(--color-bg);
+  stroke: rgba(214, 191, 148, 0.7);
+  stroke-width: 1;
+}
+
+/* Sur téléphone, la forme est moins haute (et la languette, du coup, moins large) */
+@media (max-width: 768px) {
+  .footer-edge {
+    height: 20px;
+  }
 }
 
 .footer-inner {
@@ -4689,6 +5230,10 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   }
 
   .badge-available::before,
+  .hero-floor,
+  .hero-floor span,
+  .section-lamp::before,
+  .section-lamp::after,
   .hero-reveal,
   .reveal-word,
   .reveal-word-highlight,
@@ -4721,8 +5266,8 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
     display: none;
   }
 
-  /* Même chose pour le bouton « Me contacter » de la navbar : ses lueurs ne tournent plus */
-  .navbar-cta {
+  /* Même chose pour les boutons au contour en laiton : leurs lueurs ne tournent plus */
+  .btn-metal {
     animation: none;
   }
 

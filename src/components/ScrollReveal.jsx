@@ -19,6 +19,17 @@ import { createSparks } from "./sparks";
 // en deux temps : on attend d'en voir un bon tiers, sinon tout se passerait sous le bas de l'écran.
 const DEFAULT_VISIBLE = 0.1;
 
+// Le décalage entre deux voisins du même type (les cartes, les paragraphes), en secondes
+const STAGGER = 0.2;
+
+// Sur téléphone, les blocs sont empilés et souvent aussi hauts que l'écran. Avec les réglages du grand
+// écran, on faisait défiler du noir avant de les voir arriver : il fallait en voir un tiers, attendre
+// son tour derrière le voisin du dessus, puis regarder l'apparition se jouer. Là, chaque bloc part dès
+// qu'il dépasse du bas de l'écran, presque sans attendre son voisin, et son apparition se joue plus vite.
+const SMALL_SCREEN = "(max-width: 768px)";
+const SMALL_SCREEN_STAGGER = 0.05;
+const SMALL_SCREEN_SPEED = 1.4; // 1 = la vitesse du grand écran
+
 const TARGETS = [
   { selector: ".section-title", effect: "laser" },
   { selector: ".about-text > p", effect: "cut" },
@@ -128,18 +139,31 @@ function weldSeam(section) {
   return stop;
 }
 
+// Les animations d'apparition d'un bloc : toutes celles qui ont une fin.
+function revealAnimations(element) {
+  return (
+    element
+      // subtree : les animations du bloc ET de tout ce qu'il contient
+      .getAnimations({ subtree: true })
+      // Pas celles qui tournent sans fin (ex. : la lueur des cartes projet)
+      .filter((animation) => Number.isFinite(animation.effect?.getComputedTiming().endTime))
+  );
+}
+
+// Joue l'apparition d'un bloc plus vite, sans toucher au CSS. Toutes ses animations (la découpe, le trait,
+// les étages…) accélèrent du même facteur, délais compris : elles restent calées les unes sur les autres.
+function speedUp(element, rate) {
+  revealAnimations(element).forEach((animation) => {
+    animation.playbackRate = rate;
+  });
+}
+
 // Note la fin de l'apparition d'un bloc (classe reveal-over), une fois toutes ses animations terminées.
 // Le CSS s'en sert pour ne pas rejouer l'apparition sur ce qui arrive plus tard dans le bloc
 // (ex. : le formulaire, recréé à neuf après un envoi : ses champs ne sont pas ressoudés).
 function markWhenOver(element) {
-  const animations = element
-    // subtree : les animations du bloc ET de tout ce qu'il contient
-    .getAnimations({ subtree: true })
-    // On n'attend pas celles qui tournent sans fin (ex. : la lueur des cartes projet)
-    .filter((animation) => Number.isFinite(animation.effect?.getComputedTiming().endTime));
-
   // allSettled (et pas all) : une animation interrompue ne doit pas empêcher de noter la fin
-  Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
+  Promise.allSettled(revealAnimations(element).map((animation) => animation.finished)).then(() => {
     element.classList.add("reveal-over");
   });
 }
@@ -155,6 +179,10 @@ function ScrollReveal() {
     // Réglage « réduire les animations » : on ne cache rien, tout reste affiché normalement
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // Les réglages du téléphone (voir SMALL_SCREEN plus haut)
+    const isSmallScreen = window.matchMedia(SMALL_SCREEN).matches;
+    const stagger = isSmallScreen ? SMALL_SCREEN_STAGGER : STAGGER;
+
     // Pour chaque bloc à faire apparaître : la part de lui-même qui doit être visible (une Map
     // associe une valeur à un élément de la page, comme un petit carnet « élément → réglage »)
     const visibleNeeded = new Map();
@@ -166,9 +194,10 @@ function ScrollReveal() {
           child.matches(selector)
         );
         const order = Math.min(siblings.indexOf(element), 4);
-        element.style.setProperty("--reveal-delay", `${order * 0.2}s`);
+        element.style.setProperty("--reveal-delay", `${order * stagger}s`);
         element.classList.add("reveal", `reveal-${effect}`);
-        visibleNeeded.set(element, visible);
+        // Sur téléphone, 10 % suffisent pour tous : un tiers d'une carte, c'est déjà un tiers de l'écran
+        visibleNeeded.set(element, isSmallScreen ? DEFAULT_VISIBLE : visible);
       });
     });
 
@@ -178,6 +207,7 @@ function ScrollReveal() {
           // Le -0.01 : le navigateur annonce parfois 0.0999 au lieu de 0.1, on ne rate pas le coche pour si peu
           if (entry.intersectionRatio >= visibleNeeded.get(entry.target) - 0.01) {
             entry.target.classList.add("revealed");
+            if (isSmallScreen) speedUp(entry.target, SMALL_SCREEN_SPEED);
             markWhenOver(entry.target);
             // Une seule fois : on arrête de surveiller ce bloc
             observer.unobserve(entry.target);
@@ -186,7 +216,8 @@ function ScrollReveal() {
       },
       {
         // -15 % en bas : le bloc apparaît quand il est bien entré à l'écran, pas au ras du bord
-        rootMargin: "0px 0px -15% 0px",
+        // (-5 % sur téléphone, où il part plus tôt)
+        rootMargin: isSmallScreen ? "0px 0px -5% 0px" : "0px 0px -15% 0px",
         // Le navigateur nous prévient à chacun des seuils demandés (ici 10 % et 35 %) ;
         // new Set(...) retire les doublons de la liste
         threshold: [...new Set(visibleNeeded.values())],

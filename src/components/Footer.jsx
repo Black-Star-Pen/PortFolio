@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
+import FooterEdge from "./FooterEdge";
 import Weld from "./Weld";
 import { scrollToSiteTop } from "../utils/siteTop";
 
@@ -39,6 +40,9 @@ function Footer() {
 
   return (
     <footer className="footer">
+      {/* Le bord du haut du pied de page : une tôle découpée, avec sa languette (voir FooterEdge.jsx) */}
+      <FooterEdge />
+
       <div className="footer-inner">
         <div className="footer-grid">
           {/* La signature */}
@@ -54,7 +58,7 @@ function Footer() {
                 peut ainsi voir que la visite vient de ce portfolio. « noopener » suffit à la sécurité :
                 la page ouverte dans le nouvel onglet ne peut pas agir sur celle-ci. */}
             <p className="footer-thanks">
-              Merci pour tout à Cédric, développeur et fondateur d'
+              Petite mention honorable, merci pour tout à Cédric, développeur et fondateur d'
               <a href="https://octaforge.fr/" target="_blank" rel="noopener">
                 Octaforge <span aria-hidden="true">↗</span>
                 <span className="sr-only"> (nouvel onglet)</span>

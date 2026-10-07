@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import Pegboard from "./Pegboard";
 import SectionTitle from "./SectionTitle";
 import SkillPanel from "./SkillPanel";
 import Weld from "./Weld";
@@ -47,6 +48,9 @@ function Skills() {
 
   return (
     <section id="skills">
+      {/* Le fond de la section : le panneau perforé de l'atelier (voir Pegboard.jsx) */}
+      <Pegboard />
+
       <SectionTitle
         label="Compétences"
         title="Une boîte à outils"
