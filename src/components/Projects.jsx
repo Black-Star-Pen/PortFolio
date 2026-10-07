@@ -2,9 +2,13 @@ import { useLocation, useNavigate, useSearchParams } from "react-router";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import SectionTitle from "./SectionTitle";
-import projectsData from "../data/projectsData.json";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function Projects() {
+  // Les textes de la section et la liste des projets, dans la langue en cours
+  const { t, data } = useLanguage();
+  const projectsData = data.projects;
+
   // Le projet ouvert est écrit dans l'adresse : /?projet=askvera
   // Au rechargement, React relit l'adresse et rouvre la même modale.
   const [searchParams] = useSearchParams();
@@ -24,10 +28,16 @@ function Projects() {
   const nextProject = projectsData[(selectedIndex + 1) % total];
 
   // Ouvre un projet (slug) ou ferme la modale (null) en changeant l'adresse.
+  // - on repart des paramètres déjà présents, pour garder la langue (?lang=en) s'il y en a une
   // - replace : on remplace l'adresse au lieu d'en ajouter une à l'historique
   // - hash : on garde l'ancre (#projects), sinon ScrollToTop remonterait en haut de la page
   function changeProject(slug) {
-    navigate({ search: slug ? `?projet=${slug}` : "", hash }, { replace: true });
+    const params = new URLSearchParams(searchParams);
+    if (slug) params.set("projet", slug);
+    else params.delete("projet");
+
+    const search = params.toString();
+    navigate({ search: search ? `?${search}` : "", hash }, { replace: true });
   }
 
   return (
@@ -37,10 +47,10 @@ function Projects() {
       <span className="section-lamp" aria-hidden="true" />
 
       <SectionTitle
-        label="Réalisations"
-        title="Des idées devenues"
-        accent="des projets concrets."
-        subtitle="Quelques projets conçus et développés de la maquette à la mise en ligne."
+        label={t.projects.label}
+        title={t.projects.title}
+        accent={t.projects.accent}
+        subtitle={t.projects.subtitle}
       />
 
       <div className="projects-grid">

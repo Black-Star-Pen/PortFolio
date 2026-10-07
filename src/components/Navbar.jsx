@@ -2,16 +2,20 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { scrollToSiteTop } from "../utils/siteTop";
 import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
+import { useLanguage } from "../i18n/LanguageContext";
+import LanguageToggle from "./LanguageToggle";
 import ThemeToggle from "./ThemeToggle";
 
+// Les liens du menu : leur ancre, et le nom de leur texte dans t.nav (voir src/i18n/texts.js)
 const links = [
-  { href: "/#about", label: "À propos" },
-  { href: "/#skills", label: "Compétences" },
-  { href: "/#projects", label: "Projets" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/#about", name: "about" },
+  { href: "/#skills", name: "skills" },
+  { href: "/#projects", name: "projects" },
+  { href: "/#contact", name: "contact" },
 ];
 
 function Navbar({ onContactClick }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   // Menu ouvert (petit écran) : la page derrière ne défile plus. On ne débloque qu'à la fermeture
@@ -51,13 +55,14 @@ function Navbar({ onContactClick }) {
           {links.map((link, index) => (
             <a key={link.href} href={link.href} onClick={closeMenu} style={{ "--i": index }}>
               <span className="navbar-link-number">{String(index + 1).padStart(2, "0")}</span>
-              {link.label}
+              {t.nav[link.name]}
             </a>
           ))}
         </nav>
 
-        {/* À droite : les réglages du site (le thème), puis le bouton « Me contacter » */}
+        {/* À droite : les réglages du site (la langue, le thème), puis le bouton « Me contacter » */}
         <div className="navbar-actions">
+          <LanguageToggle />
           <ThemeToggle />
 
           <button
@@ -65,7 +70,7 @@ function Navbar({ onContactClick }) {
             className="btn btn-primary btn-small btn-metal navbar-cta"
             onClick={onContactClick}
           >
-            Me contacter
+            {t.nav.cta}
           </button>
         </div>
 
@@ -73,7 +78,7 @@ function Navbar({ onContactClick }) {
           type="button"
           className={`navbar-burger ${isOpen ? "open" : ""}`}
           onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-label={isOpen ? t.nav.closeMenu : t.nav.openMenu}
           aria-expanded={isOpen}
         >
           <span></span>

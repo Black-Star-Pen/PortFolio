@@ -1,11 +1,13 @@
 import technoIcons from "../data/technoIcons";
 import projectsData from "../data/projectsData.json";
 import Weld from "./Weld";
+import { useLanguage } from "../i18n/LanguageContext";
 
 // isWelded : ce tiroir a déjà été ouvert, son encadré est donc déjà soudé (voir Skills.jsx)
 // isFirst : c'est le panneau affiché quand la boîte à outils apparaît. Lui seul joue l'animation
 //           d'arrivée (voir reveal-drawers dans le CSS) ; les suivants s'affichent normalement.
 function SkillPanel({ skill, reference, isWelded, isFirst }) {
+  const { t } = useLanguage();
   const refNumber = String(reference).padStart(2, "0");
 
   return (
@@ -40,7 +42,7 @@ function SkillPanel({ skill, reference, isWelded, isFirst }) {
               <span className="tool-usage">
                 {usedIn.length > 0
                   ? usedIn.map((project) => project.title).join(" · ")
-                  : "Projets à venir"}
+                  : t.skills.upcoming}
               </span>
             </li>
           );
@@ -48,9 +50,11 @@ function SkillPanel({ skill, reference, isWelded, isFirst }) {
       </ul>
 
       <div className="cartouche-footer">
-        <span>ÉCH. 1:1</span>
-        <span>OUTILS : {skill.technos.length}</span>
-        <span>RÉV. 2026</span>
+        <span>{t.skills.scale}</span>
+        <span>
+          {t.skills.tools} : {skill.technos.length}
+        </span>
+        <span>{t.skills.revision} 2026</span>
       </div>
     </div>
   );

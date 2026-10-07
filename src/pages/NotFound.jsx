@@ -1,18 +1,21 @@
 import { Link } from "react-router";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function NotFound() {
-  usePageTitle("Page introuvable");
+  const { t } = useLanguage();
+  usePageTitle(t.notFound.pageTitle);
 
   return (
     <section className="not-found">
-      <p className="not-found-code">ERREUR 404</p>
+      <p className="not-found-code">{t.notFound.code}</p>
       <h1>
-        Pièce <span className="accent">introuvable</span>.
+        {t.notFound.titleBefore}
+        <span className="accent">{t.notFound.titleAccent}</span>.
       </h1>
-      <p>Cette page n'existe pas, ou elle est encore sur l'établi.</p>
+      <p>{t.notFound.text}</p>
       <Link to="/" className="btn btn-primary">
-        Retour à l'accueil
+        {t.notFound.back}
       </Link>
     </section>
   );

@@ -1,6 +1,7 @@
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
 import RichText from "./RichText";
+import { useLanguage } from "../i18n/LanguageContext";
 
 // Sur la carte, on ne montre que les premières technos : la liste complète est dans la modale
 const MAX_TECHNOS = 4;
@@ -11,6 +12,7 @@ const MAX_TECHNOS = 4;
 //   3. le titre
 //   4. la description et les technos
 function ProjectCard({ number, title, category, description, technos, image, onClick }) {
+  const { t } = useLanguage();
   // slice(0, 4) : une copie des 4 premiers éléments (le tableau d'origine n'est pas modifié)
   const visibleTechnos = technos.slice(0, MAX_TECHNOS);
   const hiddenCount = technos.length - visibleTechnos.length;
@@ -28,7 +30,9 @@ function ProjectCard({ number, title, category, description, technos, image, onC
       </div>
 
       <div className="project-meta">
-        <span className="project-ref">N° {String(number).padStart(2, "0")}</span>
+        <span className="project-ref">
+          {t.projects.number} {String(number).padStart(2, "0")}
+        </span>
         <span className="project-category">{category}</span>
       </div>
 
@@ -57,7 +61,7 @@ function ProjectCard({ number, title, category, description, technos, image, onC
           {hiddenCount > 0 && (
             <li className="tech-badge tech-badge-more">
               +{hiddenCount}
-              <span className="sr-only"> autres technologies</span>
+              <span className="sr-only">{t.projects.moreTechnos}</span>
             </li>
           )}
         </ul>

@@ -1,6 +1,7 @@
 import { useState, useId, useRef, useEffect, useLayoutEffect } from "react";
 import Weld from "./Weld";
 import { API_URL } from "../utils/api";
+import { useLanguage } from "../i18n/LanguageContext";
 
 /* ===== Les listes de choix ===== */
 // Une petite mallette, pour mettre en avant le choix « Recrutement »
@@ -20,28 +21,27 @@ const briefcaseIcon = (
   </svg>
 );
 
+// Chaque choix a une « value » : c'est elle qui est envoyée au serveur, elle ne change jamais.
+// Le texte affiché, lui, dépend de la langue : il est dans src/i18n/texts.js (t.form.types, etc.),
+// rangé sous la même « value ».
 const requestTypes = [
-  { value: "site", label: "Site vitrine" },
-  { value: "application", label: "Application" },
+  { value: "site" },
+  { value: "application" },
   // variant : un style à part (bleu acier, la couleur de la fiche de poste) ; icon : l'icône affichée devant
-  { value: "recrutement", label: "Recrutement", variant: "steel", icon: briefcaseIcon },
-  { value: "autre", label: "Autre" },
+  { value: "recrutement", variant: "steel", icon: briefcaseIcon },
+  { value: "autre" },
 ];
 
 // Cette liste doit rester la même que CONTRACT_TYPES dans server/validation.js : le serveur refuse
 // tout contrat qui n'y est pas.
 const contractTypes = [
-  { value: "cdi", label: "CDI" },
-  { value: "cdd", label: "CDD" },
+  { value: "cdi" },
+  { value: "cdd" },
   // unavailable : affiché, mais grisé et non cliquable, avec la mention « indisponible »
-  { value: "freelance", label: "Freelance", unavailable: true },
+  { value: "freelance", unavailable: true },
 ];
 
-const remoteOptions = [
-  { value: "site", label: "Sur site" },
-  { value: "hybride", label: "Hybride" },
-  { value: "remote", label: "Télétravail complet" },
-];
+const remoteOptions = [{ value: "site" }, { value: "hybride" }, { value: "remote" }];
 
 
 const initialForm = {
@@ -136,50 +136,51 @@ function suggestEmail(email) {
 }
 
 /* ===== La validation ===== */
-function validate(form, cityLookup) {
+// messages : les textes des erreurs dans la langue en cours (t.form.errors, voir src/i18n/texts.js)
+function validate(form, cityLookup, messages) {
   const errors = {};
 
   if (!form.type) {
-    errors.type = "Choisissez un type de demande.";
+    errors.type = messages.type;
   }
   if (!NAME_PATTERN.test(form.firstName.trim())) {
-    errors.firstName = "Indiquez votre prénom (lettres uniquement).";
+    errors.firstName = messages.firstName;
   }
   if (!NAME_PATTERN.test(form.lastName.trim())) {
-    errors.lastName = "Indiquez votre nom (lettres uniquement).";
+    errors.lastName = messages.lastName;
   }
   if (!isEmailValid(form.email)) {
-    errors.email = "Cette adresse email semble invalide.";
+    errors.email = messages.email;
   }
 
   // Champs supplémentaires, vérifiés uniquement pour un recrutement
   if (form.type === "recrutement") {
     if (form.company.trim().length < 2) {
-      errors.company = "Indiquez le nom de l'entreprise.";
+      errors.company = messages.company;
     }
     if (form.position.trim().length < 2) {
-      errors.position = "Indiquez l'intitulé du poste.";
+      errors.position = messages.position;
     }
     if (!form.contract) {
-      errors.contract = "Choisissez un type de contrat.";
+      errors.contract = messages.contract;
     }
 
     // Code postal et ville, selon la réponse du service officiel
     if (!/^\d{5}$/.test(form.postalCode)) {
-      errors.postalCode = "Le code postal doit contenir 5 chiffres.";
+      errors.postalCode = messages.postalCode;
     } else if (cityLookup.status === "loading") {
-      errors.postalCode = "Vérification du code postal en cours, patientez un instant.";
+      errors.postalCode = messages.postalCodeLoading;
     } else if (cityLookup.status === "notfound") {
-      errors.postalCode = "Ce code postal n'existe pas.";
+      errors.postalCode = messages.postalCodeUnknown;
     } else if (cityLookup.status === "found" && !cityLookup.communes.includes(form.city)) {
-      errors.city = "Choisissez la commune dans la liste.";
+      errors.city = messages.cityChoose;
     } else if (cityLookup.status === "error" && form.city.trim().length < 2) {
-      errors.city = "Indiquez la ville du poste.";
+      errors.city = messages.city;
     }
   }
 
   if (form.message.trim().length < 20) {
-    errors.message = "Détaillez un peu votre demande (20 caractères minimum).";
+    errors.message = messages.message;
   }
 
   return errors;
@@ -224,17 +225,20 @@ function TextField({ id, name, label, error, children, ...inputProps }) {
 }
 
 /* ===== Un groupe de boutons à choix unique, réutilisable ===== */
-function OptionGroup({ name, legend, options, value, onSelect, error, optional = false }) {
+// labels : le texte de chaque choix dans la langue en cours, rangé sous sa « value » (ex. : { cdi: "CDI" })
+function OptionGroup({ name, legend, options, labels, value, onSelect, error, optional = false }) {
+  const { t } = useLanguage();
+
   return (
     <fieldset className={`form-field ${error ? "has-error" : ""}`} data-field={name}>
       <legend>
         {legend}
         {optional ? (
-          <span className="form-optional"> (facultatif)</span>
+          <span className="form-optional">{t.form.optional}</span>
         ) : (
           <>
             <RequiredMark />
-            <span className="sr-only"> (obligatoire)</span>
+            <span className="sr-only">{t.form.required}</span>
           </>
         )}
       </legend>
@@ -257,8 +261,8 @@ function OptionGroup({ name, legend, options, value, onSelect, error, optional =
             onClick={() => onSelect(name, option.value)}
           >
             {option.icon}
-            {option.label}
-            {option.unavailable && <span className="type-option-note">indisponible</span>}
+            {labels[option.value]}
+            {option.unavailable && <span className="type-option-note">{t.form.unavailable}</span>}
           </button>
         ))}
       </div>
@@ -269,6 +273,9 @@ function OptionGroup({ name, legend, options, value, onSelect, error, optional =
 
 /* ===== Le formulaire ===== */
 function ContactForm() {
+  // lang : la langue en cours ; f : les textes du formulaire dans cette langue (voir src/i18n/texts.js)
+  const { lang, t } = useLanguage();
+  const f = t.form;
   const id = useId();
   const orderRef = useRef(null);
   const formRef = useRef(null);
@@ -386,7 +393,7 @@ function ContactForm() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const newErrors = validate(form, cityLookup);
+    const newErrors = validate(form, cityLookup, f.errors);
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       showFirstError(newErrors);
@@ -414,11 +421,21 @@ function ContactForm() {
 
       setStatus("idle");
 
+      // Le serveur écrit ses messages en français. En anglais, f.serverErrors donne leur équivalent
+      // (un par champ) ; en français, f.serverErrors vaut null et on garde les messages du serveur.
+      const serverErrors = f.serverErrors;
+
       // 400 : le serveur a trouvé des erreurs dans les champs
       if (response.status === 400 && result.errors) {
+        const fieldErrors = serverErrors
+          ? Object.fromEntries(
+              Object.keys(result.errors).map((field) => [field, serverErrors[field] ?? f.errors.generic])
+            )
+          : result.errors;
+
         setSubmitError("");
-        setErrors(result.errors);
-        showFirstError(result.errors);
+        setErrors(fieldErrors);
+        showFirstError(fieldErrors);
         return;
       }
 
@@ -428,13 +445,15 @@ function ContactForm() {
         setRetryIn(Number(response.headers.get("Retry-After")) || 60);
       }
 
-      setSubmitError(result.error || "Une erreur est survenue. Réessayez dans quelques instants.");
+      if (serverErrors) {
+        setSubmitError(response.status === 429 ? serverErrors.tooMany : f.errors.generic);
+      } else {
+        setSubmitError(result.error || f.errors.generic);
+      }
     } catch {
       // Le serveur ne répond pas du tout (éteint, pas de connexion...)
       setStatus("idle");
-      setSubmitError(
-        "Impossible de joindre le serveur. Vérifiez votre connexion ou écrivez-moi directement."
-      );
+      setSubmitError(f.errors.network);
     }
   }
 
@@ -456,9 +475,9 @@ function ContactForm() {
     // 1. Le texte d'état, selon l'avancée de la vérification
     let statusText = null;
     if (cityLookup.status === "found" && cityLookup.communes.length > 1) {
-      statusText = `${cityLookup.communes.length} communes pour ce code postal.`;
+      statusText = f.cityCount(cityLookup.communes.length);
     } else if (cityLookup.status === "error") {
-      statusText = "Vérification indisponible : saisissez la ville.";
+      statusText = f.cityUnavailable;
     }
 
     // 2. On relie au champ les textes réellement affichés, pour les lecteurs d'écran
@@ -479,7 +498,7 @@ function ContactForm() {
     if (cityLookup.status === "found") {
       control = (
         <select {...common}>
-          {cityLookup.communes.length > 1 && <option value="">Choisissez la commune</option>}
+          {cityLookup.communes.length > 1 && <option value="">{f.cityChoose}</option>}
           {cityLookup.communes.map((commune) => (
             <option key={commune} value={commune}>
               {commune}
@@ -490,15 +509,14 @@ function ContactForm() {
     } else if (cityLookup.status === "error") {
       control = <input {...common} type="text" autoComplete="address-level2" maxLength={100} />;
     } else {
-      const placeholder =
-        cityLookup.status === "loading" ? "Recherche en cours..." : "Saisissez d'abord le code postal";
+      const placeholder = cityLookup.status === "loading" ? f.citySearching : f.cityWaiting;
       control = <input {...common} type="text" placeholder={placeholder} disabled />;
     }
 
     return (
       <div className={`form-field ${errors.city ? "has-error" : ""}`} data-field="city">
         <label htmlFor={fieldId}>
-          Ville
+          {f.city}
           <RequiredMark />
         </label>
         {control}
@@ -524,27 +542,26 @@ function ContactForm() {
       {status === "success" && <Weld />}
 
       <div className="work-order-header">
-        <span>Ordre de fabrication</span>
-        <span>N° {orderNumber}</span>
+        <span>{f.header}</span>
+        <span>
+          {f.number} {orderNumber}
+        </span>
       </div>
 
       {status === "success" ? (
         <div className="work-order-success">
-          <p className="stamp">Validé</p>
-          <h3>Commande bien reçue !</h3>
-          <p>
-            Merci {form.firstName}, je reviens vers vous sous 48 heures
-            {isRecruitment && ", avec mon CV en pièce jointe"}.
-          </p>
+          <p className="stamp">{f.stamp}</p>
+          <h3>{f.successTitle}</h3>
+          <p>{f.success(form.firstName, isRecruitment)}</p>
           <button type="button" className="btn btn-secondary" onClick={handleReset}>
-            Nouvelle demande
+            {f.newRequest}
           </button>
         </div>
       ) : (
         <form className="work-order-form" ref={formRef} onSubmit={handleSubmit} noValidate>
           {/* Champ piège : caché aux humains et aux lecteurs d'écran, rempli par les robots */}
           <div className="honeypot" aria-hidden="true">
-            <label htmlFor={`${id}-website`}>Ne pas remplir</label>
+            <label htmlFor={`${id}-website`}>{f.honeypot}</label>
             <input
               id={`${id}-website`}
               name="website"
@@ -559,14 +576,15 @@ function ContactForm() {
           {/* La légende de l'astérisque, avant les champs. aria-hidden : un lecteur d'écran n'en a pas
               besoin, il annonce déjà « obligatoire » sur chaque champ */}
           <p className="form-required-note" aria-hidden="true">
-            <RequiredMark /> Champs obligatoires
+            <RequiredMark /> {f.requiredNote}
           </p>
 
           {/* 1. Le type de demande, en premier : il adapte la suite du formulaire */}
           <OptionGroup
             name="type"
-            legend="Type de demande"
+            legend={f.type}
             options={requestTypes}
+            labels={f.types}
             value={form.type}
             onSelect={selectOption}
             error={errors.type}
@@ -577,7 +595,7 @@ function ContactForm() {
             <TextField
               id={id}
               name="firstName"
-              label="Prénom"
+              label={f.firstName}
               type="text"
               value={form.firstName}
               onChange={handleChange}
@@ -588,7 +606,7 @@ function ContactForm() {
             <TextField
               id={id}
               name="lastName"
-              label="Nom"
+              label={f.lastName}
               type="text"
               value={form.lastName}
               onChange={handleChange}
@@ -601,7 +619,7 @@ function ContactForm() {
           <TextField
             id={id}
             name="email"
-            label={isRecruitment ? "Email professionnel" : "Email"}
+            label={isRecruitment ? f.workEmail : f.email}
             type="email"
             value={form.email}
             onChange={handleChange}
@@ -611,11 +629,12 @@ function ContactForm() {
           >
             {emailSuggestion && (
               <p className="form-suggestion">
-                Vouliez-vous dire{" "}
+                {f.didYouMean}{" "}
                 <button type="button" onClick={() => selectOption("email", emailSuggestion)}>
                   {emailSuggestion}
-                </button>{" "}
-                ?
+                </button>
+                {/* En français, une espace avant le point d'interrogation ; pas en anglais */}
+                {lang === "fr" ? " ?" : "?"}
               </p>
             )}
           </TextField>
@@ -623,13 +642,13 @@ function ContactForm() {
           {/* 3. La fiche de poste, uniquement si "Recrutement" est choisi */}
           {isRecruitment && (
             <div className="recruit-block">
-              <p className="recruit-block-title">Fiche de poste</p>
+              <p className="recruit-block-title">{f.jobBlock}</p>
 
               <div className="form-row">
                 <TextField
                   id={id}
                   name="company"
-                  label="Entreprise"
+                  label={f.company}
                   type="text"
                   value={form.company}
                   onChange={handleChange}
@@ -640,11 +659,11 @@ function ContactForm() {
                 <TextField
                   id={id}
                   name="position"
-                  label="Intitulé du poste"
+                  label={f.position}
                   type="text"
                   value={form.position}
                   onChange={handleChange}
-                  placeholder="Ex. : Développeur full stack"
+                  placeholder={f.positionPlaceholder}
                   maxLength={100}
                   error={errors.position}
                 />
@@ -652,8 +671,9 @@ function ContactForm() {
 
               <OptionGroup
                 name="contract"
-                legend="Type de contrat"
+                legend={f.contract}
                 options={contractTypes}
+                labels={f.contracts}
                 value={form.contract}
                 onSelect={selectOption}
                 error={errors.contract}
@@ -664,14 +684,14 @@ function ContactForm() {
                 <TextField
                   id={id}
                   name="postalCode"
-                  label="Code postal"
+                  label={f.postalCode}
                   type="text"
                   inputMode="numeric"
                   value={form.postalCode}
                   onChange={handleChange}
                   autoComplete="postal-code"
                   maxLength={5}
-                  placeholder="Ex. : 75011"
+                  placeholder={f.postalCodePlaceholder}
                   error={errors.postalCode}
                 />
                 {renderCityField()}
@@ -679,21 +699,22 @@ function ContactForm() {
 
               <OptionGroup
                 name="remote"
-                legend="Mode de travail"
+                legend={f.remote}
                 options={remoteOptions}
+                labels={f.remotes}
                 value={form.remote}
                 onSelect={selectOption}
                 optional
               />
 
-              <p className="form-hint">Mon CV vous sera envoyé par email en réponse à votre message.</p>
+              <p className="form-hint">{f.cvHint}</p>
             </div>
           )}
 
           {/* 4. Le message */}
           <div className={`form-field ${errors.message ? "has-error" : ""}`} data-field="message">
             <label htmlFor={`${id}-message`}>
-              {isRecruitment ? "Description du poste" : "Cahier des charges"}
+              {isRecruitment ? f.jobMessage : f.message}
               <RequiredMark />
             </label>
             <textarea
@@ -704,11 +725,7 @@ function ContactForm() {
               value={form.message}
               onChange={handleChange}
               aria-required="true"
-              placeholder={
-                isRecruitment
-                  ? "Missions, stack technique, équipe, date de démarrage..."
-                  : "Décrivez votre projet, votre besoin ou votre offre..."
-              }
+              placeholder={isRecruitment ? f.jobMessagePlaceholder : f.messagePlaceholder}
               aria-invalid={Boolean(errors.message)}
               aria-describedby={`${id}-message-error`}
             ></textarea>
@@ -721,9 +738,9 @@ function ContactForm() {
 
           {/* Information RGPD : dans un nouvel onglet, pour ne pas perdre la saisie */}
           <p className="form-privacy">
-            Vos données servent uniquement à répondre à votre demande.{" "}
+            {f.privacy}{" "}
             <a href="/confidentialite" target="_blank" rel="noreferrer">
-              Politique de confidentialité ↗
+              {f.privacyLink} ↗
             </a>
           </p>
 
@@ -739,10 +756,10 @@ function ContactForm() {
             disabled={status === "sending" || retryIn > 0}
           >
             {status === "sending"
-              ? "Fabrication en cours..."
+              ? f.sending
               : retryIn > 0
-                ? `Patientez ${Math.floor(retryIn / 60)}:${String(retryIn % 60).padStart(2, "0")}`
-                : "Lancer la fabrication →"}
+                ? `${f.wait} ${Math.floor(retryIn / 60)}:${String(retryIn % 60).padStart(2, "0")}`
+                : f.submit}
           </button>
         </form>
       )}

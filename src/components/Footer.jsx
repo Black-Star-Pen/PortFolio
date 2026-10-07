@@ -3,15 +3,18 @@ import { Link } from "react-router";
 import FooterEdge from "./FooterEdge";
 import Weld from "./Weld";
 import { scrollToSiteTop } from "../utils/siteTop";
+import { useLanguage } from "../i18n/LanguageContext";
 
+// Les liens du plan du site : leur ancre, et le nom de leur texte dans t.nav (voir src/i18n/texts.js)
 const navLinks = [
-  { href: "/#about", label: "À propos" },
-  { href: "/#skills", label: "Compétences" },
-  { href: "/#projects", label: "Projets" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/#about", name: "about" },
+  { href: "/#skills", name: "skills" },
+  { href: "/#projects", name: "projects" },
+  { href: "/#contact", name: "contact" },
 ];
 
 function Footer() {
+  const { t } = useLanguage();
   const year = new Date().getFullYear();
   const cartoucheRef = useRef(null);
   const [isWelded, setIsWelded] = useState(false);
@@ -51,51 +54,53 @@ function Footer() {
             <Link to="/" className="navbar-logo" onClick={scrollToSiteTop}>
               ADAM <span className="accent">BOULKHEDERT</span>
             </Link>
-            <p>Développeur full stack. Du métal au code, le goût du travail bien fait.</p>
+            <p>{t.footer.tagline}</p>
 
             {/* Les remerciements, sous la signature.
                 Ce lien n'a pas « noreferrer », contrairement aux autres liens externes : le site d'Octaforge
                 peut ainsi voir que la visite vient de ce portfolio. « noopener » suffit à la sécurité :
                 la page ouverte dans le nouvel onglet ne peut pas agir sur celle-ci. */}
             <p className="footer-thanks">
-              Petite mention honorable, merci pour tout à Cédric, développeur et fondateur d'
+              {t.footer.thanks}
               <a href="https://octaforge.fr/" target="_blank" rel="noopener">
                 Octaforge <span aria-hidden="true">↗</span>
-                <span className="sr-only"> (nouvel onglet)</span>
+                <span className="sr-only">{t.common.newTab}</span>
               </a>
             </p>
           </div>
 
           {/* La navigation */}
-          <nav className="footer-col" aria-label="Navigation du pied de page">
-            <p className="footer-col-title">Plan du site</p>
+          <nav className="footer-col" aria-label={t.footer.navLabel}>
+            <p className="footer-col-title">{t.footer.siteMap}</p>
             {navLinks.map((link) => (
               <a key={link.href} href={link.href}>
-                {link.label}
+                {t.nav[link.name]}
               </a>
             ))}
           </nav>
 
           {/* Les liens externes et légaux */}
           <div className="footer-col">
-            <p className="footer-col-title">Liens</p>
+            <p className="footer-col-title">{t.footer.links}</p>
             <a href="https://github.com/Black-Star-Pen" target="_blank" rel="noreferrer">
               GitHub ↗
             </a>
             <a href="https://www.linkedin.com/in/adam-boulkhedert" target="_blank" rel="noreferrer">
               LinkedIn ↗
             </a>
-            <Link to="/mentions-legales">Mentions légales</Link>
-            <Link to="/confidentialite">Confidentialité</Link>
+            <Link to="/mentions-legales">{t.footer.legal}</Link>
+            <Link to="/confidentialite">{t.footer.privacy}</Link>
           </div>
         </div>
 
         {/* Le cartouche, comme en bas d'un plan technique */}
         <div className="footer-cartouche" ref={cartoucheRef}>
           <span>© {year} Adam Boulkhedert</span>
-          <span>Conçu et soudé à la main</span>
+          <span>{t.footer.handmade}</span>
           <span>React · Express</span>
-          <span>RÉV. {year}</span>
+          <span>
+            {t.footer.revision} {year}
+          </span>
           {/* En dernier, pour ne pas décaler les :nth-child du CSS mobile */}
           {isWelded && <Weld variant="blue" />}
         </div>
