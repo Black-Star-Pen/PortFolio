@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
 import RichText from "./RichText";
-import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
+import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../utils/smoothScroll";
 
 // Le glissement du doigt qui fait changer de projet (sur téléphone) :
 // il doit parcourir au moins SWIPE_DISTANCE pixels à l'horizontale, et être nettement plus horizontal
@@ -32,6 +32,7 @@ function ProjectModal({
   const { slug, title, category, description, details, technos, image, links, linksNote } = project;
   const titleId = useId();
   const overlayRef = useRef(null);
+  const modalRef = useRef(null);
   const closeButtonRef = useRef(null);
   // De quel côté arrive la fiche : "next" (par la droite), "previous" (par la gauche),
   // ou null à l'ouverture (elle apparaît alors normalement). Voir .modal-from-… dans le CSS.
@@ -48,6 +49,11 @@ function ProjectModal({
     setDirection("next");
     onNext();
   }
+
+  // Le défilement fluide à l'intérieur de la fiche, le même que celui de la page (voir startSmoothScrollIn).
+  // La fiche est remplacée par une nouvelle à chaque changement de projet (key={slug}, plus bas) :
+  // « slug » dans les dépendances relance donc le défilement fluide sur la nouvelle fiche.
+  useEffect(() => startSmoothScrollIn(modalRef.current), [slug]);
 
   useEffect(() => {
     // On retient l'élément qui avait le focus (la carte cliquée)...
@@ -135,11 +141,12 @@ function ProjectModal({
     >
       {/* key={slug} : quand on change de projet, React remplace la fiche par une nouvelle au lieu de
           modifier l'ancienne. Elle repart donc du haut, et son animation d'arrivée se rejoue.
-          data-lenis-prevent : à l'intérieur de la modale, la molette fait défiler la modale elle-même,
-          normalement. Sans cet attribut, le défilement fluide de la page (smoothScroll.js) prendrait
-          la molette pour lui, et la modale ne bougerait pas. */}
+          data-lenis-prevent : à l'intérieur de la modale, la molette fait défiler la modale elle-même.
+          Sans cet attribut, le défilement fluide de la PAGE (smoothScroll.js) prendrait la molette
+          pour lui, et la modale ne bougerait pas. La fiche a son propre défilement fluide (voir plus haut). */}
       <div
         key={slug}
+        ref={modalRef}
         className={`modal ${direction ? `modal-from-${direction}` : ""}`}
         data-lenis-prevent
         onClick={(event) => event.stopPropagation()}

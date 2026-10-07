@@ -67,6 +67,37 @@ export function startSmoothScroll() {
   };
 }
 
+// Le même défilement fluide, mais à l'intérieur d'une zone qui défile toute seule : une modale.
+// Lenis accepte plusieurs instances : celle-ci ne s'occupe que de cette zone (« wrapper »), avec la même
+// durée de glisse que la page. Renvoie la fonction qui l'arrête (pour le nettoyage de useEffect).
+export function startSmoothScrollIn(wrapper) {
+  if (!wrapper || !wantsSmoothScroll()) return () => {};
+
+  const instance = new Lenis({
+    wrapper,
+    content: wrapper.firstElementChild,
+    duration: DURATION,
+  });
+
+  // La hauteur du contenu peut changer pendant que la modale est ouverte (une image qui arrive, des
+  // champs de formulaire qui apparaissent). Lenis ne le voit pas toujours : on le lui signale, sinon il
+  // s'arrêterait avant le vrai bas de la zone.
+  let knownHeight = wrapper.scrollHeight;
+  const tick = (time) => {
+    if (wrapper.scrollHeight !== knownHeight) {
+      knownHeight = wrapper.scrollHeight;
+      instance.resize();
+    }
+    instance.raf(time * 1000);
+  };
+  gsap.ticker.add(tick);
+
+  return () => {
+    gsap.ticker.remove(tick);
+    instance.destroy();
+  };
+}
+
 // Fait défiler jusqu'à un élément de la page (une section, par exemple).
 // Lenis tient compte de sa marge « scroll-margin-top » (voir « section » dans le CSS), comme le navigateur.
 export function scrollToElement(element) {

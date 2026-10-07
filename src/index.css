@@ -2668,18 +2668,29 @@ html.has-intro .hero-pin {
   stroke-linejoin: round;
 }
 
-/* Au survol : la flèche se remplit de doré et avance d'un rien dans son sens */
-.modal-nav-button:hover {
+/* Au survol : la flèche se remplit de doré et avance d'un rien dans son sens.
+   @media (hover: hover) : seulement sur un appareil qui a un vrai survol (souris, pavé tactile).
+   Sur un téléphone, le « survol » reste collé au dernier élément touché : la flèche restait dorée
+   après chaque appui. */
+@media (hover: hover) {
+  .modal-nav-button:hover {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .modal-nav-button:first-child:hover {
+    transform: translateX(-3px);
+  }
+
+  .modal-nav-button:last-child:hover {
+    transform: translateX(3px);
+  }
+}
+
+/* Pendant l'appui (au doigt comme à la souris), la flèche se remplit : on voit que le geste est pris en compte */
+.modal-nav-button:active {
   background-color: var(--color-accent);
   color: var(--color-bg);
-}
-
-.modal-nav-button:first-child:hover {
-  transform: translateX(-3px);
-}
-
-.modal-nav-button:last-child:hover {
-  transform: translateX(3px);
 }
 
 .modal-nav-button:focus-visible {

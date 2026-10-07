@@ -26,8 +26,14 @@
       "Apache ECharts",
       "Discord"
     ],
-    "image": "",
-    "links": []
+    "image": "/projects/askvera.webp",
+    "links": [
+      {
+        "type": "site",
+        "label": "Voir le site",
+        "url": "https://front-on-vera.vercel.app/"
+      }
+    ]
   },
   {
     "id": 2,
@@ -106,7 +112,18 @@
       "Nodemailer",
       "CSS"
     ],
-    "image": "",
-    "links": []
+    "image": "/projects/portfolio.webp",
+    "links": [
+      {
+        "type": "site",
+        "label": "Voir le site",
+        "url": "https://adam-boulkhedert.onrender.com/"
+      },
+      {
+        "type": "code",
+        "label": "Voir le code",
+        "url": "https://github.com/Black-Star-Pen/Portfolio"
+      }
+    ]
   }
 ]

@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
 import ContactForm from "./ContactForm";
 import ContactLinks from "./ContactLinks";
-import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
+import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../utils/smoothScroll";
 
 function ContactModal({ onClose }) {
   const dialogRef = useRef(null);
+
+  // Le défilement fluide à l'intérieur de la modale, le même que celui de la page (voir startSmoothScrollIn)
+  useEffect(() => startSmoothScrollIn(dialogRef.current), []);
 
   useEffect(() => {
     // 1. On mémorise le bouton qui a ouvert la modale
