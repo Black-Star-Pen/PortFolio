@@ -2,3 +2,6 @@
 # « User-agent: * » = la règle vaut pour tous les robots ; « Allow: / » = ils peuvent tout parcourir.
 User-agent: *
 Allow: /
+
+# Le plan du site : la liste des pages, pour que les robots n'en oublient aucune
+Sitemap: https://adam-boulkhedert.onrender.com/sitemap.xml
