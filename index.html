@@ -22,6 +22,10 @@
     <meta name="author" content="Adam Boulkhedert" />
     <!-- La couleur de la barre du navigateur sur mobile : le fond du site -->
     <meta name="theme-color" content="#0a0b0f" />
+    <!-- Le thème choisi par le visiteur à sa dernière visite (clair ou sombre). Ce petit script est lu
+         avant l'affichage de la page, pour éviter un éclair de thème sombre. Il est dans un fichier à part
+         (public/theme-init.js) : la règle de sécurité du site refuse les scripts écrits dans la page. -->
+    <script src="/theme-init.js"></script>
 
     <!-- L'adresse officielle de la page : si le site est joignable par plusieurs adresses, c'est celle-ci
          que les moteurs de recherche retiennent -->

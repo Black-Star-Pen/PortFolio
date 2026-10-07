@@ -1,8 +1,15 @@
 /* ===== 1. Variables ===== */
-:root {
+/* Deux thèmes : sombre (celui d'origine, par défaut) et clair. Toutes les couleurs du site passent par
+   les variables ci-dessous ; le thème clair, plus bas, ne fait que leur donner d'autres valeurs.
+   Le thème est choisi avec le bouton de la navbar, qui pose data-theme="light" sur <html>
+   (voir src/utils/theme.js).
+   « :root, .intro » : ces valeurs sombres valent pour tout le site, ET sont redonnées à l'intro.
+   L'intro reste ainsi une scène sombre même en thème clair : son film est fait pour le noir. */
+:root,
+.intro {
   --color-bg: #0a0b0f;
   --color-surface: #111318;
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border: rgba(var(--rgb-ink), 0.08);
   --color-text: #f2efe9;
   --color-muted: #9a9ca5;
   --color-accent: #d6bf94;
@@ -11,6 +18,37 @@
   --color-required: #f87171; /* rouge de l'astérisque des champs obligatoires */
   --color-available: #4ade80;
   --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
+
+  /* Les mêmes couleurs écrites « rouge, vert, bleu », pour pouvoir régler leur transparence :
+     rgba(var(--rgb-accent), 0.3) donne le doré à 30 %. */
+  --rgb-accent: 214, 191, 148;
+  --rgb-steel: 143, 179, 201;
+  --rgb-tig: 168, 212, 245;
+  --rgb-arc: 120, 190, 255; /* le bleu vif de l'arc, pour les lueurs */
+  --rgb-arc-deep: 60, 130, 255;
+  --rgb-bg: 10, 11, 15;
+  --rgb-surface: 17, 19, 24;
+  --rgb-ink: 255, 255, 255; /* ce qu'on pose PAR-DESSUS le fond pour le nuancer : du blanc sur le sombre */
+  --rgb-muted: 154, 156, 165;
+  --rgb-error: 227, 160, 143;
+
+  /* Le métal « chauffé à blanc » des soudures et des traits lumineux, et son halo ; puis leur version bleue */
+  --hot: #fffbe8;
+  --hot-halo: #fff1c1;
+  --hot-white: #fff;
+  --hot-blue: #f2f9ff;
+  --hot-blue-halo: #d6ecff;
+
+  /* Les plaques d'acier (la référence des cartes projet et de la modale) et le fond le plus profond */
+  --plate-top: #171c22;
+  --plate-bottom: #0c0f13;
+  --color-deep: #0d0f14;
+
+  /* Les points éclairés du panneau perforé (section 12) */
+  --peg-light: rgba(255, 236, 190, 0.95);
+
+  /* Le jeu de couleurs des éléments dessinés par le navigateur (listes déroulantes, cases…) */
+  --scheme: dark;
 
   /* Le métal des bordures (cartes projet, boutons au contour en laiton) : un dégradé en biais
      qui alterne reflets clairs et creux sombres, comme une baguette de laiton poli.
@@ -56,6 +94,79 @@
   --section-space: clamp(100px, 12.5vw, 160px);
 }
 
+/* ----- Le thème clair : « ivoire doré », le plan sur papier -----
+   Le fond devient un papier ivoire, chaud et lumineux, le texte une encre presque noire.
+   Le doré est dédoublé, parce qu'un doré clair est illisible sur du papier :
+   - --color-accent, foncé, sert au TEXTE : il garde un contraste d'au moins 4,5 avec le fond, le seuil
+     de lisibilité d'un texte (les bleus aussi) ;
+   - --rgb-accent, plus lumineux, sert aux TRAITS et aux bordures, qui peuvent briller davantage.
+   Le métal « chauffé » ne peut plus être blanc sur du blanc : il devient orange, la couleur d'une
+   pièce qu'on chauffe. Les retouches section par section sont à la fin du fichier (section 21). */
+:root[data-theme="light"] {
+  --color-bg: #faf6ee;
+  --color-surface: #ffffff;
+  --color-border: rgba(var(--rgb-ink), 0.14);
+  --color-text: #1b1a17;
+  --color-muted: #5f5b52;
+  --color-accent: #8a6410;
+  --color-steel: #356a92;
+  --color-error: #b24a31;
+  --color-required: #c53030;
+  --color-available: #137236;
+  --color-tig: #17609c;
+
+  --rgb-accent: 176, 134, 46;
+  --rgb-steel: 53, 106, 146;
+  --rgb-tig: 23, 96, 156;
+  --rgb-arc: 30, 120, 220;
+  --rgb-arc-deep: 20, 80, 190;
+  --rgb-bg: 250, 246, 238;
+  --rgb-surface: 255, 255, 255;
+  --rgb-ink: 27, 26, 23; /* ici, on nuance le fond avec de l'encre */
+  --rgb-muted: 95, 91, 82;
+  --rgb-error: 178, 74, 49;
+
+  --hot: #c2620c;
+  --hot-halo: #f0a030;
+  --hot-white: #c2620c;
+  --hot-blue: #0f62c4;
+  --hot-blue-halo: #4c9ff0;
+
+  --plate-top: #ffffff;
+  --plate-bottom: #f0eadc;
+  --color-deep: #f1ecdf;
+
+  /* Le fond des boutons au contour en métal : le papier, à peine teinté de doré ou de bleu */
+  --paper-gold: #fbf5e6;
+  --paper-blue: #eef4fa;
+
+  --peg-light: rgba(var(--rgb-accent), 0.95);
+
+  --scheme: light;
+
+  /* Les deux métaux, plus soutenus : sur du papier, un laiton pâle disparaîtrait */
+  --metal-gold: linear-gradient(
+    135deg,
+    #8a6410 0%,
+    #f0d48a 14%,
+    #c9a24a 28%,
+    #7a560a 46%,
+    #d8b25a 62%,
+    #f0d48a 76%,
+    #946c14 100%
+  );
+  --metal-steel: linear-gradient(
+    135deg,
+    #2f5f85 0%,
+    #9fd0f2 14%,
+    #4a7fa8 28%,
+    #1f4a6e 46%,
+    #5f9cc8 62%,
+    #9fd0f2 76%,
+    #2c5878 100%
+  );
+}
+
 /* ===== 2. Reset ===== */
 *,
 *::before,
@@ -83,7 +194,7 @@ html.lenis {
    Les zones qui défilent à l'intérieur de la page (les modales) règlent la leur de la même façon. */
 html {
   scrollbar-width: thin;
-  scrollbar-color: rgba(214, 191, 148, 0.75) var(--color-bg);
+  scrollbar-color: rgba(var(--rgb-accent), 0.75) var(--color-bg);
 }
 
 /* Safari ne connaît pas encore scrollbar-color : pour lui, on passe par les anciens sélecteurs ::-webkit-.
@@ -101,7 +212,7 @@ html {
 
   ::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color: rgba(214, 191, 148, 0.75);
+    background-color: rgba(var(--rgb-accent), 0.75);
   }
 }
 
@@ -186,12 +297,12 @@ main > section + section::before {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(214, 191, 148, 0.2) 15%,
+    rgba(var(--rgb-accent), 0.2) 15%,
     var(--color-accent) 50%,
-    rgba(214, 191, 148, 0.2) 85%,
+    rgba(var(--rgb-accent), 0.2) 85%,
     transparent
   );
-  filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.55));
+  filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.55));
   transform-origin: left;
   pointer-events: none;
 }
@@ -215,10 +326,10 @@ main > section.seam-welded::after {
   height: 8px;
   margin: -4px 0 0 -4px;
   border-radius: 50%;
-  background-color: #fffbe8;
+  background-color: var(--hot);
   box-shadow:
-    0 0 6px 2px #fff1c1,
-    0 0 16px 6px rgba(214, 191, 148, 0.8),
+    0 0 6px 2px var(--hot-halo),
+    0 0 16px 6px rgba(var(--rgb-accent), 0.8),
     0 0 32px 12px rgba(214, 150, 60, 0.4);
   pointer-events: none;
   animation:
@@ -332,7 +443,7 @@ main > section.seam-welded::after {
 
 .btn-primary {
   border-color: var(--color-accent);
-  background-color: rgba(214, 191, 148, 0.08);
+  background-color: rgba(var(--rgb-accent), 0.08);
   color: var(--color-accent);
 }
 
@@ -362,8 +473,8 @@ main > section.seam-welded::after {
 }
 
 .btn-secondary:hover {
-  border-color: rgba(214, 191, 148, 0.5);
-  background-color: rgba(214, 191, 148, 0.06);
+  border-color: rgba(var(--rgb-accent), 0.5);
+  background-color: rgba(var(--rgb-accent), 0.06);
 }
 
 .btn-small {
@@ -397,11 +508,11 @@ main > section.seam-welded::after {
     conic-gradient(
         from var(--spark-angle),
         transparent 0 32%,
-        rgba(120, 190, 255, 0.45) 44%,
-        #e8f4ff 48.5%,
+        rgba(var(--rgb-arc), 0.45) 44%,
+        var(--hot-blue) 48.5%,
         transparent 50% 80%,
         rgba(251, 232, 182, 0.55) 93%,
-        #fffdf2 98.5%,
+        var(--hot) 98.5%,
         transparent 100%
       )
       border-box,
@@ -430,11 +541,11 @@ main > section.seam-welded::after {
     conic-gradient(
         from var(--spark-angle),
         transparent 0 32%,
-        rgba(60, 130, 255, 0.55) 44%,
-        #d6ecff 48.5%,
+        rgba(var(--rgb-arc-deep), 0.55) 44%,
+        var(--hot-blue-halo) 48.5%,
         transparent 50% 80%,
-        rgba(168, 212, 245, 0.6) 93%,
-        #ffffff 98.5%,
+        rgba(var(--rgb-tig), 0.6) 93%,
+        var(--hot-blue) 98.5%,
         transparent 100%
       )
       border-box,
@@ -590,8 +701,8 @@ html.has-intro .hero-pin {
   transform: rotateX(64deg);
   transform-origin: 50% 100%;
   background-image:
-    linear-gradient(to right, rgba(214, 191, 148, 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(214, 191, 148, 0.5) 1px, transparent 1px);
+    linear-gradient(to right, rgba(var(--rgb-accent), 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--rgb-accent), 0.5) 1px, transparent 1px);
   background-size: 64px 64px;
   background-position: 50% 100%;
   animation: floor-roll 2.6s linear infinite;
@@ -613,8 +724,8 @@ html.has-intro .hero-pin {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 55% 60% at 50% 100%, rgba(214, 191, 148, 0.14), transparent),
-    linear-gradient(to bottom, var(--color-bg) 2%, rgba(10, 11, 15, 0.55) 45%, transparent 82%);
+    radial-gradient(ellipse 55% 60% at 50% 100%, rgba(var(--rgb-accent), 0.14), transparent),
+    linear-gradient(to bottom, var(--color-bg) 2%, rgba(var(--rgb-bg), 0.55) 45%, transparent 82%);
 }
 
 /* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
@@ -674,10 +785,10 @@ html.has-intro .hero-pin {
 @keyframes word-weld {
   0%,
   20% {
-    color: #fffbe8;
+    color: var(--hot);
     text-shadow:
-      0 0 6px #fff1c1,
-      0 0 14px rgba(214, 191, 148, 0.9);
+      0 0 6px var(--hot-halo),
+      0 0 14px rgba(var(--rgb-accent), 0.9);
   }
 }
 
@@ -685,7 +796,7 @@ html.has-intro .hero-pin {
 .reveal-word-steel {
   font-weight: 600;
   color: var(--color-tig);
-  text-shadow: 0 0 10px rgba(168, 212, 245, 0.25);
+  text-shadow: 0 0 10px rgba(var(--rgb-tig), 0.25);
   animation:
     word-reveal 0.5s ease-out var(--word-delay) both,
     word-weld-blue 1s ease-out var(--word-delay) both;
@@ -694,11 +805,11 @@ html.has-intro .hero-pin {
 @keyframes word-weld-blue {
   0%,
   20% {
-    color: #f2f9ff;
+    color: var(--hot-blue);
     text-shadow:
-      0 0 6px #d6ecff,
-      0 0 14px rgba(120, 190, 255, 0.9),
-      0 0 28px rgba(60, 130, 255, 0.5);
+      0 0 6px var(--hot-blue-halo),
+      0 0 14px rgba(var(--rgb-arc), 0.9),
+      0 0 28px rgba(var(--rgb-arc-deep), 0.5);
   }
 }
 
@@ -738,15 +849,15 @@ html.has-intro .hero-pin {
 @keyframes letter-weld {
   0% {
     color: transparent;
-    -webkit-text-stroke: 1px rgba(214, 191, 148, 0.5);
+    -webkit-text-stroke: 1px rgba(var(--rgb-accent), 0.5);
     text-shadow: none;
   }
   15% {
-    color: #fffbe8;
+    color: var(--hot);
     -webkit-text-stroke: 0 transparent;
     text-shadow:
-      0 0 6px #fff1c1,
-      0 0 16px rgba(214, 191, 148, 0.9),
+      0 0 6px var(--hot-halo),
+      0 0 16px rgba(var(--rgb-accent), 0.9),
       0 0 32px rgba(214, 150, 60, 0.6);
   }
   100% {
@@ -799,7 +910,7 @@ html.has-intro .hero-pin {
   display: flex;
   justify-content: center;
   margin-bottom: 24px;
-  border-bottom: 1px solid rgba(214, 191, 148, 0.4);
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.4);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -813,7 +924,7 @@ html.has-intro .hero-pin {
   align-items: center;
   gap: 10px;
   padding: 8px 18px 7px;
-  border: 1px solid rgba(214, 191, 148, 0.4);
+  border: 1px solid rgba(var(--rgb-accent), 0.4);
   border-bottom: 0;
   border-radius: 6px 6px 0 0;
   background-color: var(--color-surface);
@@ -919,23 +1030,23 @@ html.has-intro .hero-pin {
 /* Les formes, en doré ; les axes, plus fins, en « trait mixte » (un long tiret, un point) ;
    les cotes, en bleu clair. Tout est très transparent : le texte de la section reste le premier lu. */
 .epure-shape {
-  stroke: rgba(214, 191, 148, 0.26);
+  stroke: rgba(var(--rgb-accent), 0.26);
   stroke-width: 1.2;
 }
 
 .epure-axis {
-  stroke: rgba(214, 191, 148, 0.2);
+  stroke: rgba(var(--rgb-accent), 0.2);
   stroke-width: 0.8;
   stroke-dasharray: 26 6 4 6;
 }
 
 .epure-dim {
-  stroke: rgba(168, 212, 245, 0.3);
+  stroke: rgba(var(--rgb-tig), 0.3);
   stroke-width: 0.8;
 }
 
 .epure text {
-  fill: rgba(168, 212, 245, 0.45);
+  fill: rgba(var(--rgb-tig), 0.45);
   stroke: none;
   font-family: var(--font-mono);
   font-size: 13px;
@@ -943,7 +1054,7 @@ html.has-intro .hero-pin {
 }
 
 .epure-arrow {
-  fill: rgba(168, 212, 245, 0.5);
+  fill: rgba(var(--rgb-tig), 0.5);
   stroke: none;
 }
 
@@ -1105,7 +1216,7 @@ main > section.seam-welded .epure-fade {
 .timeline-heading {
   margin-bottom: 40px;
   padding-bottom: 16px;
-  border-bottom: 1px dashed rgba(214, 191, 148, 0.3);
+  border-bottom: 1px dashed rgba(var(--rgb-accent), 0.3);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.2em;
@@ -1126,7 +1237,7 @@ main > section.seam-welded .epure-fade {
   width: 2px;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(214, 191, 148, 0.3) 0 6px,
+    rgba(var(--rgb-accent), 0.3) 0 6px,
     transparent 6px 12px
   );
 }
@@ -1135,7 +1246,7 @@ main > section.seam-welded .epure-fade {
   position: absolute;
   inset: 0;
   background-color: var(--color-accent);
-  box-shadow: 0 0 8px rgba(214, 191, 148, 0.6);
+  box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.6);
   transform: scaleY(var(--progress));
   transform-origin: top;
 }
@@ -1148,10 +1259,10 @@ main > section.seam-welded .epure-fade {
   height: 10px;
   margin: -5px 0 0 -5px;
   border-radius: 50%;
-  background-color: #fffbe8;
+  background-color: var(--hot);
   box-shadow:
-    0 0 6px 2px #fff1c1,
-    0 0 16px 6px rgba(214, 191, 148, 0.8),
+    0 0 6px 2px var(--hot-halo),
+    0 0 16px 6px rgba(var(--rgb-accent), 0.8),
     0 0 32px 12px rgba(214, 150, 60, 0.4);
   opacity: 0;
   transition: opacity 0.3s;
@@ -1179,7 +1290,7 @@ main > section.seam-welded .epure-fade {
   left: -43px;
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(214, 191, 148, 0.4);
+  border: 2px solid rgba(var(--rgb-accent), 0.4);
   border-radius: 50%;
   background-color: var(--color-bg);
   transition:
@@ -1191,11 +1302,11 @@ main > section.seam-welded .epure-fade {
 .timeline-item.reached .timeline-dot {
   border-color: var(--color-accent);
   background-color: var(--color-accent);
-  box-shadow: 0 0 12px rgba(214, 191, 148, 0.7);
+  box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.7);
 }
 
 .timeline-item:last-child .timeline-dot {
-  outline: 1px solid rgba(214, 191, 148, 0.4);
+  outline: 1px solid rgba(var(--rgb-accent), 0.4);
   outline-offset: 3px;
 }
 
@@ -1242,20 +1353,20 @@ main > section.seam-welded .epure-fade {
 }
 
 .timeline-type.formation {
-  border-color: rgba(214, 191, 148, 0.45);
-  background-color: rgba(214, 191, 148, 0.06);
+  border-color: rgba(var(--rgb-accent), 0.45);
+  background-color: rgba(var(--rgb-accent), 0.06);
   color: var(--color-accent);
 }
 
 .timeline-type.experience {
-  border-color: rgba(143, 179, 201, 0.45);
-  background-color: rgba(143, 179, 201, 0.06);
+  border-color: rgba(var(--rgb-steel), 0.45);
+  background-color: rgba(var(--rgb-steel), 0.06);
   color: var(--color-steel);
 }
 
 .timeline-type.timeline-status {
   border-style: dashed;
-  border-color: rgba(154, 156, 165, 0.45);
+  border-color: rgba(var(--rgb-muted), 0.45);
   color: var(--color-muted);
 }
 
@@ -1308,11 +1419,11 @@ main > section.seam-welded .epure-fade {
     to right,
     transparent,
     var(--color-accent) 18%,
-    #fff6dc 50%,
+    var(--hot) 50%,
     var(--color-accent) 82%,
     transparent
   );
-  box-shadow: 0 0 14px 2px rgba(214, 191, 148, 0.7);
+  box-shadow: 0 0 14px 2px rgba(var(--rgb-accent), 0.7);
 }
 
 /* La lumière. Cinq dégradés superposés lui donnent sa profondeur, du plus proche au plus lointain :
@@ -1342,18 +1453,18 @@ main > section.seam-welded .epure-fade {
     conic-gradient(
       from 90deg at 50% 0,
       transparent 48deg,
-      rgba(214, 191, 148, 0.15) 74deg,
-      rgba(214, 191, 148, 0.15) 106deg,
+      rgba(var(--rgb-accent), 0.15) 74deg,
+      rgba(var(--rgb-accent), 0.15) 106deg,
       transparent 132deg
     ),
     conic-gradient(
       from 90deg at 50% 0,
       transparent 18deg,
-      rgba(214, 191, 148, 0.08) 56deg,
-      rgba(214, 191, 148, 0.08) 124deg,
+      rgba(var(--rgb-accent), 0.08) 56deg,
+      rgba(var(--rgb-accent), 0.08) 124deg,
       transparent 162deg
     ),
-    radial-gradient(ellipse 30% 15% at 50% 34%, rgba(214, 191, 148, 0.14), transparent 72%);
+    radial-gradient(ellipse 30% 15% at 50% 34%, rgba(var(--rgb-accent), 0.14), transparent 72%);
   mask-image: radial-gradient(
     ellipse 50% 100% at 50% 0,
     #000 6%,
@@ -1412,7 +1523,7 @@ main > section.seam-welded .section-lamp::after {
    (« span 4 » = elle en occupe quatre). Les cartes d'une même ligne partagent donc les mêmes rangées :
    si un titre passe sur deux lignes, son étage grandit sur toutes les cartes, et les filets restent alignés. */
 .project-card {
-  --project-line: rgba(214, 191, 148, 0.2);
+  --project-line: rgba(var(--rgb-accent), 0.2);
   /* Le métal de la bordure : le dégradé de laiton poli défini dans les variables (section 1) */
   --project-metal: var(--metal-gold);
 
@@ -1468,11 +1579,11 @@ main > section.seam-welded .section-lamp::after {
   background: conic-gradient(
     from var(--spark-angle),
     transparent 0 32%,
-    rgba(120, 190, 255, 0.45) 44%,
-    #e8f4ff 48.5%,
+    rgba(var(--rgb-arc), 0.45) 44%,
+    var(--hot-blue) 48.5%,
     transparent 50% 80%,
     rgba(251, 232, 182, 0.55) 93%,
-    #fffdf2 98.5%,
+    var(--hot) 98.5%,
     transparent 100%
   );
   /* Un tour en 15 secondes, et un scintillement sur 4,5 secondes : les lueurs se promènent, elles ne courent pas */
@@ -1575,10 +1686,10 @@ main > section.seam-welded .section-lamp::after {
   height: 100%;
   padding: 24px;
   text-align: center;
-  background-color: #0d0f14;
+  background-color: var(--color-deep);
   background-image:
-    linear-gradient(rgba(143, 179, 201, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(143, 179, 201, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(var(--rgb-steel), 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-steel), 0.07) 1px, transparent 1px);
   background-size: 24px 24px;
   background-position: center;
   transition: transform 0.5s;
@@ -1589,7 +1700,7 @@ main > section.seam-welded .section-lamp::after {
   content: "";
   position: absolute;
   inset: 16px;
-  border: 1px dashed rgba(214, 191, 148, 0.3);
+  border: 1px dashed rgba(var(--rgb-accent), 0.3);
   pointer-events: none;
 }
 
@@ -1637,7 +1748,7 @@ main > section.seam-welded .section-lamp::after {
   /* La plaque d'acier sombre dans laquelle la référence est gravée (voir .project-category) :
      un peu plus claire en haut qu'en bas, avec un filet de lumière sous son bord haut et une ombre
      au-dessus de son bord bas (les deux ombres « inset », à l'intérieur de la plaque). */
-  background: linear-gradient(180deg, #171c22, #0c0f13);
+  background: linear-gradient(180deg, var(--plate-top), var(--plate-bottom));
   box-shadow:
     0 -1px 0 var(--project-line),
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -1673,7 +1784,7 @@ main > section.seam-welded .section-lamp::after {
    ESSAI en cours : les deux versions précédentes sont notées dans feuille-de-route.md. */
 .project-header,
 .modal-content .project-title {
-  --title-line: linear-gradient(rgba(214, 191, 148, 0.35), rgba(214, 191, 148, 0.35));
+  --title-line: linear-gradient(rgba(var(--rgb-accent), 0.35), rgba(var(--rgb-accent), 0.35));
   /* La case fait la largeur de ce qu'elle contient (44px : la flèche, ou le bouton de fermeture)
      plus 16px de chaque côté */
   --cell: 76px;
@@ -1682,9 +1793,9 @@ main > section.seam-welded .section-lamp::after {
     var(--title-line) top / 100% 1px no-repeat,
     var(--title-line) bottom / 100% 1px no-repeat,
     var(--title-line) calc(100% - var(--cell)) 0 / 1px 100% no-repeat,
-    repeating-linear-gradient(135deg, rgba(143, 179, 201, 0.3) 0 1px, transparent 1px 7px) right / var(--cell)
+    repeating-linear-gradient(135deg, rgba(var(--rgb-steel), 0.3) 0 1px, transparent 1px 7px) right / var(--cell)
       100% no-repeat,
-    linear-gradient(90deg, rgba(214, 191, 148, 0.1), rgba(214, 191, 148, 0) 70%);
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.1), rgba(var(--rgb-accent), 0) 70%);
 }
 
 /* 16px à droite (et non 24) : la flèche est ainsi au milieu de sa case de 76px */
@@ -1730,7 +1841,7 @@ main > section.seam-welded .section-lamp::after {
   /* Le numéro est gravé et doré comme le type (voir .project-category). Son cadre est une petite
      cuvette dans la plaque : un fond plus sombre, une ombre à l'intérieur sous le bord du haut (inset),
      et un filet clair sous le bord du bas. */
-  border: 1px solid rgba(214, 191, 148, 0.55);
+  border: 1px solid rgba(var(--rgb-accent), 0.55);
   font-family: var(--font-mono);
   letter-spacing: 0.1em;
   color: var(--color-accent);
@@ -1761,7 +1872,7 @@ main > section.seam-welded .section-lamp::after {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(214, 191, 148, 0.35);
+  border: 1px solid rgba(var(--rgb-accent), 0.35);
   border-radius: 50%;
   /* Un fond plein : les hachures de l'étage du titre ne traversent pas la pastille */
   background-color: var(--color-surface);
@@ -1803,8 +1914,8 @@ main > section.seam-welded .section-lamp::after {
 .project-technos li {
   font-size: 0.8rem;
   padding: 4px 12px;
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(214, 191, 148, 0.25);
+  background-color: rgba(var(--rgb-ink), 0.04);
+  border: 1px solid rgba(var(--rgb-accent), 0.25);
   border-radius: 999px;
   color: var(--color-muted);
 }
@@ -1823,7 +1934,7 @@ main > section.seam-welded .section-lamp::after {
 .tech-badge:hover {
   border-color: var(--color-accent);
   color: var(--color-text);
-  background-color: rgba(214, 191, 148, 0.08);
+  background-color: rgba(var(--rgb-accent), 0.08);
 }
 
 /* Le badge « +8 » : les technos restantes, visibles dans la modale */
@@ -1845,7 +1956,7 @@ main > section.seam-welded .section-lamp::after {
 
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, rgba(214, 191, 148, 0.17) 1.4px, transparent 2px) 0 0 /
+  background: radial-gradient(circle, rgba(var(--rgb-accent), 0.17) 1.4px, transparent 2px) 0 0 /
     var(--peg) var(--peg);
 }
 
@@ -1869,10 +1980,10 @@ main > section.seam-welded .section-lamp::after {
     calc(var(--light-y, -999px) - var(--half))
   );
   background:
-    radial-gradient(circle, rgba(255, 236, 190, 0.95) 1.5px, transparent 2.1px)
+    radial-gradient(circle, var(--peg-light) 1.5px, transparent 2.1px)
       calc(var(--half) - var(--light-x, 0px)) calc(var(--half) - var(--light-y, 0px)) / var(--peg)
       var(--peg),
-    radial-gradient(closest-side, rgba(214, 191, 148, 0.09), transparent);
+    radial-gradient(closest-side, rgba(var(--rgb-accent), 0.09), transparent);
   mask-image: radial-gradient(closest-side, #000 20%, transparent);
 }
 .blueprint {
@@ -1880,12 +1991,12 @@ main > section.seam-welded .section-lamp::after {
   grid-template-columns: 240px 1fr;
   gap: 32px;
   padding: 32px;
-  border: 1px dashed rgba(214, 191, 148, 0.3);
+  border: 1px dashed rgba(var(--rgb-accent), 0.3);
   border-radius: var(--radius);
   background-color: var(--color-surface);
   background-image:
-    linear-gradient(rgba(214, 191, 148, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(214, 191, 148, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(var(--rgb-accent), 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.05) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -1925,7 +2036,7 @@ main > section.seam-welded .section-lamp::after {
   padding: 16px 20px;
   border: 1px solid var(--color-border);
   border-radius: 2px;
-  background-color: rgba(10, 11, 15, 0.6);
+  background-color: rgba(var(--rgb-bg), 0.6);
   color: var(--color-muted);
   font-family: var(--font-title);
   font-size: 1.05rem;
@@ -1944,7 +2055,7 @@ main > section.seam-welded .section-lamp::after {
 .skills-tab.active {
   color: var(--color-text);
   border-color: var(--color-accent);
-  background-color: rgba(214, 191, 148, 0.08);
+  background-color: rgba(var(--rgb-accent), 0.08);
 }
 
 .skills-tab-ref {
@@ -1959,8 +2070,8 @@ main > section.seam-welded .section-lamp::after {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  border: 1px solid rgba(214, 191, 148, 0.3);
-  background-color: rgba(10, 11, 15, 0.7);
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
+  background-color: rgba(var(--rgb-bg), 0.7);
 
   /* L'apparition du panneau, à chaque tiroir qu'on ouvre : le cadre arrive en fondu, puis son en-tête
      et sa description, puis les outils se posent un par un (voir .tool-tile).
@@ -1987,7 +2098,7 @@ main > section.seam-welded .section-lamp::after {
   align-items: baseline;
   gap: 16px;
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(214, 191, 148, 0.3);
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.3);
 }
 
 .cartouche-header span {
@@ -2059,7 +2170,7 @@ main > section.seam-welded .section-lamp::after {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin-top: auto;
-  border-top: 1px solid rgba(214, 191, 148, 0.3);
+  border-top: 1px solid rgba(var(--rgb-accent), 0.3);
 }
 
 .cartouche-footer span {
@@ -2071,7 +2182,7 @@ main > section.seam-welded .section-lamp::after {
 }
 
 .cartouche-footer span + span {
-  border-left: 1px solid rgba(214, 191, 148, 0.3);
+  border-left: 1px solid rgba(var(--rgb-accent), 0.3);
 }
 
 /* La soudure */
@@ -2087,11 +2198,11 @@ main > section.seam-welded .section-lamp::after {
 /* Variante bleue : l'arc blanc bleuté du soudage TIG */
 .weld-blue {
   --weld-color: var(--color-steel);
-  --weld-glow: rgba(120, 190, 255, 0.8);
-  --spark-core: #f2f9ff;
-  --spark-inner: #d6ecff;
-  --spark-middle: rgba(120, 190, 255, 0.85);
-  --spark-outer: rgba(60, 130, 255, 0.45);
+  --weld-glow: rgba(var(--rgb-arc), 0.8);
+  --spark-core: var(--hot-blue);
+  --spark-inner: var(--hot-blue-halo);
+  --spark-middle: rgba(var(--rgb-arc), 0.85);
+  --spark-outer: rgba(var(--rgb-arc-deep), 0.45);
 }
 
 /* Soudure du cartouche du footer : un long cadre, donc un tour un peu plus lent */
@@ -2115,7 +2226,7 @@ main > section.seam-welded .section-lamp::after {
 .weld-line {
   position: absolute;
   background-color: var(--weld-color, var(--color-accent));
-  box-shadow: 0 0 8px var(--weld-glow, rgba(214, 191, 148, 0.7));
+  box-shadow: 0 0 8px var(--weld-glow, rgba(var(--rgb-accent), 0.7));
 }
 
 .weld-top {
@@ -2174,10 +2285,10 @@ main > section.seam-welded .section-lamp::after {
   height: 8px;
   margin: -3px 0 0 -3px;
   border-radius: 50%;
-  background-color: var(--spark-core, #fffbe8);
+  background-color: var(--spark-core, var(--hot));
   box-shadow:
-    0 0 6px 2px var(--spark-inner, #fff1c1),
-    0 0 16px 6px var(--spark-middle, rgba(214, 191, 148, 0.8)),
+    0 0 6px 2px var(--spark-inner, var(--hot-halo)),
+    0 0 16px 6px var(--spark-middle, rgba(var(--rgb-accent), 0.8)),
     0 0 32px 12px var(--spark-outer, rgba(214, 150, 60, 0.4));
   opacity: 0;
   animation:
@@ -2286,11 +2397,11 @@ main > section.seam-welded .section-lamp::after {
   position: relative;
   max-width: 760px;
   margin: 0 auto;
-  border: 1px solid rgba(214, 191, 148, 0.3);
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
   background-color: var(--color-surface);
   background-image:
-    linear-gradient(rgba(214, 191, 148, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(214, 191, 148, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(var(--rgb-accent), 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.04) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -2300,7 +2411,7 @@ main > section.seam-welded .section-lamp::after {
   justify-content: space-between;
   gap: 8px 16px;
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(214, 191, 148, 0.3);
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.3);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.2em;
@@ -2339,7 +2450,7 @@ main > section.seam-welded .section-lamp::after {
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(214, 191, 148, 0.7);
+  color: rgba(var(--rgb-accent), 0.7);
   transition: color 0.3s;
 }
 
@@ -2394,7 +2505,7 @@ main > section.seam-welded .section-lamp::after {
 /* Dans la fiche de poste : bleu acier */
 .recruit-block .form-field > label,
 .recruit-block .form-field > legend {
-  color: rgba(143, 179, 201, 0.75);
+  color: rgba(var(--rgb-steel), 0.75);
 }
 
 .recruit-block .form-field:focus-within > label,
@@ -2409,8 +2520,8 @@ main > section.seam-welded .section-lamp::after {
   padding: 12px 14px;
   font: inherit;
   color: var(--color-text);
-  color-scheme: dark;
-  background-color: rgba(10, 11, 15, 0.7);
+  color-scheme: var(--scheme);
+  background-color: rgba(var(--rgb-bg), 0.7);
   border: 1px solid var(--color-border);
   border-radius: 2px;
   transition:
@@ -2436,7 +2547,7 @@ main > section.seam-welded .section-lamp::after {
 
 .form-field input::placeholder,
 .form-field textarea::placeholder {
-  color: rgba(154, 156, 165, 0.5);
+  color: rgba(var(--rgb-muted), 0.5);
 }
 
 .form-field input:focus,
@@ -2444,7 +2555,7 @@ main > section.seam-welded .section-lamp::after {
 .form-field textarea:focus {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(214, 191, 148, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-accent), 0.15);
 }
 
 /* Saisie automatique de Chrome : on garde le fond sombre au lieu du bleu clair */
@@ -2452,7 +2563,7 @@ main > section.seam-welded .section-lamp::after {
 .form-field input:-webkit-autofill:hover,
 .form-field input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--color-text);
-  -webkit-box-shadow: 0 0 0 1000px #0d0e13 inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-deep) inset;
   caret-color: var(--color-text);
   transition: background-color 9999s;
 }
@@ -2484,9 +2595,9 @@ main > section.seam-welded .section-lamp::after {
 /* Le message d'échec d'envoi */
 .form-alert {
   padding: 12px 16px;
-  border: 1px solid rgba(227, 160, 143, 0.5);
+  border: 1px solid rgba(var(--rgb-error), 0.5);
   border-left-width: 3px;
-  background-color: rgba(227, 160, 143, 0.08);
+  background-color: rgba(var(--rgb-error), 0.08);
   font-size: 0.9rem;
   color: var(--color-error);
   animation: error-in 0.3s ease-out;
@@ -2558,8 +2669,8 @@ main > section.seam-welded .section-lamp::after {
   flex-direction: column;
   gap: 24px;
   padding: 24px 20px;
-  border: 1px dashed rgba(143, 179, 201, 0.45);
-  background-color: rgba(143, 179, 201, 0.04);
+  border: 1px dashed rgba(var(--rgb-steel), 0.45);
+  background-color: rgba(var(--rgb-steel), 0.04);
   animation: recruit-in 0.4s ease-out;
 }
 
@@ -2608,7 +2719,7 @@ main > section.seam-welded .section-lamp::after {
    ajouté dans ContactForm.jsx), qui lui donne sa bordure, ses lueurs, son texte bleu et son remplissage
    bleu au survol et à la sélection. Ici, seulement un léger halo bleu en plus (et sa mallette). */
 .type-option-steel {
-  box-shadow: 0 0 18px -4px rgba(120, 190, 255, 0.5);
+  box-shadow: 0 0 18px -4px rgba(var(--rgb-arc), 0.5);
 }
 
 .type-option-icon {
@@ -2623,7 +2734,7 @@ main > section.seam-welded .section-lamp::after {
    « indisponible » doit rester lisible. */
 .type-option-unavailable:disabled {
   border-style: dashed;
-  border-color: rgba(154, 156, 165, 0.45);
+  border-color: rgba(var(--rgb-muted), 0.45);
   background-color: transparent;
   color: var(--color-muted);
   opacity: 1;
@@ -2710,15 +2821,15 @@ main > section.seam-welded .section-lamp::after {
   max-width: 760px;
   margin: 0 auto;
   padding: 28px 24px;
-  border: 1px solid rgba(214, 191, 148, 0.3);
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
   border-radius: 4px;
   background:
-    linear-gradient(180deg, rgba(214, 191, 148, 0.07), transparent 70%),
+    linear-gradient(180deg, rgba(var(--rgb-accent), 0.07), transparent 70%),
     var(--color-surface);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 24px 48px -20px rgba(0, 0, 0, 0.8),
-    0 0 40px -10px rgba(214, 191, 148, 0.15);
+    0 0 40px -10px rgba(var(--rgb-accent), 0.15);
 }
 
 .contact-links-title {
@@ -2753,12 +2864,12 @@ main > section.seam-welded .section-lamp::after {
 .contact-links .btn {
   padding: 12px 20px;
   font-size: 0.78rem;
-  background-color: rgba(10, 11, 15, 0.6);
+  background-color: rgba(var(--rgb-bg), 0.6);
 }
 
 .contact-links .btn:hover {
   border-color: var(--color-accent);
-  background-color: rgba(214, 191, 148, 0.1);
+  background-color: rgba(var(--rgb-accent), 0.1);
 }
 
 .link-icon {
@@ -2843,7 +2954,7 @@ main > section.seam-welded .section-lamp::after {
   gap: 14px;
   padding: 20px 24px 24px;
   border: none;
-  border-top: 1px dashed rgba(214, 191, 148, 0.3);
+  border-top: 1px dashed rgba(var(--rgb-accent), 0.3);
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -2860,12 +2971,12 @@ main > section.seam-welded .section-lamp::after {
   max-width: 760px;
   max-height: 90vh;
   overflow-y: auto;
-  border: 1px solid rgba(214, 191, 148, 0.4);
+  border: 1px solid rgba(var(--rgb-accent), 0.4);
   background-color: var(--color-surface);
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   animation: pop-in 0.3s ease-out;
   scrollbar-width: thin;
-  scrollbar-color: rgba(214, 191, 148, 0.4) transparent;
+  scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
 }
 
 .contact-modal-bar {
@@ -2877,7 +2988,7 @@ main > section.seam-welded .section-lamp::after {
   align-items: center;
   padding: 12px 16px 12px 24px;
   background-color: var(--color-surface);
-  border-bottom: 1px solid rgba(214, 191, 148, 0.3);
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.3);
 }
 
 .contact-modal-bar p {
@@ -2931,7 +3042,7 @@ main > section.seam-welded .section-lamp::after {
   animation: pop-in 0.3s ease-out;
   /* Le même fil doré que la barre de défilement de la page (voir section 3), un peu plus discret */
   scrollbar-width: thin;
-  scrollbar-color: rgba(214, 191, 148, 0.5) transparent;
+  scrollbar-color: rgba(var(--rgb-accent), 0.5) transparent;
 }
 
 /* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
@@ -2969,7 +3080,7 @@ main > section.seam-welded .section-lamp::after {
   padding: var(--modal-padding);
   border-radius: var(--radius) var(--radius) 0 0;
   background-color: var(--color-surface);
-  box-shadow: 0 -1px 0 rgba(214, 191, 148, 0.35);
+  box-shadow: 0 -1px 0 rgba(var(--rgb-accent), 0.35);
 }
 
 .modal-content h3 {
@@ -3014,7 +3125,7 @@ main > section.seam-welded .section-lamp::after {
   margin: 0 72px 0 var(--modal-padding);
   padding: 8px 12px;
   border-radius: 2px;
-  background: linear-gradient(180deg, #171c22, #0c0f13);
+  background: linear-gradient(180deg, var(--plate-top), var(--plate-bottom));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.7);
@@ -3116,8 +3227,8 @@ main > section.seam-welded .section-lamp::after {
   flex-direction: column;
   gap: 12px;
   padding: 16px var(--modal-padding);
-  border-top: 1px solid rgba(214, 191, 148, 0.25);
-  background-color: rgba(17, 19, 24, 0.92);
+  border-top: 1px solid rgba(var(--rgb-accent), 0.25);
+  background-color: rgba(var(--rgb-surface), 0.92);
   backdrop-filter: blur(8px);
 }
 
@@ -3143,9 +3254,9 @@ main > section.seam-welded .section-lamp::after {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--rgb-ink), 0.2);
   border-radius: 50%;
-  background-color: rgba(10, 11, 15, 0.85);
+  background-color: rgba(var(--rgb-bg), 0.85);
   backdrop-filter: blur(4px);
   color: var(--color-text);
   font-size: 1.1rem;
@@ -3196,9 +3307,9 @@ main > section.seam-welded .section-lamp::after {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(214, 191, 148, 0.6);
+  border: 1px solid rgba(var(--rgb-accent), 0.6);
   border-radius: 50%;
-  background-color: rgba(10, 11, 15, 0.85);
+  background-color: rgba(var(--rgb-bg), 0.85);
   color: var(--color-accent);
   pointer-events: auto;
   transition:
@@ -3374,7 +3485,7 @@ main > section.seam-welded .section-lamp::after {
   position: sticky;
   top: 0;
   z-index: 50;
-  background-color: rgba(10, 11, 15, 0.7);
+  background-color: rgba(var(--rgb-bg), 0.7);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
 }
@@ -3468,6 +3579,46 @@ main > section.seam-welded .section-lamp::after {
   display: none;
 }
 
+/* À droite de la navbar : les réglages du site (thème, langue) et le bouton « Me contacter », groupés */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Un réglage : un petit bouton carré, discret, qui se dore au survol */
+.navbar-tool {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+
+.navbar-tool:hover {
+  border-color: rgba(var(--rgb-accent), 0.6);
+  color: var(--color-accent);
+}
+
+.navbar-tool:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.navbar-tool svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Le bouton « Me contacter » de la navbar (.navbar-cta) porte le contour en laiton poli des boutons :
    voir .btn-metal, section 6. Il n'a pas d'autre style ici ; sur téléphone, il est masqué (section 19). */
 
@@ -3516,8 +3667,8 @@ main > section.seam-welded .section-lamp::after {
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface);
   background-image:
-    linear-gradient(rgba(214, 191, 148, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(214, 191, 148, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(var(--rgb-accent), 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -3551,7 +3702,7 @@ main > section.seam-welded .section-lamp::after {
 /* Le trou de fixation de la languette : on voit le fond du site à travers */
 .footer-edge-hole {
   fill: var(--color-bg);
-  stroke: rgba(214, 191, 148, 0.7);
+  stroke: rgba(var(--rgb-accent), 0.7);
   stroke-width: 1;
 }
 
@@ -3619,7 +3770,7 @@ main > section.seam-welded .section-lamp::after {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border: 1px solid rgba(143, 179, 201, 0.35);
+  border: 1px solid rgba(var(--rgb-steel), 0.35);
 }
 
 .footer-cartouche > span {
@@ -3632,7 +3783,7 @@ main > section.seam-welded .section-lamp::after {
 }
 
 .footer-cartouche > span + span {
-  border-left: 1px solid rgba(143, 179, 201, 0.35);
+  border-left: 1px solid rgba(var(--rgb-steel), 0.35);
 }
 
 /* Les remerciements, sous la signature, dans la police du cartouche, entre quatre « repères de plan » :
@@ -3832,8 +3983,8 @@ main > section.seam-welded .section-lamp::after {
     flex-wrap: nowrap;
     gap: 8px;
     padding: 12px var(--modal-padding);
-    border-top: 1px solid rgba(214, 191, 148, 0.25);
-    background-color: rgba(17, 19, 24, 0.92);
+    border-top: 1px solid rgba(var(--rgb-accent), 0.25);
+    background-color: rgba(var(--rgb-surface), 0.92);
     backdrop-filter: blur(8px);
   }
 
@@ -3863,6 +4014,37 @@ main > section.seam-welded .section-lamp::after {
     display: none;
   }
 
+  /* Les réglages (langue, thème) quittent la barre : à côté du burger, ils feraient passer le logo sur
+     deux lignes. On les retrouve en bas du menu ouvert, plus grands, faciles à toucher.
+     « top » et non « bottom » : à cause de son flou d'arrière-plan (backdrop-filter), la navbar sert de
+     repère à ses enfants « fixed » ; son haut est celui de l'écran, on compte donc à partir de lui. */
+  .navbar-actions {
+    position: fixed;
+    top: calc(100dvh - 112px);
+    right: 0;
+    left: 0;
+    z-index: 2;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
+  }
+
+  /* « ~ » : les réglages qui suivent un menu ouvert */
+  .navbar-links.open ~ .navbar-actions {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .navbar-tool {
+    width: 48px;
+    height: 48px;
+    font-size: 0.85rem;
+  }
+
   .navbar-logo,
   .navbar-burger {
     position: relative;
@@ -3881,7 +4063,7 @@ main > section.seam-welded .section-lamp::after {
     align-items: center;
     gap: 0;
     background:
-      radial-gradient(circle at 50% 35%, rgba(214, 191, 148, 0.08), transparent 60%),
+      radial-gradient(circle at 50% 35%, rgba(var(--rgb-accent), 0.08), transparent 60%),
       var(--color-bg);
     opacity: 0;
     visibility: hidden;
@@ -4013,7 +4195,7 @@ main > section.seam-welded .section-lamp::after {
     max-height: 300px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(214, 191, 148, 0.4) transparent;
+    scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
     mask-image: linear-gradient(to bottom, black 85%, transparent);
   }
 
@@ -4083,7 +4265,7 @@ main > section.seam-welded .section-lamp::after {
   }
 
   .footer-cartouche > span:nth-child(n + 3) {
-    border-top: 1px solid rgba(143, 179, 201, 0.35);
+    border-top: 1px solid rgba(var(--rgb-steel), 0.35);
   }
 
   .legal-content {
@@ -4129,10 +4311,10 @@ main > section.seam-welded .section-lamp::after {
   bottom: -6px;
   width: 2px;
   margin-left: -2px; /* le trait reste juste à l'intérieur de la zone déjà découpée */
-  background-color: #fffbe8;
+  background-color: var(--hot);
   box-shadow:
-    0 0 8px 2px #fff1c1,
-    0 0 24px 6px rgba(214, 191, 148, 0.7);
+    0 0 8px 2px var(--hot-halo),
+    0 0 24px 6px rgba(var(--rgb-accent), 0.7);
   opacity: 0;
   pointer-events: none;
   animation: laser-beam 1.3s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
@@ -4289,10 +4471,10 @@ main > section.seam-welded .section-lamp::after {
   right: 0;
   z-index: 3;
   height: 2px;
-  background-color: #f2f9ff;
+  background-color: var(--hot-blue);
   box-shadow:
-    0 0 8px 2px #d6ecff,
-    0 0 22px 6px rgba(120, 190, 255, 0.8);
+    0 0 8px 2px var(--hot-blue-halo),
+    0 0 22px 6px rgba(var(--rgb-arc), 0.8);
   opacity: 0;
   pointer-events: none;
 }
@@ -4430,12 +4612,12 @@ main > section.seam-welded .section-lamp::after {
 @keyframes field-weld {
   from {
     transform: scaleX(0);
-    border-color: #fffbe8;
-    box-shadow: 0 0 14px rgba(214, 191, 148, 0.9);
+    border-color: var(--hot);
+    box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.9);
   }
   60% {
     border-color: var(--color-accent);
-    box-shadow: 0 0 14px rgba(214, 191, 148, 0.5);
+    box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.5);
   }
 }
 
@@ -4466,7 +4648,7 @@ main > section.seam-welded .section-lamp::after {
     filter: blur(0);
     box-shadow:
       0 0 0 1px var(--color-accent),
-      0 0 50px rgba(214, 191, 148, 0.35);
+      0 0 50px rgba(var(--rgb-accent), 0.35);
   }
   to {
     opacity: 1;
@@ -4485,7 +4667,7 @@ main > section.seam-welded .section-lamp::after {
   from {
     opacity: 0;
     translate: 0 40px;
-    filter: drop-shadow(0 0 24px rgba(214, 191, 148, 0.5));
+    filter: drop-shadow(0 0 24px rgba(var(--rgb-accent), 0.5));
   }
   to {
     opacity: 1;
@@ -4570,7 +4752,7 @@ html.intro-playing .hero *::after {
   /* Le cadre du plan : sa distance au bord de l'écran, et la largeur de la bande des repères */
   --frame-edge: 12px;
   --frame-band: 22px;
-  --frame-line: rgba(143, 179, 201, 0.3);
+  --frame-line: rgba(var(--rgb-steel), 0.3);
 
   position: relative;
   z-index: 60; /* au-dessus de la navbar (50) */
@@ -4626,8 +4808,8 @@ html.intro-playing .hero *::after {
   inset: 0;
   background-color: var(--color-bg);
   background-image:
-    linear-gradient(rgba(143, 179, 201, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(143, 179, 201, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(var(--rgb-steel), 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-steel), 0.06) 1px, transparent 1px);
   background-size: 32px 32px;
   background-position: center;
   opacity: calc(1 - var(--land));
@@ -4642,8 +4824,8 @@ html.intro-playing .hero *::after {
   inset: 0;
   background-image:
     radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), rgba(255, 176, 96, 0.14), transparent 230px),
-    linear-gradient(rgba(143, 179, 201, 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(143, 179, 201, 0.3) 1px, transparent 1px);
+    linear-gradient(rgba(var(--rgb-steel), 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-steel), 0.3) 1px, transparent 1px);
   background-size:
     auto,
     32px 32px,
@@ -4681,7 +4863,7 @@ html.intro-playing .hero *::after {
   position: absolute;
   display: flex;
   font-size: 0.6rem;
-  color: rgba(143, 179, 201, 0.65);
+  color: rgba(var(--rgb-steel), 0.65);
 }
 
 .intro-zones span {
@@ -4746,7 +4928,7 @@ html.intro-playing .hero *::after {
   gap: 1px;
   border-top: 1px solid var(--frame-line);
   border-left: 1px solid var(--frame-line);
-  background-color: rgba(143, 179, 201, 0.3);
+  background-color: rgba(var(--rgb-steel), 0.3);
 }
 
 .intro-cartouche > div {
@@ -4767,7 +4949,7 @@ html.intro-playing .hero *::after {
 .intro-cartouche span {
   font-size: 0.55rem;
   letter-spacing: 0.15em;
-  color: rgba(143, 179, 201, 0.7);
+  color: rgba(var(--rgb-steel), 0.7);
 }
 
 /* … et sa valeur */
@@ -4878,7 +5060,7 @@ html.intro-playing .hero *::after {
 /* Les traits de construction : déjà là à l'arrivée */
 .intro .construction {
   fill: none;
-  stroke: rgba(143, 179, 201, 0.4);
+  stroke: rgba(var(--rgb-steel), 0.4);
   stroke-width: 0.6;
   opacity: var(--clear);
 }
@@ -4886,7 +5068,7 @@ html.intro-playing .hero *::after {
 /* L'esquisse de « AB » : des pointillés pâles, comme un tracé au crayon avant de souder */
 .intro .sketch {
   fill: none;
-  stroke: rgba(214, 191, 148, 0.4);
+  stroke: rgba(var(--rgb-accent), 0.4);
   stroke-width: 0.8;
   stroke-dasharray: 3 3;
   opacity: var(--clear);
@@ -4958,7 +5140,7 @@ html.intro-playing .hero *::after {
   fill: none;
   /* Visible pendant tout le vol, elle s'efface ensuite (les 15 derniers % du raccord) */
   opacity: clamp(0, (1 - var(--land)) / 0.15, 1);
-  filter: drop-shadow(0 0 6px rgba(214, 191, 148, 0.45));
+  filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.45));
   /* Le point fixe du rétrécissement : le milieu de la lettre (--ox est donné dans le JSX) */
   transform-origin: var(--ox) 70px;
   /* La cible bouge : tant que l'intro n'est pas finie, la navbar est encore plus bas que sa place finale.
@@ -5016,8 +5198,8 @@ html.intro-playing .hero *::after {
 
 /* Le bain de métal en fusion, au bout du trait */
 .intro .torch-core {
-  fill: #fffdf2;
-  filter: drop-shadow(0 0 2px #fff1c1) drop-shadow(0 0 8px rgba(255, 200, 120, 0.95))
+  fill: var(--hot);
+  filter: drop-shadow(0 0 2px var(--hot-halo)) drop-shadow(0 0 8px rgba(255, 200, 120, 0.95))
     drop-shadow(0 0 18px rgba(255, 140, 50, 0.7));
 }
 
@@ -5048,12 +5230,12 @@ html.intro-playing .hero *::after {
 /* Les annotations (symbole de soudure, angle, rayon) : plus fines et plus discrètes que les cotes */
 .intro .annotation {
   fill: none;
-  stroke: rgba(143, 179, 201, 0.75);
+  stroke: rgba(var(--rgb-steel), 0.75);
   stroke-width: 0.6;
 }
 
 .intro .annotation text {
-  fill: rgba(143, 179, 201, 0.9);
+  fill: rgba(var(--rgb-steel), 0.9);
   font-family: var(--font-mono);
   font-size: 8px;
   letter-spacing: 0.08em;
@@ -5066,7 +5248,7 @@ html.intro-playing .hero *::after {
 
 .intro .annotation .arrow {
   stroke: none;
-  fill: rgba(143, 179, 201, 0.9);
+  fill: rgba(var(--rgb-steel), 0.9);
 }
 
 /* L'invitation à défiler, sous le dessin : elle s'efface dès qu'on commence */
@@ -5111,7 +5293,7 @@ html.intro-playing .hero *::after {
   top: calc(var(--frame-edge) + var(--frame-band) + 14px);
   z-index: 2;
   padding: 8px 14px;
-  border: 1px solid rgba(214, 191, 148, 0.3);
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.2em;
@@ -5163,9 +5345,9 @@ html.has-intro:not(.intro-playing) .navbar .logo-initial {
 
 @keyframes initial-cool {
   from {
-    color: #fff;
+    color: var(--hot-white);
     text-shadow:
-      0 0 4px #fff5d6,
+      0 0 4px var(--hot-halo),
       0 0 12px rgba(255, 195, 86, 0.95),
       0 0 26px rgba(245, 143, 46, 0.8);
   }
@@ -5185,9 +5367,9 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   content: attr(data-text) / ""; /* le « / "" » dit aux lecteurs d'écran de ne pas lire cette copie */
   position: absolute;
   inset: 0; /* la même boîte que le logo : si le nom passe sur 2 lignes, la copie aussi */
-  color: #fff;
+  color: var(--hot-white);
   text-shadow:
-    0 0 6px #fff5d6,
+    0 0 6px var(--hot-halo),
     0 0 14px rgba(255, 195, 86, 0.9);
   pointer-events: none;
   -webkit-mask-image: linear-gradient(105deg, transparent 42%, #000 50%, transparent 58%);
@@ -5278,4 +5460,98 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   .tool-tile {
     animation: none;
   }
+}
+
+/* ===== 21. Thème clair : les retouches ===== */
+
+/* Les couleurs du thème clair sont en section 1. Ici, seulement ce que les variables ne suffisent pas
+   à régler : chaque règle commence par :root[data-theme="light"], elle ne vaut donc qu'en thème clair. */
+
+/* Le passage d'un thème à l'autre se fait en fondu, pas d'un coup */
+body {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+/* L'intro reste une scène sombre (ses variables sont redonnées sur .intro, section 1).
+   Elle reprend ici la couleur de texte du thème sombre : sinon elle hériterait de l'encre du <body>. */
+.intro {
+  color: var(--color-text);
+}
+
+/* Le fond des boutons au contour en métal : un papier légèrement teinté, doré ou bleu
+   (--paper-gold et --paper-blue, donnés avec les couleurs du thème clair) */
+:root[data-theme="light"] .btn-metal {
+  --metal-fill: var(--paper-gold);
+}
+
+:root[data-theme="light"] .btn-metal-blue {
+  --metal-fill: var(--paper-blue);
+}
+
+/* Les libellés du formulaire sont en doré à 70 % : sur le papier, ce doré pâli manque de contraste.
+   Ils prennent le doré plein. */
+:root[data-theme="light"] .form-field > label,
+:root[data-theme="light"] .form-field > legend {
+  color: var(--color-accent);
+}
+
+/* Les icônes (technos, GitHub) sont des images dorées, faites pour le fond sombre : on les fonce
+   pour qu'elles gardent du contraste sur le papier. (Une image ne peut pas changer de couleur par
+   une variable, d'où le filtre.) */
+:root[data-theme="light"] img[src^="/icons/"] {
+  filter: brightness(0.5) saturate(1.5);
+}
+
+/* La lampe des Réalisations : sur du papier, une lumière dorée ferait une ombre brune. Elle devient
+   une lumière blanche, qui éclaircit le papier, avec le même dessin (point chaud, trois cônes, flaque). */
+:root[data-theme="light"] .section-lamp::after {
+  background:
+    radial-gradient(ellipse 24% 13% at 50% 0, rgba(255, 255, 255, 0.95), transparent 72%),
+    conic-gradient(from 90deg at 50% 0, transparent 72deg, rgba(255, 255, 255, 0.6) 85deg, rgba(255, 255, 255, 0.6) 95deg, transparent 108deg),
+    conic-gradient(from 90deg at 50% 0, transparent 48deg, rgba(255, 255, 255, 0.45) 74deg, rgba(255, 255, 255, 0.45) 106deg, transparent 132deg),
+    conic-gradient(from 90deg at 50% 0, transparent 18deg, rgba(255, 255, 255, 0.3) 56deg, rgba(255, 255, 255, 0.3) 124deg, transparent 162deg),
+    radial-gradient(ellipse 30% 15% at 50% 34%, rgba(255, 255, 255, 0.5), transparent 72%);
+}
+
+/* L'épure : des traits un peu plus appuyés, l'encre claire se perd sur le papier */
+:root[data-theme="light"] .epure-shape {
+  stroke: rgba(var(--rgb-accent), 0.4);
+}
+
+:root[data-theme="light"] .epure-axis {
+  stroke: rgba(var(--rgb-accent), 0.32);
+}
+
+:root[data-theme="light"] .epure-dim {
+  stroke: rgba(var(--rgb-tig), 0.45);
+}
+
+:root[data-theme="light"] .epure text {
+  fill: rgba(var(--rgb-tig), 0.65);
+}
+
+/* La référence gravée des cartes projet (le type et le « N° 01 »). Sur la plaque sombre, la gravure
+   avait une ombre noire au-dessus des lettres ; sur une plaque claire, cette ombre les salit.
+   La gravure s'inverse : un filet blanc sous les lettres, une ombre à peine marquée au-dessus. */
+:root[data-theme="light"] .project-category,
+:root[data-theme="light"] .project-ref {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* La cuvette du numéro : un léger renfoncement dans le papier, au lieu d'un creux sombre */
+:root[data-theme="light"] .project-ref {
+  background-color: rgba(var(--rgb-ink), 0.05);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Le compteur « Projet 02 / 03 » est posé sur le voile sombre qui entoure la fiche (il reste sombre
+   dans les deux thèmes) : il garde donc un texte clair */
+:root[data-theme="light"] .modal-nav-count {
+  color: rgba(255, 255, 255, 0.82);
 }

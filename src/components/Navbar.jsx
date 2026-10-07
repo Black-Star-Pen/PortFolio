@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { scrollToSiteTop } from "../utils/siteTop";
 import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
+import ThemeToggle from "./ThemeToggle";
 
 const links = [
   { href: "/#about", label: "À propos" },
@@ -55,13 +56,18 @@ function Navbar({ onContactClick }) {
           ))}
         </nav>
 
-        <button
-          type="button"
-          className="btn btn-primary btn-small btn-metal navbar-cta"
-          onClick={onContactClick}
-        >
-          Me contacter
-        </button>
+        {/* À droite : les réglages du site (le thème), puis le bouton « Me contacter » */}
+        <div className="navbar-actions">
+          <ThemeToggle />
+
+          <button
+            type="button"
+            className="btn btn-primary btn-small btn-metal navbar-cta"
+            onClick={onContactClick}
+          >
+            Me contacter
+          </button>
+        </div>
 
         <button
           type="button"

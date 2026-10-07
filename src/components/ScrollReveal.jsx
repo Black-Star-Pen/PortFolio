@@ -1,6 +1,7 @@
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router";
 import { createSparks } from "./sparks";
+import { getTheme } from "../utils/theme";
 
 // Les blocs qui apparaissent au défilement, et l'effet « atelier » de chacun
 // (le Hero a sa propre animation). Pour animer un nouveau bloc, ajoute une ligne ici.
@@ -62,6 +63,20 @@ const SEAM_SPARKS = {
   ],
 };
 
+// En thème clair, les mêmes étincelles en plus foncé et un peu plus épaisses : de l'orange de chauffe
+// au brun, posées sur le papier au lieu de s'y additionner (voir « blend » dans sparks.js).
+const SEAM_SPARKS_LIGHT = {
+  ...SEAM_SPARKS,
+  blend: "source-over",
+  size: [0.9, 0.9],
+  colors: [
+    [0, 214, 120, 20],
+    [0.3, 194, 98, 12],
+    [0.7, 150, 96, 30],
+    [1, 125, 93, 36],
+  ],
+};
+
 // Une étincelle tous les 10 pixels de cordon soudé. Plus petit = une gerbe plus fournie.
 const SEAM_SPARK_SPACING = 10;
 
@@ -77,7 +92,7 @@ function weldSeam(section) {
   canvas.setAttribute("aria-hidden", "true");
   section.append(canvas);
 
-  const sparks = createSparks(canvas, SEAM_SPARKS);
+  const sparks = createSparks(canvas, getTheme() === "light" ? SEAM_SPARKS_LIGHT : SEAM_SPARKS);
   // getComputedStyle renvoie un objet « vivant » : à chaque lecture, il donne la position actuelle
   // de la pointe. Le CSS reste donc seul maître du mouvement, le JavaScript ne fait que le suivre.
   const tip = getComputedStyle(section, "::after");
