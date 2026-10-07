@@ -60,9 +60,9 @@ PortFolio/
 ├── index.html
 ├── render.yaml         la configuration de l'hébergement : les deux services et les en-têtes de sécurité du site
 ├── .github/workflows/  le contrôle automatique : lint, construction du site et démarrage de l'API à chaque Pull Request
-├── public/             favicon, logos des technologies, captures des projets, images du film de l'intro (en WebP) et image de partage
+├── public/             icônes du site, logos des technologies, captures des projets, images du film de l'intro (en WebP) et image de partage
 ├── images-source/      les captures d'origine, avant conversion
-├── scripts/            trois outils : convertir les captures, télécharger les logos, dessiner l'image de partage
+├── scripts/            quatre outils : convertir les captures, télécharger les logos, dessiner l'image de partage, dessiner l'icône du site
 ├── src/
 │   ├── components/     les composants React (Intro, Hero, Navbar, ContactForm…)
 │   ├── pages/          accueil, mentions légales, confidentialité, 404

@@ -12,6 +12,20 @@
   --color-available: #4ade80;
   --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
 
+  /* Le métal des bordures (cartes projet, bouton « Me contacter » de la navbar) : un dégradé en biais
+     qui alterne reflets clairs et creux sombres, comme une baguette de laiton poli.
+     Ce sont les ors de l'intro (#fbe8b6, #e2bf78, #b08542). */
+  --metal-gold: linear-gradient(
+    135deg,
+    #b08542 0%,
+    #fbe8b6 14%,
+    #d6bf94 28%,
+    #8f6c33 46%,
+    #e2bf78 62%,
+    #fbe8b6 76%,
+    #a57c3c 100%
+  );
+
   /* Les trois premières sont installées dans le projet (voir les imports dans main.jsx).
      Leur nom se termine par « Variable » : c'est celui que leur donnent les paquets @fontsource. */
   --font-body: "Inter Variable", system-ui, sans-serif;
@@ -47,6 +61,34 @@ html {
    Le défilement doux du navigateur doit se taire : sinon les deux animations se superposent. */
 html.lenis {
   scroll-behavior: auto;
+}
+
+/* La barre de défilement : un fil doré, fin, sur le fond du site.
+   scrollbar-width et scrollbar-color sont les deux propriétés officielles : la première amincit la barre,
+   la seconde donne sa couleur (le curseur, puis le rail derrière lui).
+   Les zones qui défilent à l'intérieur de la page (les modales) règlent la leur de la même façon. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(214, 191, 148, 0.75) var(--color-bg);
+}
+
+/* Safari ne connaît pas encore scrollbar-color : pour lui, on passe par les anciens sélecteurs ::-webkit-.
+   (@supports not : ce bloc n'est lu que par les navigateurs qui n'ont PAS la propriété officielle ;
+   sinon Chrome appliquerait les deux réglages à la fois.) */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(214, 191, 148, 0.75);
+  }
 }
 
 body {
@@ -899,18 +941,8 @@ html.has-intro .hero-pin {
    si un titre passe sur deux lignes, son étage grandit sur toutes les cartes, et les filets restent alignés. */
 .project-card {
   --project-line: rgba(214, 191, 148, 0.2);
-  /* Le métal de la bordure : un dégradé en biais qui alterne reflets clairs et creux sombres,
-     comme une baguette de laiton poli. Ce sont les ors de l'intro (#fbe8b6, #e2bf78, #b08542). */
-  --project-metal: linear-gradient(
-    135deg,
-    #b08542 0%,
-    #fbe8b6 14%,
-    #d6bf94 28%,
-    #8f6c33 46%,
-    #e2bf78 62%,
-    #fbe8b6 76%,
-    #a57c3c 100%
-  );
+  /* Le métal de la bordure : le dégradé de laiton poli défini dans les variables (section 1) */
+  --project-metal: var(--metal-gold);
 
   /* L'épaisseur de la bordure métallique, et l'arrondi qui reste à l'intérieur d'elle */
   --project-border: 3px;
@@ -2351,8 +2383,9 @@ html.has-intro .hero-pin {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   animation: pop-in 0.3s ease-out;
+  /* Le même fil doré que la barre de défilement de la page (voir section 3), un peu plus discret */
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: rgba(214, 191, 148, 0.5) transparent;
 }
 
 /* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
@@ -2593,6 +2626,132 @@ html.has-intro .hero-pin {
   margin: 16px 16px -60px auto;
 }
 
+/* ----- Passer d'un projet à l'autre sans fermer la modale (voir ProjectModal.jsx) ----- */
+
+/* Les deux flèches sont posées sur le fond, EN DEHORS de la fiche, de chaque côté.
+   .modal-nav est une boîte invisible, centrée, un peu plus large que la fiche : la fiche (960px) plus,
+   de chaque côté, 24px d'écart et les 44px d'une flèche. Les flèches se placent à ses deux bouts
+   (space-between), à mi-hauteur de l'écran.
+   pointer-events: none : cette boîte recouvre l'écran, elle ne doit pas intercepter les clics
+   (un clic à côté de la fiche doit toujours la fermer). Seules les flèches sont cliquables. */
+.modal-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(100%, 960px + 136px);
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.modal-nav-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(214, 191, 148, 0.6);
+  border-radius: 50%;
+  background-color: rgba(10, 11, 15, 0.85);
+  color: var(--color-accent);
+  pointer-events: auto;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    transform 0.3s;
+}
+
+.modal-nav-button svg {
+  width: 22px;
+  height: 22px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Au survol : la flèche se remplit de doré et avance d'un rien dans son sens */
+.modal-nav-button:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.modal-nav-button:first-child:hover {
+  transform: translateX(-3px);
+}
+
+.modal-nav-button:last-child:hover {
+  transform: translateX(3px);
+}
+
+.modal-nav-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Le compteur « Projet 02 / 03 » : sur grand écran, il est centré sous la fiche, dans la marge du bas */
+.modal-nav-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.4vh;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Quand l'écran n'a pas la place pour les flèches de chaque côté de la fiche (moins de 1150px de large),
+   elles passent SOUS la fiche, sur une ligne, avec le compteur entre les deux.
+   Le fond devient une grille de deux rangées : la fiche, qui prend toute la hauteur restante
+   (minmax(0, 1fr)), puis cette ligne. La fiche ne dépasse pas sa rangée (max-height: 100%). */
+@media (max-width: 1149px) {
+  .project-overlay {
+    grid-template-rows: minmax(0, 1fr) auto;
+    row-gap: 10px;
+  }
+
+  .project-overlay > .modal {
+    max-height: 100%;
+  }
+
+  .modal-nav {
+    position: static;
+    justify-content: center;
+    gap: 18px;
+    width: auto;
+    margin: 0;
+  }
+
+  .modal-nav-count {
+    position: static;
+  }
+}
+
+/* La fiche d'un autre projet arrive du côté où on est allé la chercher : par la droite pour le projet
+   suivant, par la gauche pour le précédent. (À l'ouverture, c'est l'animation « pop-in » de .modal.) */
+.modal-from-next {
+  animation: modal-from-right 0.3s ease-out;
+}
+
+.modal-from-previous {
+  animation: modal-from-left 0.3s ease-out;
+}
+
+@keyframes modal-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+
+@keyframes modal-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -2710,6 +2869,43 @@ html.has-intro .hero-pin {
 
 .navbar-link-number {
   display: none;
+}
+
+/* Le bouton « Me contacter » de la navbar : le même contour que les cartes projet, en plus fin.
+   Une bordure en laiton poli (--metal-gold) sur laquelle deux lueurs font le tour, l'une dorée,
+   l'autre bleue comme l'arc TIG (voir .project-card::before).
+   Ici, pas de calques séparés comme sur les cartes : tout tient dans trois fonds superposés,
+   du dessus vers le dessous :
+   1. le fond sombre du bouton, limité à l'intérieur de la bordure (padding-box) ;
+   2. les deux lueurs, sur toute la surface, bordure comprise (border-box) ;
+   3. le métal, lui aussi jusqu'au bord.
+   La bordure elle-même est transparente : c'est à travers elle qu'on voit les fonds 2 et 3.
+   --cta-fill est la teinte qu'avait déjà le bouton (8 % de doré sur le fond du site), mais opaque,
+   pour cacher le métal au centre.
+   Le remplissage doré au survol (.btn-primary::before) ne change pas : il passe par-dessus ces fonds. */
+.navbar-cta {
+  --cta-fill: #1a191a;
+
+  /* 2px de bordure au lieu d'1 : on retire 1px de marge intérieure, le bouton garde sa taille */
+  padding: 9px 15px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--cta-fill), var(--cta-fill)) padding-box,
+    conic-gradient(
+        from var(--spark-angle),
+        transparent 0 32%,
+        rgba(120, 190, 255, 0.45) 44%,
+        #e8f4ff 48.5%,
+        transparent 50% 80%,
+        rgba(251, 232, 182, 0.55) 93%,
+        #fffdf2 98.5%,
+        transparent 100%
+      )
+      border-box,
+    var(--metal-gold) border-box;
+  /* Un tour en 8 secondes. Le bouton est bien plus petit qu'une carte : à leur rythme (15 secondes),
+     ses lueurs sembleraient presque immobiles. */
+  animation: spark-orbit 8s linear infinite;
 }
 
 /* ===== 16. Burger ===== */
@@ -2831,6 +3027,50 @@ html.has-intro .hero-pin {
 
 .footer-cartouche > span + span {
   border-left: 1px solid rgba(143, 179, 201, 0.35);
+}
+
+/* Les remerciements, sous la signature, dans la police du cartouche, entre quatre « repères de plan » :
+   quatre coins dorés, sans cadre fermé, comme les repères de cadrage d'un dessin technique.
+   Chaque coin est fait de deux petits traits (un horizontal, un vertical), dessinés en fond :
+   14px de long, 2px d'épaisseur. --corner est le doré d'un trait ; les huit lignes de « background »
+   le posent dans chaque coin, à l'horizontale (14px × 2px) puis à la verticale (2px × 14px).
+   width: fit-content : le bloc épouse son texte au lieu de prendre toute la largeur de la colonne ;
+   400px au plus, assez pour que la phrase tienne sur deux lignes sur ordinateur.
+   (.footer-brand devant : sans lui, la règle « .footer-brand p », plus haut, imposerait sa largeur
+   et sa taille de texte.) */
+.footer-brand .footer-thanks {
+  --corner: linear-gradient(var(--color-accent), var(--color-accent));
+
+  width: fit-content;
+  max-width: 400px;
+  margin-top: 8px;
+  padding: 14px 18px;
+  background:
+    var(--corner) top left / 14px 2px no-repeat,
+    var(--corner) top left / 2px 14px no-repeat,
+    var(--corner) top right / 14px 2px no-repeat,
+    var(--corner) top right / 2px 14px no-repeat,
+    var(--corner) bottom left / 14px 2px no-repeat,
+    var(--corner) bottom left / 2px 14px no-repeat,
+    var(--corner) bottom right / 14px 2px no-repeat,
+    var(--corner) bottom right / 2px 14px no-repeat;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  line-height: 1.7;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Le nom du site remercié est un lien doré, souligné au survol */
+.footer-thanks a {
+  color: var(--color-accent);
+  text-underline-offset: 4px;
+}
+
+.footer-thanks a:hover,
+.footer-thanks a:focus-visible {
+  text-decoration: underline;
 }
 
 /* ===== 18. Pages légales et 404 ===== */
@@ -4400,6 +4640,12 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
     animation: none;
   }
 
+  /* D'un projet à l'autre, la fiche s'affiche directement, sans glisser */
+  .modal-from-next,
+  .modal-from-previous {
+    animation: none;
+  }
+
   .form-error,
   .recruit-block {
     animation: none;
@@ -4408,6 +4654,11 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   /* Les lueurs qui tournent autour des cartes projet sont retirées : il reste la bordure métallique, fixe */
   .project-card::before {
     display: none;
+  }
+
+  /* Même chose pour le bouton « Me contacter » de la navbar : ses lueurs ne tournent plus */
+  .navbar-cta {
+    animation: none;
   }
 
   /* Le panneau d'un tiroir et ses outils s'affichent directement, sans fondu ni chute */
