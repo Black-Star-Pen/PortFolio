@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router";
 import { wakeApi } from "./utils/api";
+import { startSmoothScroll } from "./utils/smoothScroll";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer.jsx";
 import ContactModal from "./components/ContactModal";
@@ -28,6 +29,10 @@ function App() {
   useEffect(() => {
     wakeApi();
   }, []);
+
+  // Le défilement fluide (voir smoothScroll.js) : démarré à l'arrivée. startSmoothScroll renvoie la
+  // fonction qui l'arrête ; en la renvoyant à notre tour, React l'appelle si l'application disparaît.
+  useEffect(() => startSmoothScroll(), []);
 
   return (
     <>

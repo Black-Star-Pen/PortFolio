@@ -42,6 +42,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Quand le défilement fluide est actif (la bibliothèque Lenis pose alors la classe « lenis » sur <html>,
+   voir src/utils/smoothScroll.js), c'est elle qui anime tous les déplacements de la page.
+   Le défilement doux du navigateur doit se taire : sinon les deux animations se superposent. */
+html.lenis {
+  scroll-behavior: auto;
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
