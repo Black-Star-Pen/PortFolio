@@ -92,11 +92,15 @@ function ContactLinks({ compact = false }) {
         </div>
       </div>
 
-      {/* Le dépôt GitHub du portfolio est privé. On le dit ici, juste sous le lien GitHub, pour que le
-          visiteur sache que le code existe et qu'il peut le demander (pas dans la modale, plus compacte). */}
+      {/* Le code de ce portfolio est public : un lien direct vers son dépôt GitHub, sous les boutons
+          (pas dans la modale, plus compacte). */}
       {!compact && (
         <p className="contact-links-note">
-          <span aria-hidden="true">&lt;/&gt;</span> Code source de ce portfolio disponible sur demande
+          <span aria-hidden="true">&lt;/&gt;</span>{" "}
+          <a href="https://github.com/Black-Star-Pen/Portfolio" target="_blank" rel="noreferrer">
+            Code source de ce portfolio sur GitHub <span aria-hidden="true">↗</span>
+            <span className="sr-only"> (nouvel onglet)</span>
+          </a>
         </p>
       )}
     </div>
