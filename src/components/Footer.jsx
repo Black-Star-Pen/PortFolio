@@ -48,6 +48,18 @@ function Footer() {
               ADAM <span className="accent">BOULKHEDERT</span>
             </Link>
             <p>Développeur full stack. Du métal au code, le goût du travail bien fait.</p>
+
+            {/* Les remerciements, sous la signature.
+                Ce lien n'a pas « noreferrer », contrairement aux autres liens externes : le site d'Octaforge
+                peut ainsi voir que la visite vient de ce portfolio. « noopener » suffit à la sécurité :
+                la page ouverte dans le nouvel onglet ne peut pas agir sur celle-ci. */}
+            <p className="footer-thanks">
+              Merci pour tout à Cédric, développeur et fondateur d'
+              <a href="https://octaforge.fr/" target="_blank" rel="noopener">
+                Octaforge <span aria-hidden="true">↗</span>
+                <span className="sr-only"> (nouvel onglet)</span>
+              </a>
+            </p>
           </div>
 
           {/* La navigation */}

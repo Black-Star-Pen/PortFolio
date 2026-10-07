@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Icône du site — outil</title>
+    <!-- Cette page est un outil : elle dessine l'icône du site (voir favicon.js).
+         Elle ne fait pas partie du site en ligne. Pour l'ouvrir : lance « npm run dev »,
+         puis va sur http://localhost:5173/scripts/favicon.html -->
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #16181d;
+        color: #f2efe9;
+        font-family: system-ui, sans-serif;
+      }
+
+      p {
+        max-width: 70ch;
+        color: #9a9ca5;
+        line-height: 1.5;
+      }
+
+      #icons {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 32px;
+        margin-top: 24px;
+      }
+
+      figure {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 0;
+      }
+
+      figcaption {
+        color: #9a9ca5;
+        font-size: 0.85rem;
+      }
+
+      button {
+        padding: 10px 16px;
+        border: 1px solid #d6bf94;
+        background: transparent;
+        color: #d6bf94;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #d6bf94;
+        color: #0a0b0f;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Icône du site</h1>
+    <p>
+      C'est la petite image de l'onglet du navigateur, des favoris et de l'écran d'accueil d'un
+      téléphone. Les lettres viennent de la dernière image du film de l'intro. Pour la modifier,
+      change le code de <code>scripts/favicon.js</code> : la page se met à jour toute seule.
+    </p>
+
+    <div id="icons"></div>
+
+    <script type="module" src="./favicon.js"></script>
+  </body>
+</html>
