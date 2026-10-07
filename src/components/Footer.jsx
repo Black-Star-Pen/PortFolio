@@ -54,7 +54,7 @@ function Footer() {
                 peut ainsi voir que la visite vient de ce portfolio. « noopener » suffit à la sécurité :
                 la page ouverte dans le nouvel onglet ne peut pas agir sur celle-ci. */}
             <p className="footer-thanks">
-              Merci pour tout à Cédric, développeur et fondateur d'
+              Petite mention honorable, merci pour tout à Cédric, développeur et fondateur d'
               <a href="https://octaforge.fr/" target="_blank" rel="noopener">
                 Octaforge <span aria-hidden="true">↗</span>
                 <span className="sr-only"> (nouvel onglet)</span>

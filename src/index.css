@@ -415,6 +415,192 @@ html.has-intro .hero-pin {
   }
 }
 
+/* ----- Le fond du Hero (MODE TEST : quatre fonds au choix, voir HeroBackground.jsx) ----- */
+
+/* Le fond est fixé à l'écran et passe derrière tout le contenu (z-index: -1). C'est HeroBackground.jsx
+   qui règle son opacité : plein feu quand le Hero remplit l'écran, éteint quand il l'a quitté.
+   « fixed » le fait aussi échapper à la découpe de .hero (overflow-x: clip) : il prend toute la largeur. */
+.hero-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Le fond s'allume en douceur à l'arrivée, et à chaque changement de fond pendant le test */
+.hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  animation: hero-bg-on 1.6s ease-out both;
+}
+
+@keyframes hero-bg-on {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 1. PROJECTEURS : trois faisceaux partent du coin en haut à gauche.
+      Chacun est un grand carré accroché à ce coin. Son dégradé « conique » tourne autour du coin :
+      transparent, puis la couleur, puis transparent à nouveau : cela dessine un cône de lumière aux bords doux.
+      Le masque l'efface avec la distance, et l'animation le fait osciller de quelques degrés autour du coin. */
+.hero-beam {
+  position: absolute;
+  top: -6vh;
+  left: -4vw;
+  width: 140vmax;
+  height: 140vmax;
+  transform-origin: 0 0;
+  background: conic-gradient(
+    from var(--beam-from) at 0 0,
+    transparent 0deg,
+    rgba(var(--beam-color), var(--beam-strength)) calc(var(--beam-width) * 0.4),
+    rgba(var(--beam-color), var(--beam-strength)) calc(var(--beam-width) * 0.6),
+    transparent var(--beam-width)
+  );
+  mask-image: radial-gradient(circle at 0 0, #000 0, rgba(0, 0, 0, 0.55) 30%, transparent 62%);
+  animation: beam-sway var(--beam-time) ease-in-out infinite alternate;
+}
+
+/* --beam-from : la direction du bord du cône (90deg = vers la droite, 180deg = vers le bas) */
+.hero-beam-1 {
+  --beam-from: 100deg;
+  --beam-width: 30deg;
+  --beam-color: 214, 191, 148;
+  --beam-strength: 0.28;
+  --beam-time: 9s;
+}
+
+.hero-beam-2 {
+  --beam-from: 121deg;
+  --beam-width: 16deg;
+  --beam-color: 168, 212, 245;
+  --beam-strength: 0.2;
+  --beam-time: 12s;
+}
+
+.hero-beam-3 {
+  --beam-from: 134deg;
+  --beam-width: 24deg;
+  --beam-color: 214, 191, 148;
+  --beam-strength: 0.18;
+  --beam-time: 15s;
+}
+
+@keyframes beam-sway {
+  from {
+    transform: rotate(-2.5deg);
+  }
+  to {
+    transform: rotate(2.5deg);
+  }
+}
+
+/* 2. HALOS : trois grands disques de lumière, dorés et bleu, qui dérivent lentement.
+      Le dégradé radial fait déjà le flou : pas besoin de filtre, qui coûterait cher sur téléphone. */
+.hero-halo {
+  position: absolute;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--halo-color), var(--halo-strength)), transparent);
+  animation: halo-drift var(--halo-time) ease-in-out infinite alternate;
+}
+
+.hero-halo-1 {
+  top: -30vmax;
+  left: -24vmax;
+  --halo-color: 214, 191, 148;
+  --halo-strength: 0.24;
+  --halo-x: 10vw;
+  --halo-y: 8vh;
+  --halo-time: 16s;
+}
+
+.hero-halo-2 {
+  right: -22vmax;
+  bottom: -34vmax;
+  --halo-color: 168, 212, 245;
+  --halo-strength: 0.16;
+  --halo-x: -9vw;
+  --halo-y: -8vh;
+  --halo-time: 21s;
+}
+
+.hero-halo-3 {
+  top: -40vmax;
+  right: 4vw;
+  --halo-color: 214, 191, 148;
+  --halo-strength: 0.12;
+  --halo-x: -7vw;
+  --halo-y: 10vh;
+  --halo-time: 26s;
+}
+
+@keyframes halo-drift {
+  to {
+    transform: translate(var(--halo-x), var(--halo-y)) scale(1.12);
+  }
+}
+
+/* 3 et 4. POUSSIÈRE D'OR et DALLES : dessinées sur une toile qui remplit le fond (voir HeroBackground.jsx) */
+.hero-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Les dalles s'effacent en haut (sous la navbar) et en bas (vers la section suivante) */
+.hero-bg-tiles {
+  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 68%, transparent);
+}
+
+/* Le panneau du mode test : en haut à droite, sous la navbar. Il sera supprimé avec HeroBackgroundTest.jsx. */
+.hero-bg-test {
+  position: fixed;
+  top: calc(var(--navbar-h, 73px) + 12px);
+  right: 12px;
+  z-index: 40;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(214, 191, 148, 0.5);
+  background-color: rgba(17, 19, 24, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.hero-bg-test strong {
+  color: var(--color-accent);
+}
+
+.hero-bg-test div {
+  display: flex;
+  gap: 6px;
+}
+
+.hero-bg-test button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.hero-bg-test button.is-active {
+  border-color: var(--color-accent);
+  background-color: rgba(214, 191, 148, 0.14);
+  color: var(--color-accent);
+}
+
 /* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
 .hero-intro {
   display: grid;
@@ -497,6 +683,31 @@ html.has-intro .hero-pin {
       0 0 6px #d6ecff,
       0 0 14px rgba(120, 190, 255, 0.9),
       0 0 28px rgba(60, 130, 255, 0.5);
+  }
+}
+
+/* Sur un écran tactile, pas de flou : les mots montent et s'éclaircissent, c'est tout.
+   Safari sur iPhone garde parfois l'image floutée d'un mot une fois son animation finie
+   (« React » ou « sécurité » restaient flous à l'écran). Sans filtre, il n'a plus rien à garder.
+   On ne change que le nom de la première animation : l'éclat de soudure des mots dorés et bleus reste. */
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .reveal-word {
+    animation-name: word-rise;
+  }
+
+  .reveal-word-highlight {
+    animation-name: word-rise, word-weld;
+  }
+
+  .reveal-word-steel {
+    animation-name: word-rise, word-weld-blue;
   }
 }
 
@@ -663,12 +874,18 @@ html.has-intro .hero-pin {
    au défilement (voir Timeline.jsx), puis repartent ensemble.
    Sur un écran trop étroit ou trop bas pour ça, les deux blocs s'empilent, centrés, avec les styles de base.
    (La même condition est écrite dans Timeline.jsx : PINNED_SCREEN.)
-   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre. */
-@media (min-width: 1000px) and (min-height: 820px) {
+   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre.
+   Deuxième condition, après la virgule (« ou ») : un écran d'ordinateur portable, large mais moins haut.
+   La présentation y tient aussi, parce que ses marges et son texte se resserrent avec la hauteur :
+   voir les valeurs en vh plus bas (1vh = 1 % de la hauteur de l'écran). Elles sont calculées pour
+   redonner exactement les tailles d'origine à partir de 820px de haut : rien ne change sur grand écran. */
+@media (min-width: 1000px) and (min-height: 820px), (min-width: 1100px) and (min-height: 640px) {
   .about-layout {
-    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran */
-    --frame-top: calc(var(--navbar-h, 73px) + 40px);
-    --frame-height: calc(100vh - var(--frame-top) - 40px);
+    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran
+       (moins sur un écran bas : 4.9vh valent 40px à 820px de haut) */
+    --frame-gap: min(40px, 4.9vh);
+    --frame-top: calc(var(--navbar-h, 73px) + var(--frame-gap));
+    --frame-height: calc(100vh - var(--frame-top) - var(--frame-gap));
     /* La distance de défilement pendant laquelle elles restent en place, le temps de souder le cordon.
        Pour que ça dure plus ou moins longtemps, change cette valeur. */
     --about-hold: 110vh;
@@ -696,25 +913,30 @@ html.has-intro .hero-pin {
 
   .about-intro .section-title {
     max-width: none;
-    margin: 0 0 32px;
+    margin: 0 0 min(32px, 3.9vh);
     text-align: left;
   }
 
   /* Un titre un peu plus petit que dans les autres sections : dans une demi-largeur,
-     « le goût du travail bien fait. » doit tenir sur une seule ligne */
+     « le goût du travail bien fait. » doit tenir sur une seule ligne.
+     Le min(…, 4.5vh) le réduit encore sur un écran bas. */
   .about-intro .section-title h2 {
-    font-size: clamp(1.9rem, 2.9vw, 2.3rem);
+    font-size: min(clamp(1.9rem, 2.9vw, 2.3rem), 4.5vh);
   }
 
   /* Aligné à gauche, l'onglet du libellé se cale au bord, comme le titre */
   .about-intro .section-label {
     justify-content: flex-start;
+    margin-bottom: min(24px, 2.95vh);
   }
 
+  /* Le texte rétrécit avec la hauteur de l'écran, sans descendre sous 0.92rem pour rester lisible */
   .about-intro .about-text {
+    gap: min(16px, 1.95vh);
     max-width: none;
     margin: 0;
     text-align: left;
+    font-size: clamp(0.92rem, 2.15vh, 1.1rem);
   }
 
   /* Le parcours : son titre en haut, et en dessous une fenêtre qui prend toute la hauteur restante */
@@ -2086,7 +2308,7 @@ html.has-intro .hero-pin {
 }
 
 /* Un choix affiché mais pas proposé pour le moment (ex. : Freelance) : gris, en pointillés, comme
-   le badge « titre non obtenu » du parcours. Le bouton est désactivé (voir ContactForm.jsx).
+   le badge « formation suivie » du parcours. Le bouton est désactivé (voir ContactForm.jsx).
    opacity: 1 : un bouton désactivé est à 60 % d'opacité (.btn:disabled) ; ici le gris suffit, et le mot
    « indisponible » doit rester lisible. */
 .type-option-unavailable:disabled {
@@ -4689,6 +4911,9 @@ html.has-intro:not(.intro-playing) .navbar .navbar-logo::after {
   }
 
   .badge-available::before,
+  .hero-bg-layer,
+  .hero-beam,
+  .hero-halo,
   .hero-reveal,
   .reveal-word,
   .reveal-word-highlight,

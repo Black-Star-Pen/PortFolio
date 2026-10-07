@@ -1,9 +1,13 @@
+import HeroBackgroundTest from "./HeroBackgroundTest";
 import WeldText from "./WeldText";
 import WordReveal from "./WordReveal";
 
 function Hero({ onContactClick }) {
   return (
     <section className="hero">
+      {/* MODE TEST (temporaire) : le fond du Hero et le panneau pour en changer */}
+      <HeroBackgroundTest />
+
       {/* .hero-pin regroupe tout le contenu : après l'intro, c'est lui qui reste « épinglé »
           à l'écran pendant quelques instants de défilement (voir .hero-pin dans le CSS) */}
       <div className="hero-pin">

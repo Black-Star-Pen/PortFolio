@@ -16,8 +16,11 @@ function ContactModal({ onClose }) {
     // 2. On bloque le scroll de la page
     lockPageScroll();
 
-    // 3. On place le curseur dans le premier champ
-    dialogRef.current.querySelector("input")?.focus();
+    // 3. On place le curseur dans le champ Prénom, le premier où l'on écrit.
+    //    On le vise par son nom, et pas « le premier input venu » : le tout premier de la feuille est
+    //    le champ piège anti-robots, invisible. Le clavier s'ouvrait alors sur lui : on tapait dans le vide,
+    //    et un message écrit ainsi aurait été pris pour celui d'un robot.
+    dialogRef.current.querySelector('input[name="firstName"]')?.focus();
 
     // 4. Échap ferme la modale
     function handleKeyDown(event) {

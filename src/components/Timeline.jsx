@@ -12,7 +12,9 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 // La gamme se parcourt de deux façons, selon l'écran (la même condition est écrite dans le CSS, section 9) :
 // - grand écran : l'À propos est en deux colonnes qui restent en place le temps que le cordon se soude ;
 // - sinon : la gamme défile avec la page, et le cordon suit une ligne aux 60 % de la hauteur de l'écran.
-const PINNED_SCREEN = "(min-width: 1000px) and (min-height: 820px)";
+// La virgule veut dire « ou » : un grand écran, ou un écran d'ordinateur portable (large mais moins haut).
+const PINNED_SCREEN =
+  "(min-width: 1000px) and (min-height: 820px), (min-width: 1100px) and (min-height: 640px)";
 
 const SMOOTHING = 0.5; // en secondes : le retard du cordon sur le défilement, pour qu'il glisse (comme l'intro)
 // Avec le défilement fluide (voir smoothScroll.js), la page glisse déjà : un léger lissage suffit (comme l'intro)
@@ -80,7 +82,16 @@ function Timeline() {
     // Si la fenêtre change de taille et passe de l'un à l'autre, GSAP défait le premier et installe le second.
     const media = gsap.matchMedia();
 
-    media.add(PINNED_SCREEN, () => {
+    // Deux conditions nommées : « always » est toujours vraie, la fonction est donc toujours installée,
+    // et GSAP la rejoue quand « pinned » change. (On ne peut pas écrire « not all and … » devant
+    // PINNED_SCREEN pour le cas contraire : avec sa virgule, le « non » ne porterait que sur sa première moitié.)
+    media.add({ pinned: PINNED_SCREEN, always: "all" }, (context) => {
+      if (!context.conditions.pinned) {
+        // Le cordon commence quand le haut de la gamme passe la ligne des 60 %, et finit quand son bas la passe
+        weldOnScroll({ trigger: body, start: "top 60%", end: "bottom 60%", scrub: true }, false);
+        return;
+      }
+
       const layout = root.closest(".about-layout");
 
       weldOnScroll(
@@ -95,11 +106,6 @@ function Timeline() {
         },
         true
       );
-    });
-
-    media.add(`not all and ${PINNED_SCREEN}`, () => {
-      // Le cordon commence quand le haut de la gamme passe la ligne des 60 %, et finit quand son bas la passe
-      weldOnScroll({ trigger: body, start: "top 60%", end: "bottom 60%", scrub: true }, false);
     });
 
     return () => media.revert();
