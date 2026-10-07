@@ -18,6 +18,10 @@ const DEFAULT_STYLE = {
   life: [0.3, 0.8], // la durée de vie, en secondes
   size: [0.3, 0.5], // l'épaisseur du trait
   splitChance: 0.14, // la part des étincelles qui éclatent en vol, comme de vraies étincelles
+  // La façon dont les traits se mélangent au fond. « lighter » : leurs lumières s'additionnent, parfait
+  // sur un fond sombre. Sur un fond clair, on ne peut pas éclaircir du blanc : on passe « source-over »
+  // (le trait est simplement posé par-dessus), avec des couleurs plus foncées.
+  blend: "lighter",
   // La couleur selon l'âge (0 = vient de naître, 1 = s'éteint) : [âge, rouge, vert, bleu]
   colors: [
     [0, 255, 252, 236],
@@ -42,7 +46,7 @@ function colorAt(colors, age) {
 
 // style : les réglages à changer par rapport à DEFAULT_STYLE (rien = les étincelles de l'intro)
 export function createSparks(canvas, style) {
-  const { maxSparks, gravity, drag, spread, speed, life, size, splitChance, colors } = {
+  const { maxSparks, gravity, drag, spread, speed, life, size, splitChance, blend, colors } = {
     ...DEFAULT_STYLE,
     ...style,
   };
@@ -121,8 +125,8 @@ export function createSparks(canvas, style) {
     ctx.clearRect(0, 0, width, height);
     if (sparks.length === 0) return 0;
 
-    // « lighter » : là où deux traits se croisent, leurs lumières s'additionnent
-    ctx.globalCompositeOperation = "lighter";
+    // Par défaut « lighter » : là où deux traits se croisent, leurs lumières s'additionnent
+    ctx.globalCompositeOperation = blend;
     ctx.lineCap = "round";
 
     const born = [];

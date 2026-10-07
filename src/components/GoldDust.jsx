@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
+import { THEME_CHANGE, themeColor } from "../utils/theme";
 
 // La poussière d'or : le fond de la section Contact. Des grains dorés (et quelques bleus) montent
 // doucement, scintillent, et s'allument près du curseur. Ils sont dessinés sur une toile (<canvas>).
 // Le fond reste dans sa section : il commence au cordon de soudure, en haut, et s'arrête au trait
 // du pied de page, en bas (voir .gold-dust dans le CSS).
 
-// Les deux couleurs du site, écrites « rouge, vert, bleu » pour pouvoir régler leur transparence
-const GOLD = "214, 191, 148";
-const TIG = "168, 212, 245";
+// Les deux couleurs des grains, lues dans le CSS (écrites « rouge, vert, bleu », pour pouvoir régler leur
+// transparence) : elles changent avec le thème, clair ou sombre. Une toile ne sait pas lire une variable
+// CSS elle-même, d'où themeColor.
+function readColors() {
+  return { gold: themeColor("--rgb-accent"), tig: themeColor("--rgb-tig") };
+}
 
 // La densité : un grain pour 6 500 px² de section, 400 au plus. La même sur un téléphone que sur un
 // grand écran. Pour plus de poussière, baisse le premier nombre (et monte le second s'il le faut).
@@ -17,8 +21,9 @@ const MAX_GRAINS = 400;
 // La fonction renvoyée dessine une image ; elle garde ses grains d'une image à l'autre.
 function createDust() {
   let grains = [];
+  let colors = readColors();
 
-  return function drawDust(context, width, height, time, pointer) {
+  function drawDust(context, width, height, time, pointer) {
     const count = Math.min(Math.round((width * height) / AREA_PER_GRAIN), MAX_GRAINS);
 
     if (grains.length !== count) {
@@ -40,7 +45,7 @@ function createDust() {
       const near = Math.max(0, 1 - Math.hypot(x - pointer.x, y - pointer.y) / 160);
       const twinkle = 0.5 + 0.5 * Math.sin(time * 1.4 + grain.phase);
       const alpha = Math.min(0.2 + 0.5 * twinkle + near * 0.6, 1);
-      const color = grain.blue ? TIG : GOLD;
+      const color = grain.blue ? colors.tig : colors.gold;
 
       // Les plus gros ont un halo, comme une braise
       if (grain.radius > 1.7) {
@@ -55,7 +60,14 @@ function createDust() {
       context.arc(x, y, grain.radius + near * 1.6, 0, Math.PI * 2);
       context.fill();
     });
+  }
+
+  // À appeler quand le thème change : les grains prennent les couleurs du nouveau thème
+  drawDust.refreshColors = () => {
+    colors = readColors();
   };
+
+  return drawDust;
 }
 
 function GoldDust() {
@@ -119,13 +131,21 @@ function GoldDust() {
       frame = requestAnimationFrame(tick);
     }
 
+    // Le visiteur change de thème : on reprend les couleurs et on redessine tout de suite
+    function onThemeChange() {
+      draw.refreshColors();
+      render(performance.now());
+    }
+
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener(THEME_CHANGE, onThemeChange);
 
     return () => {
       cancelAnimationFrame(frame);
       visibility.disconnect();
       sizes.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener(THEME_CHANGE, onThemeChange);
     };
   }, [draw]);
 

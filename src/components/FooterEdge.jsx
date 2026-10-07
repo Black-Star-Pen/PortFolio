@@ -2,6 +2,13 @@
 // au milieu et son trou de fixation. La forme est dessinée deux fois : une fois pleine, de la couleur
 // du pied de page (elle le prolonge vers le haut), et une fois en trait doré, qui suit son bord.
 // Sa place et sa taille sont dans le CSS (voir .footer-edge, section 17).
+
+// Une étape du dégradé du trait doré : offset = sa position le long du trait (de 0 à 1), opacity = sa
+// transparence. La couleur vient du CSS (var(--color-accent)), pour suivre le thème, clair ou sombre.
+function GoldStop({ offset, opacity = 1 }) {
+  return <stop offset={offset} style={{ stopColor: "var(--color-accent)", stopOpacity: opacity }} />;
+}
+
 function FooterEdge() {
   return (
     // Un dessin très large (3000) dont on ne voit que le milieu (« slice ») : la languette garde ainsi
@@ -14,13 +21,13 @@ function FooterEdge() {
     >
       <defs>
         {/* Le dégradé du trait doré : lumineux au milieu, il s'estompe à 750 de chaque côté, la longueur
-            d'un cordon de soudure (1500). offset = la position le long du trait, de 0 à 1. */}
+            d'un cordon de soudure (1500). */}
         <linearGradient id="footer-edge-gold" gradientUnits="userSpaceOnUse" x1="750" x2="2250">
-          <stop offset="0" stopColor="#d6bf94" stopOpacity="0" />
-          <stop offset="0.15" stopColor="#d6bf94" stopOpacity="0.25" />
-          <stop offset="0.5" stopColor="#d6bf94" />
-          <stop offset="0.85" stopColor="#d6bf94" stopOpacity="0.25" />
-          <stop offset="1" stopColor="#d6bf94" stopOpacity="0" />
+          <GoldStop offset="0" opacity={0} />
+          <GoldStop offset="0.15" opacity={0.25} />
+          <GoldStop offset="0.5" />
+          <GoldStop offset="0.85" opacity={0.25} />
+          <GoldStop offset="1" opacity={0} />
         </linearGradient>
       </defs>
 
