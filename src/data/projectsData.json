@@ -6,7 +6,7 @@
     "category": "Bot IA & landing page",
     "description": "Un **bot Telegram** qui analyse texte, images, PDF et vidéos **grâce à l'IA**, et la landing page de la startup AskVera.",
     "details": {
-      "context": "Projet d'école réalisé pour les fondateurs de la **startup AskVera**, en compétition avec d'autres équipes. **Équipe de 5** (développeurs et designers), en méthode agile avec Trello et Discord.",
+      "context": "Projet d'école réalisé pour les fondateurs de la **startup AskVera**, en compétition avec d'autres équipes. **Équipe de 4** (trois développeurs et un web designer), en méthode agile avec Trello et Discord.",
       "role": [
         "Conception et développement du bot Telegram **de A à Z** (Node.js, Telegraf).",
         "Détection automatique du type de contenu envoyé et vérification des fichiers, puis routage vers le bon traitement (analyse des images et des vidéos via l'**API OpenAI**, extraction du texte pour les PDF) avant l'envoi à l'API Vera.",
