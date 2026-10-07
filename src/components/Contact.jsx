@@ -1,10 +1,14 @@
 import SectionTitle from "./SectionTitle";
 import ContactForm from "./ContactForm";
 import ContactLinks from "./ContactLinks";
+import GoldDust from "./GoldDust";
 
 function Contact() {
   return (
     <section id="contact">
+      {/* Le fond de la section : la poussière d'or (voir GoldDust.jsx) */}
+      <GoldDust />
+
       {/* Le titre est écrit en JSX (et pas en simple texte) pour pouvoir mettre un seul mot en valeur :
           « poste » passe en doré, comme « Applications Web » dans le titre du Hero, et il est souligné
           à la main, de deux coups de crayon.

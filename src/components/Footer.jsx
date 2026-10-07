@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
+import FooterEdge from "./FooterEdge";
 import Weld from "./Weld";
 import { scrollToSiteTop } from "../utils/siteTop";
 
@@ -39,6 +40,9 @@ function Footer() {
 
   return (
     <footer className="footer">
+      {/* Le bord du haut du pied de page : une tôle découpée, avec sa languette (voir FooterEdge.jsx) */}
+      <FooterEdge />
+
       <div className="footer-inner">
         <div className="footer-grid">
           {/* La signature */}

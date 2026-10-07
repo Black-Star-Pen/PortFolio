@@ -57,7 +57,7 @@ function Navbar({ onContactClick }) {
 
         <button
           type="button"
-          className="btn btn-primary btn-small navbar-cta"
+          className="btn btn-primary btn-small btn-metal navbar-cta"
           onClick={onContactClick}
         >
           Me contacter

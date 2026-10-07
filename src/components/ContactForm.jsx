@@ -243,8 +243,12 @@ function OptionGroup({ name, legend, options, value, onSelect, error, optional =
           <button
             key={option.value}
             type="button"
-            className={`btn btn-primary btn-small type-option ${
-              option.variant ? `type-option-${option.variant}` : ""
+            // Une option ordinaire est un bouton doré (btn-primary). La variante « steel » porte à la
+            // place le contour en acier bleui des boutons (btn-metal btn-metal-blue, voir le CSS, section 6).
+            className={`btn btn-small type-option ${
+              option.variant === "steel"
+                ? "btn-metal btn-metal-blue type-option-steel"
+                : "btn-primary"
             } ${option.unavailable ? "type-option-unavailable" : ""} ${
               value === option.value ? "selected" : ""
             }`}
@@ -731,7 +735,7 @@ function ContactForm() {
 
           <button
             type="submit"
-            className="btn btn-primary work-order-submit"
+            className="btn btn-primary btn-metal work-order-submit"
             disabled={status === "sending" || retryIn > 0}
           >
             {status === "sending"
