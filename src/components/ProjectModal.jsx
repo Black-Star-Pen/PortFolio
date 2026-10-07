@@ -3,6 +3,7 @@ import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
 import RichText from "./RichText";
 import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../utils/smoothScroll";
+import { useLanguage } from "../i18n/LanguageContext";
 
 // Le glissement du doigt qui fait changer de projet (sur téléphone), comme une pile de cartes :
 // la fiche suit le doigt en penchant, et celle du projet voisin apparaît derrière elle.
@@ -45,11 +46,12 @@ function Chevron({ direction }) {
 // pendant un glissement du doigt. Cette dernière n'a ni titleId, ni closeButtonRef, ni onClose :
 // elle n'est qu'une image de ce qui arrive.
 function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
+  const { t } = useLanguage();
   const { title, category, description, details, technos, image, links, linksNote } = project;
 
   return (
     <>
-      <button ref={closeButtonRef} className="modal-close" onClick={onClose} aria-label="Fermer">
+      <button ref={closeButtonRef} className="modal-close" onClick={onClose} aria-label={t.common.close}>
         ✕
       </button>
 
@@ -60,7 +62,9 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
             qui reste en haut de la modale pendant que le texte défile dessous (voir .modal-heading) */}
         <div className="modal-heading">
           <span className="project-category">
-            <span className="project-ref">N° {String(number).padStart(2, "0")}</span>
+            <span className="project-ref">
+              {t.projects.number} {String(number).padStart(2, "0")}
+            </span>
             {category}
           </span>
           <h3 id={titleId} className="project-title">
@@ -76,7 +80,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
           <div className="project-details">
             {details.context && (
               <div className="project-detail">
-                <h4>Contexte</h4>
+                <h4>{t.projects.context}</h4>
                 <p>
                   <RichText text={details.context} />
                 </p>
@@ -85,7 +89,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
 
             {details.role && details.role.length > 0 && (
               <div className="project-detail">
-                <h4>Mon rôle</h4>
+                <h4>{t.projects.role}</h4>
                 <ul className="project-role">
                   {details.role.map((item) => (
                     <li key={item}>
@@ -98,7 +102,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
 
             {details.challenge && (
               <div className="project-detail">
-                <h4>Le défi</h4>
+                <h4>{t.projects.challenge}</h4>
                 <p>
                   <RichText text={details.challenge} />
                 </p>
@@ -107,7 +111,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
 
             {details.learned && (
               <div className="project-detail">
-                <h4>Ce que j'ai appris</h4>
+                <h4>{t.projects.learned}</h4>
                 <p>
                   <RichText text={details.learned} />
                 </p>
@@ -117,7 +121,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
         )}
 
         <div className="project-detail project-stack">
-          <h4>Stack technique</h4>
+          <h4>{t.projects.stack}</h4>
           <ul className="project-technos">
             {technos.map((techno) => (
               <TechBadge key={techno} name={techno} />
@@ -150,7 +154,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
                 className="btn btn-primary"
               >
                 {link.label} <span aria-hidden="true">↗</span>
-                <span className="sr-only"> (nouvel onglet)</span>
+                <span className="sr-only">{t.common.newTab}</span>
               </a>
             ))}
           </div>
@@ -170,6 +174,7 @@ function ProjectModal({
   onNext,
   onClose,
 }) {
+  const { t } = useLanguage();
   const { slug } = project;
   const titleId = useId();
   const overlayRef = useRef(null);
@@ -451,13 +456,13 @@ function ProjectModal({
               event.stopPropagation();
               goPrevious();
             }}
-            aria-label={`Projet précédent : ${previousProject.title}`}
+            aria-label={t.projects.previous(previousProject.title)}
           >
             <Chevron direction="previous" />
           </button>
 
           <span className="modal-nav-count" aria-hidden="true">
-            Projet {String(number).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            {t.projects.count} {String(number).padStart(2, "0")} / {String(total).padStart(2, "0")}
           </span>
 
           <button
@@ -468,7 +473,7 @@ function ProjectModal({
               event.stopPropagation();
               goNext();
             }}
-            aria-label={`Projet suivant : ${nextProject.title}`}
+            aria-label={t.projects.next(nextProject.title)}
           >
             <Chevron direction="next" />
           </button>

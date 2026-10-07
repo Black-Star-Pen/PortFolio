@@ -1,0 +1,134 @@
+[
+  {
+    "id": 1,
+    "slug": "askvera",
+    "title": "AskVera",
+    "category": "AI bot & landing page",
+    "description": "A **Telegram bot** that analyses text, images, PDFs and videos **with AI**, plus the landing page of the AskVera startup.",
+    "details": {
+      "context": "School project built for the founders of the **AskVera startup**, in competition with other teams. **Team of 4** (three developers and one web designer), working in agile with Trello and Discord.",
+      "role": [
+        "Designed and built the Telegram bot **from start to finish** (Node.js, Telegraf).",
+        "Automatic detection of the type of content received and file checks, then routing to the right processing (image and video analysis through the **OpenAI API**, text extraction for PDFs) before sending to the Vera API.",
+        "**CSV export** of the Dashboard data.",
+        "Contributed to the integration of the landing page (Angular, Tailwind)."
+      ],
+      "challenge": "Heavy processing, such as extracting the text of a PDF or analysing a video, took time and could block the bot for everyone. I made that processing **asynchronous**: the bot replies straight away with “analysis in progress…”, then sends the result when it is ready, without keeping other users waiting. In production, I switched it to **webhooks**: Telegram notifies the server on every message, instead of the bot polling in a loop.",
+      "learned": "Getting **several APIs** (Telegram, OpenAI, Vera, the database) to work together in a single Node.js application while keeping the code readable. And delivering a product that a real client can use, with its constraints."
+    },
+    "technos": [
+      "Node.js",
+      "Angular",
+      "PostgreSQL",
+      "API OpenAI",
+      "Telegraf",
+      "TailwindCSS",
+      "Apache ECharts",
+      "Discord"
+    ],
+    "image": "/projects/askvera.webp",
+    "links": [
+      {
+        "type": "site",
+        "label": "View the site",
+        "url": "https://front-on-vera.vercel.app/"
+      },
+      {
+        "type": "code",
+        "label": "View the code",
+        "url": "https://github.com/Black-Star-Pen/AskVera"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "slug": "hero-experience",
+    "title": "The Hero Experience",
+    "category": "Full stack application",
+    "description": "A superhero booking app: 563 heroes, customer accounts, bookings and verified reviews. A team project that I later **rebuilt on my own as a full stack app**.",
+    "details": {
+      "context": "Final exam project at Wild Code School (Paris, April 2024), built in a **team of 4**. In September 2026, I rebuilt it entirely on my own in a personal repository, with the help of **the AI assistant Claude Code**. Fictional project, with no real payment.",
+      "role": [
+        "2024, as a team: the booking form, the customer reviews on the hero page and the PayPal payment integration (in test mode).",
+        "2026, on my own: built a **real API** (Node.js, Express) for a site that had no backend at all.",
+        "Accounts and security: hashed passwords (**Argon2id**), sessions in an HttpOnly cookie, **CSRF** protection and rate limiting.",
+        "Bookings with a price **calculated by the server**, no possible double booking, and reviews reserved for customers who actually booked.",
+        "Front end rewritten in TypeScript, **158 automated tests**, continuous integration and deployment: the site only goes live if every test passes."
+      ],
+      "challenge": "In the original version, everything happened in the browser: fake data, a browser-side “login”, and the team's credentials hard-coded in the code shipped to visitors. I rebuilt a **real backend**: the server handles sessions, calculates prices and checks availability, and the new repository no longer contains any personal data. After going live, I also fixed a bug: behind Cloudflare, the rate limiter saw every visitor with the same IP address. It now reads the **CF-Connecting-IP** header, and I checked online that each visitor does have their own counter.",
+      "learned": "Structuring an API in layers and sharing the same validation (Zod) between front and back. Securing an application without ever trusting the browser. Writing tests and automating deployment. Bringing the known vulnerabilities of the dependencies **from 43 down to 0**. And above all, evolving existing code without breaking everything."
+    },
+    "technos": [
+      "React",
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Express",
+      "Vite",
+      "React Router",
+      "TanStack Query",
+      "Zod",
+      "Drizzle",
+      "Vitest",
+      "GitHub Actions",
+      "Claude Code"
+    ],
+    "image": "/projects/hero-experience.webp",
+    "links": [
+      {
+        "type": "site",
+        "label": "View the site",
+        "url": "https://the-hero-experience.onrender.com"
+      },
+      {
+        "type": "code",
+        "label": "View the code",
+        "url": "https://github.com/Black-Star-Pen/The-Hero-Experience"
+      }
+    ],
+    "linksNote": "Free hosting: the first load can take about a minute. A demo account is offered on the login page."
+  },
+  {
+    "id": 3,
+    "slug": "portfolio",
+    "title": "Portfolio",
+    "category": "Full stack application",
+    "description": "My portfolio, designed and coded **from start to finish**: a world of technical drawings and metal workshops, a nod to my boilermaking background.",
+    "details": {
+      "context": "Personal project, **built on my own**, to present my background and my work.",
+      "role": [
+        "React front end (Vite): reusable components, navigation with React Router, legal pages and a 404 page.",
+        "Art direction inspired by technical drawings, with **welding animations** on scroll (career path, tabs, footer).",
+        "Adaptive contact form: the fields change with the type of request, live check of the city (public API geo.api.gouv.fr) and a suggestion when the email has a typo.",
+        "Express API that **re-checks everything on the server**, verifies that the email domain really exists (DNS), then sends the message by email (Nodemailer).",
+        "Anti-spam protection: a limit of 3 messages per 5 minutes and an invisible honeypot field for bots.",
+        "Accessibility: full keyboard navigation, modals that keep the focus, respect for the “reduce motion” setting."
+      ],
+      "challenge": "**Never trust the browser**. Everything the form checks can be bypassed, so the server runs every check again itself: allow-list of fields, maximum lengths, email, city. It also limits the number of submissions and returns clear errors, which the form displays field by field.",
+      "learned": "Designing **scroll-driven animations** with GSAP and ScrollTrigger, drawn in CSS and SVG (paths, masks, CSS variables). Building an API that defends itself, with **security and privacy in mind from the design stage**. And running a project from end to end with a clean Git workflow: one branch per feature, and Pull Requests."
+    },
+    "technos": [
+      "React",
+      "Node.js",
+      "Express",
+      "Vite",
+      "React Router",
+      "GSAP",
+      "Nodemailer",
+      "CSS"
+    ],
+    "image": "/projects/portfolio.webp",
+    "links": [
+      {
+        "type": "site",
+        "label": "View the site",
+        "url": "https://adam-boulkhedert.onrender.com/"
+      },
+      {
+        "type": "code",
+        "label": "View the code",
+        "url": "https://github.com/Black-Star-Pen/Portfolio"
+      }
+    ]
+  }
+]

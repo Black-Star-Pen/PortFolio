@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { createSparks } from "./sparks";
 import { createWeldSound } from "./weldSound";
 import { scrollToPosition, wantsSmoothScroll } from "../utils/smoothScroll";
+import { useLanguage } from "../i18n/LanguageContext";
 
 // GSAP est la bibliothèque d'animation ; ScrollTrigger est son module qui relie une animation
 // au défilement de la page ; useGSAP est le « hook » qui les fait fonctionner proprement avec React.
@@ -224,6 +225,7 @@ function Zones({ side, labels }) {
 }
 
 function Intro() {
+  const { t } = useLanguage();
   const { pathname } = useLocation();
   const [isEnabled, setIsEnabled] = useState(shouldPlay);
   // Le film n'est proposé que sur un écran large (décidé une fois, à l'arrivée)
@@ -669,26 +671,26 @@ function Intro() {
           {/* Le cartouche : la « carte d'identité » d'un plan. Chaque case a une étiquette et une valeur. */}
           <div className="intro-cartouche">
             <div className="intro-cartouche-wide">
-              <span>Dessiné par</span>
+              <span>{t.intro.drawnBy}</span>
               <strong>Adam Boulkhedert</strong>
             </div>
             <div>
-              <span>Plan n°</span>
+              <span>{t.intro.planNumber}</span>
               <strong>01</strong>
             </div>
             <div>
-              <span>Procédé</span>
+              <span>{t.intro.process}</span>
               <strong>TIG · 141</strong>
             </div>
             <div>
-              <span>Échelle</span>
+              <span>{t.intro.scale}</span>
               <strong>1:1</strong>
             </div>
             {/* Le contrôle passe de « En cours » à « Validé » quand « AB » est entièrement soudé */}
             <div className="intro-cartouche-check">
-              <span>Contrôle</span>
-              <strong className="pending">En cours</strong>
-              <strong className="done">Validé ✓</strong>
+              <span>{t.intro.check}</span>
+              <strong className="pending">{t.intro.pending}</strong>
+              <strong className="done">{t.intro.done}</strong>
             </div>
           </div>
         </div>
@@ -893,7 +895,7 @@ function Intro() {
           </div>
 
           <p className="intro-hint">
-            Défiler <span>↓</span>
+            {t.intro.scroll} <span>↓</span>
           </p>
         </div>
 
@@ -903,11 +905,11 @@ function Intro() {
         {/* Le son de la soudure : coupé au départ, c'est le visiteur qui choisit de l'entendre.
             aria-pressed dit aux lecteurs d'écran si le bouton est enfoncé. */}
         <button type="button" className="intro-sound" aria-pressed={isSoundOn} onClick={toggleSound}>
-          Son · {isSoundOn ? "oui" : "non"}
+          {t.intro.sound} · {isSoundOn ? t.intro.on : t.intro.off}
         </button>
 
         <button type="button" className="intro-skip" onClick={skipIntro}>
-          Passer <span aria-hidden="true">›</span>
+          {t.intro.skip} <span aria-hidden="true">›</span>
         </button>
       </div>
     </div>

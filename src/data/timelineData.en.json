@@ -1,0 +1,43 @@
+[
+  {
+    "id": 1,
+    "type": "formation",
+    "date": "2021-2022",
+    "title": "BTS in Industrial Boilermaking",
+    "place": "Argenteuil · two-year technical degree",
+    "description": "Design and fabrication from metalwork drawings. It taught me to read a drawing, to hold a dimension to the millimetre and to leave nothing to chance."
+  },
+  {
+    "id": 2,
+    "type": "experience",
+    "date": "2022-2025",
+    "title": "Waiter in 4- and 5-star hotels",
+    "place": "Hôtel Newport, Pullman Paris La Défense, Disneyland Paris",
+    "description": "High-end and event service. Teamwork, managing priorities and an eye for detail, in front of guests who forgive nothing."
+  },
+  {
+    "id": 3,
+    "type": "formation",
+    "date": "2024",
+    "title": "Web and Mobile Web Developer (two-year degree)",
+    "place": "Wild Code School · Paris",
+    "description": "My career change: the foundations of full stack development, from mockup to integration, using agile methods."
+  },
+  {
+    "id": 4,
+    "type": "experience",
+    "date": "Sept. - Nov. 2024",
+    "title": "WordPress Developer",
+    "place": "Internship · Independent project · Paris",
+    "description": "Designing and building websites on my own, from the client's needs to going live."
+  },
+  {
+    "id": 5,
+    "type": "formation",
+    "date": "2025-2026",
+    "title": "Full Stack Application Designer and Developer",
+    "status": "Course attended",
+    "place": "Digital Campus · Paris",
+    "description": "End-to-end application design and architecture. Command of new containerisation tools (Docker, etc.) and deployment."
+  }
+]

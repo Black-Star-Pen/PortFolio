@@ -2,8 +2,10 @@ import { useEffect, useRef } from "react";
 import ContactForm from "./ContactForm";
 import ContactLinks from "./ContactLinks";
 import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../utils/smoothScroll";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function ContactModal({ onClose }) {
+  const { t } = useLanguage();
   const dialogRef = useRef(null);
 
   // Le défilement fluide à l'intérieur de la modale, le même que celui de la page (voir startSmoothScrollIn)
@@ -51,8 +53,8 @@ function ContactModal({ onClose }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="contact-modal-bar">
-          <p id="contact-modal-title">Demande express</p>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Fermer">
+          <p id="contact-modal-title">{t.contact.modalTitle}</p>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={t.common.close}>
             ✕
           </button>
         </div>

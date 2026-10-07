@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import timelineData from "../data/timelineData.json";
+import { useLanguage } from "../i18n/LanguageContext";
 import { wantsSmoothScroll } from "../utils/smoothScroll";
 
 // Mêmes outils que l'intro : GSAP, son module ScrollTrigger (qui relie une animation au défilement)
@@ -23,6 +23,9 @@ const TIP_PLACE = 0.45; // où se tient la pointe du cordon dans la fenêtre : 0
 const FIRST_STEP = 16; // en pixels : de quoi allumer la première étape d'entrée, avant que le cordon parte
 
 function Timeline() {
+  // Les textes et les étapes du parcours, dans la langue en cours
+  const { t, data } = useLanguage();
+  const timelineData = data.timeline;
   // progress : l'avancement du cordon, de 0 à 1 · reached : le nombre d'étapes atteintes
   // shift : de combien de pixels la gamme est remontée dans sa fenêtre (grand écran seulement)
   const [weld, setWeld] = useState({ progress: 0, reached: 0, shift: 0 });
@@ -151,9 +154,7 @@ function Timeline() {
 
   return (
     <div className="timeline" ref={rootRef}>
-      <p className="timeline-heading">
-        Gamme de fabrication · Développeur Full Stack
-      </p>
+      <p className="timeline-heading">{t.timeline.heading}</p>
 
       {/* La fenêtre : sur grand écran, elle a une hauteur fixe et la gamme glisse derrière elle (--shift).
           Sur petit écran, elle n'a aucun style : la gamme défile avec la page. */}
@@ -179,7 +180,7 @@ function Timeline() {
                     <span className="timeline-op">OP {(index + 1) * 10}</span>
                     <span className="timeline-date">{step.date}</span>
                     <span className={`timeline-type ${step.type}`}>
-                      {step.type === "formation" ? "Formation" : "Expérience"}
+                      {step.type === "formation" ? t.timeline.formation : t.timeline.experience}
                     </span>
                     {step.status && (
                       <span className="timeline-type timeline-status">

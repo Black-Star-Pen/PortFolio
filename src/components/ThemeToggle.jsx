@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 import { getTheme, setTheme, THEME_CHANGE } from "../utils/theme";
 
 // Le bouton de la navbar qui passe du thème sombre au thème clair, et retour.
 // Il montre le thème vers lequel on ira : un soleil en thème sombre, une lune en thème clair.
 function ThemeToggle() {
+  const { t } = useLanguage();
   const [theme, setCurrentTheme] = useState(getTheme);
   const next = theme === "light" ? "dark" : "light";
 
@@ -26,8 +28,8 @@ function ThemeToggle() {
       type="button"
       className="navbar-tool"
       onClick={toggle}
-      aria-label={next === "light" ? "Passer au thème clair" : "Passer au thème sombre"}
-      title={next === "light" ? "Thème clair" : "Thème sombre"}
+      aria-label={next === "light" ? t.nav.toLight : t.nav.toDark}
+      title={next === "light" ? t.nav.lightTheme : t.nav.darkTheme}
     >
       {/* aria-hidden : le dessin est un décor, c'est aria-label qui dit ce que fait le bouton */}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">

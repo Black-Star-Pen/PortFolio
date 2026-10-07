@@ -3,9 +3,12 @@ import Pegboard from "./Pegboard";
 import SectionTitle from "./SectionTitle";
 import SkillPanel from "./SkillPanel";
 import Weld from "./Weld";
-import skillsData from "../data/skillsData.json";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function Skills() {
+  // Les textes de la section et la liste des tiroirs, dans la langue en cours
+  const { t, data } = useLanguage();
+  const skillsData = data.skills;
   const [activeIndex, setActiveIndex] = useState(0);
   // Les tiroirs déjà ouverts une fois. Leur encadré a eu sa soudure : quand on y revient,
   // on l'affiche déjà en place au lieu de la rejouer depuis le début.
@@ -52,10 +55,10 @@ function Skills() {
       <Pegboard />
 
       <SectionTitle
-        label="Compétences"
-        title="Une boîte à outils"
-        accent="pour chaque étape d'un projet."
-        subtitle="Ouvre un tiroir de l'établi pour découvrir les outils que j'utilise."
+        label={t.skills.label}
+        title={t.skills.title}
+        accent={t.skills.accent}
+        subtitle={t.skills.subtitle}
       />
 
       <div className="blueprint">
@@ -64,7 +67,7 @@ function Skills() {
             <button
               className="tabs-arrow tabs-arrow-left"
               onClick={() => scrollTabs(-1)}
-              aria-label="Voir les onglets précédents"
+              aria-label={t.skills.previousTabs}
             >
               <span>‹</span>
             </button>
@@ -99,7 +102,7 @@ function Skills() {
             <button
               className="tabs-arrow tabs-arrow-right"
               onClick={() => scrollTabs(1)}
-              aria-label="Voir les onglets suivants"
+              aria-label={t.skills.nextTabs}
             >
               <span>›</span>
             </button>
