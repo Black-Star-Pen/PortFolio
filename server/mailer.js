@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { buildContactEmail } from "./emailTemplate.js";
 
 // Les secrets viennent du fichier .env (ou des réglages de l'hébergeur), jamais du code
 const { MAIL_USER, MAIL_PASS, MAIL_TO, MAIL_FROM, RESEND_API_KEY } = process.env;
@@ -42,56 +43,6 @@ export async function verifyMailer() {
   }
 }
 
-// Les libellés lisibles, pour l'email
-const TYPE_LABELS = {
-  site: "Site vitrine",
-  application: "Application",
-  recrutement: "Recrutement",
-  autre: "Autre",
-};
-
-const CONTRACT_LABELS = {
-  cdi: "CDI",
-  cdd: "CDD",
-};
-
-const REMOTE_LABELS = {
-  site: "Sur site",
-  hybride: "Hybride",
-  remote: "Télétravail complet",
-};
-
-// Neutralise le HTML : un visiteur ne peut pas injecter de balises dans l'email
-function escapeHtml(text = "") {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-// Construit la liste des informations à afficher dans l'email
-function buildRows(data) {
-  const rows = [
-    ["Type de demande", TYPE_LABELS[data.type]],
-    ["Nom", `${data.firstName} ${data.lastName}`],
-    ["Email", data.email],
-  ];
-
-  if (data.type === "recrutement") {
-    rows.push(
-      ["Entreprise", data.company],
-      ["Poste", data.position],
-      ["Contrat", CONTRACT_LABELS[data.contract]],
-      ["Lieu", `${data.city} (${data.postalCode})`],
-      ["Mode de travail", REMOTE_LABELS[data.remote] || "Non précisé"]
-    );
-  }
-
-  return rows;
-}
-
 // L'envoi par Resend : une requête HTTPS vers son API, avec la clé dans l'en-tête Authorization
 async function sendWithResend({ replyTo, subject, text, html }) {
   const response = await fetch("https://api.resend.com/emails", {
@@ -120,38 +71,8 @@ async function sendWithResend({ replyTo, subject, text, html }) {
 
 // Envoie la demande de contact dans ta boîte mail
 export async function sendContactEmail(data) {
-  const rows = buildRows(data);
-
-  const subject =
-    data.type === "recrutement"
-      ? `[Portfolio] Recrutement : ${data.position} chez ${data.company}`
-      : `[Portfolio] ${TYPE_LABELS[data.type]} : ${data.firstName} ${data.lastName}`;
-
-  // Version texte brut (lue par les messageries simples)
-  const text = [
-    ...rows.map(([label, value]) => `${label} : ${value}`),
-    "",
-    "Message :",
-    data.message,
-  ].join("\n");
-
-  // Version HTML (mise en forme)
-  const html = `
-    <h2 style="font-family: sans-serif;">Nouvelle demande depuis le portfolio</h2>
-    <table style="font-family: sans-serif; border-collapse: collapse;">
-      ${rows
-        .map(
-          ([label, value]) => `
-        <tr>
-          <td style="padding: 6px 16px 6px 0; color: #666;">${escapeHtml(label)}</td>
-          <td style="padding: 6px 0;"><strong>${escapeHtml(value)}</strong></td>
-        </tr>`
-        )
-        .join("")}
-    </table>
-    <h3 style="font-family: sans-serif;">Message</h3>
-    <p style="font-family: sans-serif; white-space: pre-line;">${escapeHtml(data.message)}</p>
-  `;
+  // L'objet et les deux versions de l'email (texte brut et mise en page) : voir emailTemplate.js
+  const { subject, text, html } = buildContactEmail(data);
 
   // « Répondre » dans ta messagerie écrira directement au visiteur
   if (useResend) {

@@ -6,6 +6,8 @@ const REQUEST_TYPES = ["site", "application", "recrutement", "autre"];
 // sans « freelance », qui y est affiché comme indisponible
 const CONTRACT_TYPES = ["cdi", "cdd"];
 const REMOTE_OPTIONS = ["", "site", "hybride", "remote"];
+// Les langues du site (les mêmes que dans src/i18n/texts.js)
+const LANGUAGES = ["fr", "en"];
 
 // Longueurs maximales : empêchent l'envoi de textes gigantesques
 const MAX_LENGTH = {
@@ -115,6 +117,9 @@ export async function validateContact(body = {}) {
     lastName: clean(body.lastName),
     email: clean(body.email).toLowerCase(),
     message: cleanText(body.message),
+    // La langue dans laquelle le visiteur a utilisé le site. Elle n'est jamais une cause de refus :
+    // une valeur absente ou inconnue redevient simplement le français.
+    lang: LANGUAGES.includes(body.lang) ? body.lang : "fr",
   };
 
   const errors = {};

@@ -408,7 +408,9 @@ function ContactForm() {
       const response = await fetch(`${API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        // lang : la langue du site au moment de l'envoi. Elle est indiquée dans l'email reçu,
+        // pour savoir dans quelle langue répondre au visiteur.
+        body: JSON.stringify({ ...form, lang }),
       });
       const result = await response.json().catch(() => ({}));
 

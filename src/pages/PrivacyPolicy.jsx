@@ -27,7 +27,9 @@ function FrenchPolicy() {
       <p>Aucun compte n'est créé et aucun cookie de suivi ou de publicité n'est utilisé.</p>
       <p>
         Vos réglages (thème clair ou sombre, langue) sont gardés dans votre navigateur uniquement,
-        pour votre prochaine visite : ils ne sont envoyés à personne.
+        pour votre prochaine visite : ils ne sont envoyés à personne. Une seule exception : quand
+        vous envoyez le formulaire, la langue dans laquelle vous lisez le site est jointe à votre
+        message, pour que je vous réponde dans la bonne langue.
       </p>
 
       <h3>Pourquoi ces données</h3>
@@ -103,7 +105,9 @@ function EnglishPolicy() {
       <p>No account is created and no tracking or advertising cookie is used.</p>
       <p>
         Your settings (light or dark theme, language) are kept in your browser only, for your next
-        visit: they are not sent to anyone.
+        visit: they are not sent to anyone. One exception: when you send the form, the language
+        you are reading the site in is attached to your message, so that I can reply in the right
+        language.
       </p>
 
       <h3>Why this data</h3>
