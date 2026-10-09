@@ -1,13 +1,19 @@
+import { useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import SectionTitle from "../shared/SectionTitle";
 import { useLanguage } from "../../i18n/LanguageContext";
+import { useReplayOnReturn } from "../../hooks/useReplayOnReturn";
 
 function Projects() {
   // Les textes de la section et la liste des projets, dans la langue en cours
   const { t, data } = useLanguage();
   const projectsData = data.projects;
+
+  // La lampe d'atelier se rallume chaque fois qu'on revient sur la section (voir useReplayOnReturn)
+  const lampRef = useRef(null);
+  useReplayOnReturn(lampRef);
 
   // Le projet ouvert est écrit dans l'adresse : /?projet=askvera
   // Au rechargement, React relit l'adresse et rouvre la même modale.
@@ -44,7 +50,7 @@ function Projects() {
     <section id="projects">
       {/* La lampe d'atelier : sa lumière tombe du cordon de soudure, en haut de la section, sur le titre
           et les cartes (voir .section-lamp dans le CSS). aria-hidden : un décor, les lecteurs d'écran l'ignorent. */}
-      <span className="section-lamp" aria-hidden="true" />
+      <span className="section-lamp" aria-hidden="true" ref={lampRef} />
 
       <SectionTitle
         label={t.projects.label}

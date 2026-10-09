@@ -16,6 +16,9 @@ import { getTheme } from "../../utils/theme";
 // visible (facultatif) : la part du bloc qui doit être à l'écran pour qu'il apparaisse.
 // Sans précision, c'est 10 %. Les cartes projet et le formulaire sont hauts et leur apparition se joue
 // en deux temps : on attend d'en voir un bon tiers, sinon tout se passerait sous le bas de l'écran.
+//
+// replay (facultatif) : le bloc rejoue son apparition chaque fois qu'on revient dessus après l'avoir
+// quitté. Sans ce réglage, un bloc n'apparaît qu'une fois, puis reste en place.
 const DEFAULT_VISIBLE = 0.1;
 
 // Le décalage entre deux voisins du même type (les cartes, les paragraphes), en secondes
@@ -33,9 +36,9 @@ const TARGETS = [
   { selector: ".section-title", effect: "laser" },
   { selector: ".about-text > p", effect: "cut" },
   { selector: ".timeline", effect: "unfold" },
-  { selector: ".blueprint", effect: "drawers" },
-  { selector: ".projects-grid > *", effect: "scan", visible: 0.35 },
-  { selector: ".work-order", effect: "order", visible: 0.35 },
+  { selector: ".blueprint", effect: "drawers", replay: true },
+  { selector: ".projects-grid > *", effect: "scan", visible: 0.35, replay: true },
+  { selector: ".work-order", effect: "order", visible: 0.35, replay: true },
   { selector: ".contact-divider", effect: "cut" },
   { selector: ".contact-links", effect: "rise" },
   { selector: ".legal-content", effect: "unfold" },
@@ -177,11 +180,22 @@ function speedUp(element, rate) {
 function markWhenOver(element) {
   // allSettled (et pas all) : une animation interrompue ne doit pas empêcher de noter la fin
   Promise.allSettled(revealAnimations(element).map((animation) => animation.finished)).then(() => {
-    element.classList.add("reveal-over");
+    // Un bloc « replay » sorti de l'écran en pleine apparition a été remis en attente entre-temps :
+    // son apparition n'est pas finie, elle a été interrompue
+    if (element.classList.contains("revealed")) element.classList.add("reveal-over");
   });
 }
 
-// Fait apparaître chaque bloc la première fois qu'il arrive à l'écran.
+// Le visiteur a-t-il commencé à écrire dans ce bloc ? (Seul le formulaire a des champs de saisie.)
+// Dans ce cas, le bloc ne rejoue pas son apparition : on ne fait pas disparaître puis réapparaître
+// champ par champ un message en cours d'écriture.
+function isBeingFilled(element) {
+  // [...liste] change la liste d'éléments en tableau, pour pouvoir utiliser some()
+  return [...element.querySelectorAll("input, textarea")].some((field) => field.value.trim() !== "");
+}
+
+// Fait apparaître chaque bloc la première fois qu'il arrive à l'écran (et à chaque retour, pour les
+// blocs « replay »).
 // Comme ScrollToTop, ce composant n'affiche rien : il agit seulement sur la page.
 function ScrollReveal() {
   const { pathname } = useLocation();
@@ -199,8 +213,10 @@ function ScrollReveal() {
     // Pour chaque bloc à faire apparaître : la part de lui-même qui doit être visible (une Map
     // associe une valeur à un élément de la page, comme un petit carnet « élément → réglage »)
     const visibleNeeded = new Map();
+    // Les blocs qui rejouent leur apparition à chaque retour (réglage « replay »)
+    const replayed = new Set();
 
-    TARGETS.forEach(({ selector, effect, visible = DEFAULT_VISIBLE }) => {
+    TARGETS.forEach(({ selector, effect, visible = DEFAULT_VISIBLE, replay = false }) => {
       document.querySelectorAll(`main ${selector}`).forEach((element) => {
         // Décalage en cascade entre voisins du même type (ex. : les cartes, les paragraphes)
         const siblings = [...element.parentElement.children].filter((child) =>
@@ -211,6 +227,7 @@ function ScrollReveal() {
         element.classList.add("reveal", `reveal-${effect}`);
         // Sur téléphone, 10 % suffisent pour tous : un tiers d'une carte, c'est déjà un tiers de l'écran
         visibleNeeded.set(element, isSmallScreen ? DEFAULT_VISIBLE : visible);
+        if (replay) replayed.add(element);
       });
     });
 
@@ -219,11 +236,13 @@ function ScrollReveal() {
         entries.forEach((entry) => {
           // Le -0.01 : le navigateur annonce parfois 0.0999 au lieu de 0.1, on ne rate pas le coche pour si peu
           if (entry.intersectionRatio >= visibleNeeded.get(entry.target) - 0.01) {
+            // Un bloc « replay » reste surveillé : s'il est déjà apparu, il n'y a rien à refaire
+            if (entry.target.classList.contains("revealed")) return;
             entry.target.classList.add("revealed");
             if (isSmallScreen) speedUp(entry.target, SMALL_SCREEN_SPEED);
             markWhenOver(entry.target);
-            // Une seule fois : on arrête de surveiller ce bloc
-            observer.unobserve(entry.target);
+            // Une seule fois : on arrête de surveiller ce bloc (sauf s'il doit rejouer son apparition)
+            if (!replayed.has(entry.target)) observer.unobserve(entry.target);
           }
         });
       },
@@ -238,6 +257,17 @@ function ScrollReveal() {
     );
 
     visibleNeeded.forEach((visible, element) => observer.observe(element));
+
+    // Les blocs « replay » : dès qu'ils sont entièrement sortis de l'écran, par le haut ou par le bas,
+    // ils sont remis en attente (cachés). À leur retour, l'observateur ci-dessus rejoue leur apparition.
+    // Sans réglage, un IntersectionObserver regarde tout l'écran et prévient à l'entrée et à la sortie.
+    const exitObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting || isBeingFilled(entry.target)) return;
+        entry.target.classList.remove("revealed", "reveal-over");
+      });
+    });
+    replayed.forEach((element) => exitObserver.observe(element));
 
     // Les cordons de soudure entre les sections : chacun se soude quand le haut de sa section
     // arrive aux 4/5 de l'écran (voir « section + section » dans le CSS)
@@ -263,6 +293,7 @@ function ScrollReveal() {
 
     return () => {
       observer.disconnect();
+      exitObserver.disconnect();
       seamObserver.disconnect();
       stopWelds.forEach((stop) => stop());
     };
