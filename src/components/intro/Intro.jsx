@@ -695,8 +695,10 @@ function Intro() {
           </div>
         </div>
 
-        <div className="intro-stage" aria-hidden="true">
-          <div className="intro-plan" ref={planRef}>
+        {/* La scène : le dessin, les deux boutons, puis l'invitation à défiler. Le dessin et l'invitation
+            sont un décor (aria-hidden) ; les boutons, eux, restent annoncés aux lecteurs d'écran. */}
+        <div className="intro-stage">
+          <div className="intro-plan" ref={planRef} aria-hidden="true">
             <svg viewBox="-30 -30 300 210">
               {/* Des éléments définis une fois et réutilisés plus bas grâce à leur id */}
               <defs>
@@ -894,23 +896,28 @@ function Intro() {
             </svg>
           </div>
 
-          <p className="intro-hint">
+          {/* Les deux boutons, côte à côte sous les lettres : là où l'on regarde, et à portée de pouce
+              sur un téléphone (voir .intro-controls dans intro.css) */}
+          <div className="intro-controls">
+            {/* Le son de la soudure : coupé au départ, c'est le visiteur qui choisit de l'entendre.
+                aria-pressed dit aux lecteurs d'écran si le bouton est enfoncé. */}
+            <button type="button" className="intro-sound" aria-pressed={isSoundOn} onClick={toggleSound}>
+              {t.intro.sound} · {isSoundOn ? t.intro.on : t.intro.off}
+            </button>
+
+            <button type="button" className="intro-skip" onClick={skipIntro}>
+              {t.intro.skip} <span aria-hidden="true">›</span>
+            </button>
+          </div>
+
+          <p className="intro-hint" aria-hidden="true">
             {t.intro.scroll} <span>↓</span>
           </p>
         </div>
 
-        {/* La toile des étincelles : elle recouvre tout l'écran, par-dessus le dessin (voir sparks.js) */}
+        {/* La toile des étincelles : elle recouvre tout l'écran, par-dessus le dessin (voir sparks.js).
+            Elle passe aussi devant les boutons, mais ne capte pas les clics : ils restent cliquables. */}
         <canvas className="intro-sparks" aria-hidden="true" />
-
-        {/* Le son de la soudure : coupé au départ, c'est le visiteur qui choisit de l'entendre.
-            aria-pressed dit aux lecteurs d'écran si le bouton est enfoncé. */}
-        <button type="button" className="intro-sound" aria-pressed={isSoundOn} onClick={toggleSound}>
-          {t.intro.sound} · {isSoundOn ? t.intro.on : t.intro.off}
-        </button>
-
-        <button type="button" className="intro-skip" onClick={skipIntro}>
-          {t.intro.skip} <span aria-hidden="true">›</span>
-        </button>
       </div>
     </div>
   );
