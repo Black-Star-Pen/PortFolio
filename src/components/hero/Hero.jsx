@@ -1,10 +1,20 @@
+import { useRef } from "react";
 import HeroBackground from "./HeroBackground";
 import WeldText from "./WeldText";
 import WordReveal from "./WordReveal";
 import { useLanguage } from "../../i18n/LanguageContext";
+import { useReplayOnReturn } from "../../hooks/useReplayOnReturn";
+
+// Quand on revient sur le Hero, son arrivée se rejoue (voir useReplayOnReturn). La première fois, elle
+// attend 0,7 s que l'intro ait fini de se poser. Au retour, on saute ce temps mort : le premier élément
+// repart presque aussitôt, et les suivants gardent leurs écarts.
+const REPLAY_SKIP = 0.6;
 
 function Hero({ onContactClick }) {
   const { lang, t } = useLanguage();
+  // Le bloc épinglé : c'est lui qu'on surveille, et ce sont ses animations qu'on relance
+  const pinRef = useRef(null);
+  useReplayOnReturn(pinRef, REPLAY_SKIP);
 
   return (
     <>
@@ -15,7 +25,7 @@ function Hero({ onContactClick }) {
       <section className="hero">
         {/* .hero-pin regroupe tout le contenu : après l'intro, c'est lui qui reste « épinglé »
             à l'écran pendant quelques instants de défilement (voir .hero-pin dans le CSS) */}
-        <div className="hero-pin">
+        <div className="hero-pin" ref={pinRef}>
           <span className="badge badge-available hero-reveal" style={{ "--reveal-delay": "0.7s" }}>
             <span className="badge-status">{t.hero.badgeStatus}</span>
             {t.hero.badgeRest}

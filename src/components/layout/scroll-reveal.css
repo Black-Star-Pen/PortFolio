@@ -414,3 +414,12 @@
     transform: translateX(-64px);
   }
 }
+
+/* ----- Les blocs qui rejouent leur arrivée ----- */
+
+/* Classe posée par watchReturn (src/utils/replay.js) sur un bloc sorti de l'écran, dont l'arrivée se
+   rejouera à son retour : en attendant, il est caché. Sans ça, en revenant vers lui, on le verrait
+   déjà en place au bord de l'écran, puis disparaître d'un coup pour réapparaître. */
+.replay-wait {
+  visibility: hidden;
+}

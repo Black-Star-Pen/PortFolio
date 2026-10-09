@@ -1,8 +1,12 @@
+import { useRef } from "react";
+import { useReplayOnReturn } from "../../hooks/useReplayOnReturn";
+
 // L'épure : le fond de la section À propos. Un dessin technique de chaudronnier, tracé en traits fins :
 // à droite une bride vue de face (ses cercles, ses huit trous, ses axes, ses cotes), à gauche le
 // développé d'un tronc de cône (deux arcs et leurs génératrices).
 // Le dessin se trace quand la section arrive à l'écran (voir « L'épure » dans le CSS, about.css),
-// puis ne bouge plus : il reste discret derrière le texte.
+// puis ne bouge plus : il reste discret derrière le texte. Il se retrace chaque fois qu'on revient
+// sur la section après l'avoir quittée (voir useReplayOnReturn).
 //
 // Tout est dessiné dans un cadre de 1600 × 900 (le viewBox du SVG). Les formes sont calculées
 // ci-dessous à partir de quelques mesures, plutôt qu'écrites point par point.
@@ -40,9 +44,12 @@ function coneArc(radius) {
 //   epure-axis  : les axes, en trait mixte   epure-fade : un groupe qui apparaît en fondu
 //   epure-dim   : les cotes, en bleu         --i : l'ordre de passage (plus il est grand, plus c'est tard)
 function Epure() {
+  const rootRef = useRef(null);
+  useReplayOnReturn(rootRef);
+
   return (
     // aria-hidden : un décor, les lecteurs d'écran l'ignorent
-    <div className="section-bg" aria-hidden="true">
+    <div className="section-bg" aria-hidden="true" ref={rootRef}>
       {/* La « vue » reste à l'écran pendant qu'on parcourt la section (voir .section-bg-view) */}
       <div className="section-bg-view">
         {/* xMaxYMid slice : le dessin remplit la vue en gardant ses proportions. Sur un écran étroit,
