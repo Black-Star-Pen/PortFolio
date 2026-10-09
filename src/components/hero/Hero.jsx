@@ -1,7 +1,7 @@
 import HeroBackground from "./HeroBackground";
 import WeldText from "./WeldText";
 import WordReveal from "./WordReveal";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Hero({ onContactClick }) {
   const { lang, t } = useLanguage();

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // Le bouton de la navbar qui passe du français à l'anglais, et retour.
 // Il montre la langue vers laquelle on ira : « EN » en français, « FR » en anglais.

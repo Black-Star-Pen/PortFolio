@@ -2,8 +2,8 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useLanguage } from "../i18n/LanguageContext";
-import { wantsSmoothScroll } from "../utils/smoothScroll";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { wantsSmoothScroll } from "../../utils/smoothScroll";
 
 // Mêmes outils que l'intro : GSAP, son module ScrollTrigger (qui relie une animation au défilement)
 // et le hook useGSAP (qui range tout proprement quand le composant disparaît).

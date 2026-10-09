@@ -1,4 +1,4 @@
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // L'image d'un projet.
 // S'il n'y a pas encore de capture, on affiche un visuel de remplacement

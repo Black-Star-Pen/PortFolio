@@ -1,7 +1,7 @@
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
-import RichText from "./RichText";
-import { useLanguage } from "../i18n/LanguageContext";
+import RichText from "../shared/RichText";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // Sur la carte, on ne montre que les premières technos : la liste complète est dans la modale
 const MAX_TECHNOS = 4;

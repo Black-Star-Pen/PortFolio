@@ -35,7 +35,7 @@ const TEXTS = {
   cartouche: ["PLAN N° 01", "ÉCH. 1:1", "CONTRÔLE : EN COURS"],
 };
 
-// Le film de l'intro : la même géométrie que dans src/components/Intro.jsx (voir FILM).
+// Le film de l'intro : la même géométrie que dans src/components/intro/Intro.jsx (voir FILM).
 // Ses images font 864 × 486 pixels ; x, y, width et height disent où elles se placent dans le dessin,
 // en unités du dessin (les lettres vont de 10 à 204 en largeur, et de 10 à 130 en hauteur).
 const FILM = {

@@ -3,10 +3,10 @@ import { useLocation } from "react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { createSparks } from "./sparks";
-import { createWeldSound } from "./weldSound";
-import { scrollToPosition, wantsSmoothScroll } from "../utils/smoothScroll";
-import { useLanguage } from "../i18n/LanguageContext";
+import { createSparks } from "../../utils/sparks";
+import { createWeldSound } from "../../utils/weldSound";
+import { scrollToPosition, wantsSmoothScroll } from "../../utils/smoothScroll";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // GSAP est la bibliothèque d'animation ; ScrollTrigger est son module qui relie une animation
 // au défilement de la page ; useGSAP est le « hook » qui les fait fonctionner proprement avec React.

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // L'adresse est découpée : elle n'apparaît jamais en entier dans la page (anti-bot)
 const EMAIL_USER = "adam.boulkhedert03";

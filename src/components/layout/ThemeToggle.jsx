@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useLanguage } from "../i18n/LanguageContext";
-import { getTheme, setTheme, THEME_CHANGE } from "../utils/theme";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { getTheme, setTheme, THEME_CHANGE } from "../../utils/theme";
 
 // Le bouton de la navbar qui passe du thème sombre au thème clair, et retour.
 // Il montre le thème vers lequel on ira : un soleil en thème sombre, une lune en thème clair.

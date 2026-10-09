@@ -1,7 +1,7 @@
-import technoIcons from "../data/technoIcons";
-import projectsData from "../data/projectsData.json";
-import Weld from "./Weld";
-import { useLanguage } from "../i18n/LanguageContext";
+import technoIcons from "../../data/technoIcons";
+import projectsData from "../../data/projectsData.json";
+import Weld from "../shared/Weld";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // isWelded : ce tiroir a déjà été ouvert, son encadré est donc déjà soudé (voir Skills.jsx)
 // isFirst : c'est le panneau affiché quand la boîte à outils apparaît. Lui seul joue l'animation

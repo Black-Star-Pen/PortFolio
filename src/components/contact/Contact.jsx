@@ -1,8 +1,8 @@
-import SectionTitle from "./SectionTitle";
+import SectionTitle from "../shared/SectionTitle";
 import ContactForm from "./ContactForm";
 import ContactLinks from "./ContactLinks";
 import GoldDust from "./GoldDust";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Contact() {
   const { t } = useLanguage();

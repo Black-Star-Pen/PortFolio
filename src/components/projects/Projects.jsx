@@ -1,8 +1,8 @@
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
-import SectionTitle from "./SectionTitle";
-import { useLanguage } from "../i18n/LanguageContext";
+import SectionTitle from "../shared/SectionTitle";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Projects() {
   // Les textes de la section et la liste des projets, dans la langue en cours

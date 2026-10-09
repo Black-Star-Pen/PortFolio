@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import ContactForm from "./ContactForm";
 import ContactLinks from "./ContactLinks";
-import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../utils/smoothScroll";
-import { useLanguage } from "../i18n/LanguageContext";
+import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../../utils/smoothScroll";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function ContactModal({ onClose }) {
   const { t } = useLanguage();

@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router";
-import { createSparks } from "./sparks";
-import { getTheme } from "../utils/theme";
+import { createSparks } from "../../utils/sparks";
+import { getTheme } from "../../utils/theme";
 
 // Les blocs qui apparaissent au défilement, et l'effet « atelier » de chacun
 // (le Hero a sa propre animation). Pour animer un nouveau bloc, ajoute une ligne ici.
@@ -9,10 +9,8 @@ import { getTheme } from "../utils/theme";
 //   cut     : le texte se révèle comme une découpe qui avance
 //   unfold  : se déplie de haut en bas, comme un plan qu'on déroule
 //   drawers : la boîte à outils : ses tiroirs se rangent un par un, puis le panneau se découvre
-//   lift    : se lève en 3D, comme une pièce qu'on redresse sur l'établi (plus utilisé pour l'instant)
 //   scan    : les cartes projet : un trait bleu balaie la carte de haut en bas et la révèle, étage par étage
 //   order   : le formulaire : le même trait bleu révèle la feuille vide, puis les champs sont soudés un par un
-//   stamp   : frappé comme une tôle à la presse, avec un éclat doré (plus utilisé pour l'instant)
 //   rise    : monte doucement avec un halo
 //
 // visible (facultatif) : la part du bloc qui doit être à l'écran pour qu'il apparaisse.

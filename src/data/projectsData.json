@@ -100,7 +100,7 @@
         "Front en React (Vite) : composants réutilisables, navigation avec React Router, pages légales et page 404.",
         "Direction artistique inspirée des plans techniques, avec des **animations de soudure** au scroll (parcours, onglets, footer).",
         "Formulaire de contact adaptatif : les champs changent selon le type de demande, vérification en direct de la ville (API publique geo.api.gouv.fr) et suggestion en cas de faute de frappe dans l'email.",
-        "API Express qui **revérifie tout côté serveur**, contrôle que le domaine de l'email existe vraiment (DNS), puis envoie le message par email (Nodemailer).",
+        "API Express qui **revérifie tout côté serveur**, contrôle que le domaine de l'email existe vraiment (DNS), puis envoie le message par email (Resend en ligne, Nodemailer en local).",
         "Protection anti-spam : limite de 3 messages par 5 minutes et champ piège invisible pour les robots.",
         "Accessibilité : navigation complète au clavier, modales qui gardent le focus, respect du réglage « réduire les animations »."
       ],
