@@ -548,23 +548,30 @@ html.intro-playing .hero *::after {
   }
 }
 
-/* Les deux boutons de l'intro, à l'intérieur du cadre : « Passer » en haut à droite
-   (le coin en bas à droite est pris par le cartouche) et « Son » en haut à gauche */
-.intro-skip {
-  right: calc(var(--frame-edge) + var(--frame-band) + 14px);
+/* Sur un écran large mais très peu haut (une fenêtre écrasée), il n'y a pas la place pour le dessin,
+   les boutons et l'invitation à défiler : on garde les boutons. */
+@media (min-width: 1061px) and (max-height: 520px) {
+  .intro-hint {
+    display: none;
+  }
 }
 
-.intro-sound {
-  left: calc(var(--frame-edge) + var(--frame-band) + 14px);
+/* Les deux boutons de l'intro, côte à côte sous le dessin : « Son » puis « Passer ».
+   Ils sont dans la scène (.intro-stage), entre le dessin et l'invitation à défiler : sous les lettres,
+   là où l'on regarde, on les voit et on les atteint plus facilement que dans les coins du cadre. */
+.intro-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
 }
 
 .intro-skip,
 .intro-sound {
-  position: absolute;
-  top: calc(var(--frame-edge) + var(--frame-band) + 14px);
-  z-index: 2;
-  padding: 8px 14px;
-  border: 1px solid rgba(var(--rgb-accent), 0.3);
+  padding: 10px 18px;
+  border: 1px solid rgba(var(--rgb-accent), 0.45);
+  /* Un fond sombre, presque opaque : le quadrillage du plan ne brouille pas le texte du bouton */
+  background-color: rgba(var(--rgb-bg), 0.6);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.2em;
@@ -575,6 +582,31 @@ html.intro-playing .hero *::after {
   transition:
     color 0.3s,
     border-color 0.3s;
+}
+
+/* Sur un écran couché, étroit et peu haut (un téléphone tenu à l'horizontale, une petite fenêtre),
+   la rangée de boutons arriverait sur le cartouche, en bas à droite. Les boutons reprennent alors
+   leur place dans les coins du haut du cadre : « Son » à gauche, « Passer » à droite.
+   display: contents : la rangée n'a plus de boîte à elle, elle ne prend donc plus de place dans la scène. */
+@media (orientation: landscape) and (max-width: 1060px) and (max-height: 700px) {
+  .intro-controls {
+    display: contents;
+  }
+
+  .intro-skip,
+  .intro-sound {
+    position: absolute;
+    top: calc(var(--frame-edge) + var(--frame-band) + 14px);
+    z-index: 2;
+  }
+
+  .intro-skip {
+    right: calc(var(--frame-edge) + var(--frame-band) + 14px);
+  }
+
+  .intro-sound {
+    left: calc(var(--frame-edge) + var(--frame-band) + 14px);
+  }
 }
 
 /* Pendant le raccord final (classe posée par le JavaScript), les boutons n'existent plus pour la souris ni le clavier */
