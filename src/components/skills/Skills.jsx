@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import Pegboard from "./Pegboard";
-import SectionTitle from "./SectionTitle";
+import SectionTitle from "../shared/SectionTitle";
 import SkillPanel from "./SkillPanel";
-import Weld from "./Weld";
-import { useLanguage } from "../i18n/LanguageContext";
+import Weld from "../shared/Weld";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function Skills() {
   // Les textes de la section et la liste des tiroirs, dans la langue en cours

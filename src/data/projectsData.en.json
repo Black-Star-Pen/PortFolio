@@ -100,7 +100,7 @@
         "React front end (Vite): reusable components, navigation with React Router, legal pages and a 404 page.",
         "Art direction inspired by technical drawings, with **welding animations** on scroll (career path, tabs, footer).",
         "Adaptive contact form: the fields change with the type of request, live check of the city (public API geo.api.gouv.fr) and a suggestion when the email has a typo.",
-        "Express API that **re-checks everything on the server**, verifies that the email domain really exists (DNS), then sends the message by email (Nodemailer).",
+        "Express API that **re-checks everything on the server**, verifies that the email domain really exists (DNS), then sends the message by email (Resend in production, Nodemailer locally).",
         "Anti-spam protection: a limit of 3 messages per 5 minutes and an invisible honeypot field for bots.",
         "Accessibility: full keyboard navigation, modals that keep the focus, respect for the “reduce motion” setting."
       ],

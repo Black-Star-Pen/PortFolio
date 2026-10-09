@@ -4411,29 +4411,7 @@ main > section.seam-welded .section-lamp::after {
   }
 }
 
-/* 4. LIFT : les cartes se redressent en 3D, l'une après l'autre */
-.reveal-lift.revealed {
-  animation-name: card-lift;
-  animation-duration: 1.2s;
-  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
-  transform-origin: 50% 100%;
-}
-
-@keyframes card-lift {
-  from {
-    opacity: 0;
-    transform: perspective(1000px) rotateX(38deg) translateY(70px) scale(0.94);
-  }
-  60% {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-    transform: perspective(1000px) rotateX(0) translateY(0) scale(1);
-  }
-}
-
-/* 4 bis. SCAN : les cartes projet. Un trait doré balaie la carte de haut en bas et la révèle sur
+/* 4. SCAN : les cartes projet. Un trait doré balaie la carte de haut en bas et la révèle sur
       son passage, comme un scanner ; chaque étage (le visuel, la référence, le titre, la description)
       monte à sa place au moment où le trait arrive sur lui.
       Trois animations de même durée et de même courbe, qui restent donc ensemble :
@@ -4532,7 +4510,7 @@ main > section.seam-welded .section-lamp::after {
   }
 }
 
-/* 4 ter. ORDER : l'ordre de fabrication (le formulaire). Deux temps, l'un après l'autre :
+/* 5. ORDER : l'ordre de fabrication (le formulaire). Deux temps, l'un après l'autre :
       0s      le trait bleu des cartes projet balaie la feuille de haut en bas et la révèle, encore vide
               (mêmes animations que SCAN : card-scan pour la découpe, scan-line pour le trait) ;
       0,8s    les champs sont soudés un par un, de haut en bas, un toutes les 0,12s : le libellé
@@ -4625,34 +4603,6 @@ main > section.seam-welded .section-lamp::after {
   from,
   70% {
     color: transparent;
-  }
-}
-
-/* 5. STAMP : frappé à la presse, avec un éclat doré à l'impact.
-      C'était l'apparition du formulaire, remplacée par ORDER : plus utilisé pour l'instant. */
-.reveal-stamp.revealed {
-  animation-name: press-stamp;
-  animation-duration: 1.1s;
-  animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
-}
-
-@keyframes press-stamp {
-  from {
-    opacity: 0;
-    transform: scale(1.08);
-    filter: blur(8px);
-  }
-  65% {
-    opacity: 1;
-    transform: scale(0.985);
-    filter: blur(0);
-    box-shadow:
-      0 0 0 1px var(--color-accent),
-      0 0 50px rgba(var(--rgb-accent), 0.35);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 

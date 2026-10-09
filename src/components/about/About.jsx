@@ -1,8 +1,8 @@
 import Epure from "./Epure";
-import RichText from "./RichText";
-import SectionTitle from "./SectionTitle";
+import RichText from "../shared/RichText";
+import SectionTitle from "../shared/SectionTitle";
 import Timeline from "./Timeline";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function About() {
   const { t } = useLanguage();

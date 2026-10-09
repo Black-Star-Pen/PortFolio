@@ -1,9 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
-import RichText from "./RichText";
-import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../utils/smoothScroll";
-import { useLanguage } from "../i18n/LanguageContext";
+import RichText from "../shared/RichText";
+import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../../utils/smoothScroll";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // Le glissement du doigt qui fait changer de projet (sur téléphone), comme une pile de cartes :
 // la fiche suit le doigt en penchant, et celle du projet voisin apparaît derrière elle.

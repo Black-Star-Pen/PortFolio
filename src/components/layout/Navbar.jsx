@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
-import { scrollToSiteTop } from "../utils/siteTop";
-import { lockPageScroll, unlockPageScroll } from "../utils/smoothScroll";
-import { useLanguage } from "../i18n/LanguageContext";
+import { scrollToSiteTop } from "../../utils/siteTop";
+import { lockPageScroll, unlockPageScroll } from "../../utils/smoothScroll";
+import { useLanguage } from "../../i18n/LanguageContext";
 import LanguageToggle from "./LanguageToggle";
 import ThemeToggle from "./ThemeToggle";
 

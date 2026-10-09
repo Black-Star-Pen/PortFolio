@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import SectionTitle from "../components/SectionTitle";
+import SectionTitle from "../components/shared/SectionTitle";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useLanguage } from "../i18n/LanguageContext";
 

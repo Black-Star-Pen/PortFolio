@@ -14,6 +14,7 @@ Site en ligne : https://adam-boulkhedert.onrender.com
 - **Cinq sections** : présentation, parcours (présenté comme une gamme de fabrication), compétences (l'établi et ses tiroirs), projets (avec une fiche détaillée pour chacun) et contact.
 - **Un formulaire de contact adaptatif.** Les champs changent selon le type de demande, la ville est proposée à partir du code postal (API publique geo.api.gouv.fr) et une correction est suggérée en cas de faute de frappe dans l'email.
 - **Une API qui ne fait pas confiance au navigateur.** Elle revérifie chaque donnée, contrôle que le domaine de l'email existe vraiment, puis transmet le message par email.
+- **Deux thèmes et deux langues.** Sombre ou clair, français ou anglais : le choix du visiteur est gardé dans son navigateur.
 - **Des pages légales et une page 404**, avec React Router.
 
 ## Stack technique
@@ -64,15 +65,23 @@ PortFolio/
 ├── images-source/      les captures d'origine, avant conversion
 ├── scripts/            quatre outils : convertir les captures, télécharger les logos, dessiner l'image de partage, dessiner l'icône du site
 ├── src/
-│   ├── components/     les composants React (Intro, Hero, Navbar, ContactForm…)
+│   ├── components/     les composants React, un dossier par partie du site
+│   │   ├── layout/     ce qui entoure toutes les pages : navbar, pied de page, thème, langue, apparitions au défilement
+│   │   ├── intro/      l'intro et son film
+│   │   ├── hero/       les cinq sections de l'accueil : hero/, about/, skills/, projects/ et contact/
+│   │   └── shared/     les briques communes à plusieurs sections : titre de section, soudure, texte mis en forme
 │   ├── pages/          accueil, mentions légales, confidentialité, 404
-│   ├── data/           le contenu en JSON (projets, compétences, parcours)
+│   ├── data/           le contenu en JSON, en français et en anglais (projets, compétences, parcours)
+│   ├── i18n/           les deux langues : les textes de l'interface et le choix de la langue
+│   ├── hooks/          le titre de l'onglet
+│   ├── utils/          les outils sans affichage : défilement fluide, thème, étincelles, son de l'intro, adresse de l'API
 │   ├── App.jsx         les routes et la mise en page commune
 │   └── index.css       tous les styles, rangés par sections numérotées
 └── server/             l'API Express du formulaire de contact
-    ├── index.js        les routes, la limite d'envois et les protections
-    ├── validation.js   la vérification des données
-    └── mailer.js       l'envoi des emails
+    ├── index.js          les routes, la limite d'envois et les protections
+    ├── validation.js     la vérification des données
+    ├── emailTemplate.js  le contenu et la mise en page de l'email reçu
+    └── mailer.js         l'envoi des emails
 ```
 
 ## Lancer le projet en local

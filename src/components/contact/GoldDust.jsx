@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { THEME_CHANGE, themeColor } from "../utils/theme";
+import { THEME_CHANGE, themeColor } from "../../utils/theme";
 
 // La poussière d'or : le fond de la section Contact. Des grains dorés (et quelques bleus) montent
 // doucement, scintillent, et s'allument près du curseur. Ils sont dessinés sur une toile (<canvas>).

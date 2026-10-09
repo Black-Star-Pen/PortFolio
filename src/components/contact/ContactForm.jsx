@@ -1,7 +1,7 @@
 import { useState, useId, useRef, useEffect, useLayoutEffect } from "react";
-import Weld from "./Weld";
-import { API_URL } from "../utils/api";
-import { useLanguage } from "../i18n/LanguageContext";
+import Weld from "../shared/Weld";
+import { API_URL } from "../../utils/api";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 /* ===== Les listes de choix ===== */
 // Une petite mallette, pour mettre en avant le choix « Recrutement »

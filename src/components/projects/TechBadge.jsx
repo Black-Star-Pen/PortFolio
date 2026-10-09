@@ -1,5 +1,5 @@
 import { useState } from "react";
-import technoIcons from "../data/technoIcons";
+import technoIcons from "../../data/technoIcons";
 
 function TechBadge({ name }) {
   const slug = technoIcons[name];

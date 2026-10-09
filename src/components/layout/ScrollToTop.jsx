@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router";
-import { getSiteTop, scrollToSiteTop } from "../utils/siteTop";
-import { scrollToElement } from "../utils/smoothScroll";
+import { getSiteTop, scrollToSiteTop } from "../../utils/siteTop";
+import { scrollToElement } from "../../utils/smoothScroll";
 
 // À chaque changement d'adresse :
 // - s'il y a une ancre (#contact), on fait défiler jusqu'à la section ;

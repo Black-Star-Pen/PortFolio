@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import FooterEdge from "./FooterEdge";
-import Weld from "./Weld";
-import { scrollToSiteTop } from "../utils/siteTop";
-import { useLanguage } from "../i18n/LanguageContext";
+import Weld from "../shared/Weld";
+import { scrollToSiteTop } from "../../utils/siteTop";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 // Les liens du plan du site : leur ancre, et le nom de leur texte dans t.nav (voir src/i18n/texts.js)
 const navLinks = [
