@@ -1,0 +1,324 @@
+/* ===== Hero ===== */
+.hero {
+  /* La hauteur du Hero : ce qui reste de l'écran sous la navbar (--navbar-h, mesurée par Intro), plus 32px.
+     Le Hero remplit donc l'écran, et le cordon de soudure de la section suivante (voir « section + section »)
+     se retrouve juste SOUS le bas de l'écran : on ne le voit qu'en commençant à défiler.
+     (Avant, le Hero faisait 90vh : sur un grand écran, le cordon apparaissait tout en bas dès l'arrivée.) */
+  --hero-height: calc(100vh - var(--navbar-h, 73px) + 32px);
+
+  overflow-x: clip;
+}
+
+/* svh = la hauteur de l'écran quand la barre d'adresse du téléphone est affichée (c'est le cas à l'arrivée).
+   vh compte comme si elle était cachée : le Hero serait un peu trop haut. Les navigateurs qui ne
+   connaissent pas svh gardent la ligne du dessus. */
+@supports (height: 100svh) {
+  .hero {
+    --hero-height: calc(100svh - var(--navbar-h, 73px) + 32px);
+  }
+}
+
+/* Le contenu du Hero. On retire les 200px de marges intérieures de la section (100px en haut et en bas) :
+   la section fait donc --hero-height en tout. */
+.hero-pin {
+  min-height: calc(var(--hero-height) - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* Après l'intro (classe has-intro posée par le composant Intro), le Hero « tient » à l'écran :
+   - la section est rallongée de --hero-hold ;
+   - son contenu est sticky : il reste en place pendant qu'on parcourt cette distance.
+   Pour tenir plus ou moins longtemps, change --hero-hold.
+   (On rallonge avec min-height et pas avec padding : un élément sticky ne peut se déplacer
+   que dans la zone de contenu de son parent, pas dans ses marges intérieures.) */
+html.has-intro .hero {
+  --hero-hold: 70vh;
+  min-height: calc(var(--hero-height) + var(--hero-hold));
+}
+
+html.has-intro .hero-pin {
+  position: sticky;
+  /* sa place naturelle : sous la navbar (--navbar-h, mesurée par Intro) et la marge de 100px de la section */
+  top: calc(var(--navbar-h, 73px) + 100px);
+}
+
+/* Sur téléphone, le Hero tient deux fois moins longtemps. Au doigt, 70vh d'arrêt, c'est un à deux gestes
+   pendant lesquels rien ne bouge : on a l'impression d'être bloqué. Avec 35vh, un seul geste suffit à repartir.
+   On ne descend pas à 0 : l'intro suit le défilement avec un léger retard (voir SMOOTHING dans Intro.jsx),
+   et sans arrêt le Hero serait déjà parti avant qu'elle ait fini de s'effacer. */
+@media (max-width: 768px) {
+  html.has-intro .hero {
+    --hero-hold: 35vh;
+  }
+}
+
+/* ----- Le fond du Hero : le plan en perspective (voir HeroBackground.jsx) ----- */
+
+/* Le fond est posé juste avant la section du Hero, sans prendre de place (hauteur 0) : son coin en haut
+   à gauche est donc celui du Hero, et il fait toute la largeur de l'écran. */
+.hero-bg {
+  position: relative;
+  height: 0;
+}
+
+/* Le cadre du fond : exactement la hauteur du Hero (--hero-bg-height, mesurée par HeroBackground.jsx).
+   Tout ce qui en dépasse est coupé : le fond s'arrête net au cordon de soudure de la section suivante,
+   il ne « bave » pas dessous.
+   « clip » et pas « hidden » : avec hidden, la vue ci-dessous ne pourrait plus rester épinglée à l'écran.
+   z-index: -1 : derrière tout le contenu de la page. */
+.hero-bg-clip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  overflow: clip;
+  height: var(--hero-bg-height, 100vh);
+  pointer-events: none;
+}
+
+/* La « vue » : un écran de haut, qui reste en place sous la navbar pendant que le Hero est épinglé
+   (comme .hero-pin). Quand le bas du Hero remonte, elle repart avec lui : le cordon de soudure
+   devient le bord du sol. */
+.hero-bg-view {
+  position: sticky;
+  top: var(--navbar-h, 73px);
+  height: calc(100vh - var(--navbar-h, 73px));
+}
+
+/* Le quadrillage du plan, couché comme un sol qui fuit vers l'horizon.
+   .hero-floor donne la perspective : on regarde depuis le haut du bloc (perspective-origin), c'est
+   donc là que se trouve l'horizon. Le <span> à l'intérieur est le quadrillage : il pivote autour de
+   son bord du bas (transform-origin) et son haut bascule vers l'arrière (rotateX), très loin.
+   Il avance d'une case (64px) en boucle : comme toutes les cases sont pareilles, on ne voit pas
+   le retour au départ, et le sol semble défiler sans fin vers nous.
+   Seul « transform » est animé : la carte graphique s'en charge, le défilement reste fluide. */
+.hero-floor {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  height: 56%;
+  perspective: 320px;
+  perspective-origin: 50% 0;
+  /* Le sol s'allume en douceur à l'arrivée */
+  animation: floor-on 1.6s ease-out both;
+}
+
+@keyframes floor-on {
+  from {
+    opacity: 0;
+  }
+}
+
+.hero-floor span {
+  position: absolute;
+  bottom: 0;
+  /* Bien plus large et plus haut que le bloc : au loin, la perspective le rétrécit beaucoup */
+  left: -150%;
+  width: 400%;
+  height: 300%;
+  /* L'inclinaison au repos (avec « réduire les animations », le sol reste couché mais ne défile pas) */
+  transform: rotateX(64deg);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(to right, rgba(var(--rgb-accent), 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--rgb-accent), 0.5) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: 50% 100%;
+  animation: floor-roll 2.6s linear infinite;
+}
+
+@keyframes floor-roll {
+  from {
+    transform: rotateX(64deg) translateY(0);
+  }
+  to {
+    transform: rotateX(64deg) translateY(64px);
+  }
+}
+
+/* L'horizon se perd dans le noir (en haut, pour que le texte du Hero reste lisible),
+   et une lueur dorée monte du sol (en bas, au milieu) */
+.hero-floor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 60% at 50% 100%, rgba(var(--rgb-accent), 0.14), transparent),
+    linear-gradient(to bottom, var(--color-bg) 2%, rgba(var(--rgb-bg), 0.55) 45%, transparent 82%);
+}
+
+/* Le titre et le paragraphe dans un même bloc : le paragraphe prend exactement la largeur du titre */
+.hero-intro {
+  display: grid;
+  gap: 24px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.hero-intro p {
+  /* contain: inline-size : la longueur du texte n'élargit pas le bloc.
+     C'est donc le titre qui fixe la largeur, et le paragraphe s'étale dessus. */
+  contain: inline-size;
+  font-size: 1.15rem;
+}
+
+/* ----- Arrivée sur la page : le tracé du plan ----- */
+
+/* Chaque élément apparaît à son tour : --reveal-delay est donné dans le JSX */
+.hero-reveal {
+  animation: hero-reveal 0.7s ease-out var(--reveal-delay, 0s) both;
+}
+
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ----- Le paragraphe, mot par mot ----- */
+
+/* Chaque mot sort d'un léger flou, l'un après l'autre (--word-delay est calculé dans le JSX) */
+.reveal-word {
+  display: inline-block;
+  animation: word-reveal 0.5s ease-out var(--word-delay) both;
+}
+
+@keyframes word-reveal {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(6px);
+  }
+}
+
+/* Les technos : dorées, avec un éclat de soudure quand elles apparaissent */
+.reveal-word-highlight {
+  font-weight: 600;
+  color: var(--color-accent);
+  animation:
+    word-reveal 0.5s ease-out var(--word-delay) both,
+    word-weld 1s ease-out var(--word-delay) both;
+}
+
+@keyframes word-weld {
+  0%,
+  20% {
+    color: var(--hot);
+    text-shadow:
+      0 0 6px var(--hot-halo),
+      0 0 14px rgba(var(--rgb-accent), 0.9);
+  }
+}
+
+/* Sécurité et qualité : bleu clair, avec l'éclat blanc bleuté du soudage TIG (comme le footer) */
+.reveal-word-steel {
+  font-weight: 600;
+  color: var(--color-tig);
+  text-shadow: 0 0 10px rgba(var(--rgb-tig), 0.25);
+  animation:
+    word-reveal 0.5s ease-out var(--word-delay) both,
+    word-weld-blue 1s ease-out var(--word-delay) both;
+}
+
+@keyframes word-weld-blue {
+  0%,
+  20% {
+    color: var(--hot-blue);
+    text-shadow:
+      0 0 6px var(--hot-blue-halo),
+      0 0 14px rgba(var(--rgb-arc), 0.9),
+      0 0 28px rgba(var(--rgb-arc-deep), 0.5);
+  }
+}
+
+/* Sur un écran tactile, pas de flou : les mots montent et s'éclaircissent, c'est tout.
+   Safari sur iPhone garde parfois l'image floutée d'un mot une fois son animation finie
+   (« React » ou « sécurité » restaient flous à l'écran). Sans filtre, il n'a plus rien à garder.
+   On ne change que le nom de la première animation : l'éclat de soudure des mots dorés et bleus reste. */
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .reveal-word {
+    animation-name: word-rise;
+  }
+
+  .reveal-word-highlight {
+    animation-name: word-rise, word-weld;
+  }
+
+  .reveal-word-steel {
+    animation-name: word-rise, word-weld-blue;
+  }
+}
+
+/* ----- La soudure des lettres ----- */
+
+/* Avant d'être soudée, la lettre n'est qu'un contour, comme dessinée sur le plan.
+   Puis elle chauffe à blanc et refroidit en doré, l'une après l'autre (--i). */
+.weld-letter {
+  animation: letter-weld 0.9s ease-out calc(var(--weld-delay) + var(--i) * 0.07s) both;
+}
+
+@keyframes letter-weld {
+  0% {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(var(--rgb-accent), 0.5);
+    text-shadow: none;
+  }
+  15% {
+    color: var(--hot);
+    -webkit-text-stroke: 0 transparent;
+    text-shadow:
+      0 0 6px var(--hot-halo),
+      0 0 16px rgba(var(--rgb-accent), 0.9),
+      0 0 32px rgba(214, 150, 60, 0.6);
+  }
+  100% {
+    color: var(--color-accent);
+    -webkit-text-stroke: 0 transparent;
+    text-shadow: none;
+  }
+}
+
+/* Le badge de disponibilité : un point vert qui pulse et un texte qui brille */
+.badge-available::before {
+  background-color: var(--color-available);
+  box-shadow: 0 0 8px var(--color-available);
+  animation: available-pulse 2s ease-in-out infinite;
+}
+
+.badge-status {
+  font-weight: 600;
+  color: var(--color-available);
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+}
+
+@keyframes available-pulse {
+  50% {
+    box-shadow: 0 0 2px var(--color-available);
+    opacity: 0.6;
+  }
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Les deux boutons du Hero sont posés sur le plan en perspective. Ils portent le contour en métal des
+   boutons (elements.css), qui leur donne un fond plein : sans ça, le quadrillage se verrait à travers.
+   « Voir mes projets » est en laiton (.btn-metal), « Me contacter » en acier bleui (.btn-metal-blue). */

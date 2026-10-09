@@ -1,0 +1,418 @@
+/* ===== Compétences : l'établi ===== */
+
+/* ----- Le panneau perforé : le fond de la section (voir Pegboard.jsx et .section-bg, about.css) ----- */
+
+/* Le panneau couvre toute la section. Ses trous sont un seul petit motif répété : un point doré
+   au centre d'une case de 24px (--peg), d'où la grille. */
+.pegboard {
+  --peg: 24px;
+
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(var(--rgb-accent), 0.17) 1.4px, transparent 2px) 0 0 /
+    var(--peg) var(--peg);
+}
+
+/* La lumière : un bloc rond de 440px, posé sous le curseur (--light-x et --light-y, donnés par
+   Pegboard.jsx). Il porte la même grille, en plus clair, et une lueur chaude. Deux précautions :
+   - il se déplace avec « transform » : la carte graphique s'en charge, sans redessiner le panneau ;
+   - sa grille est décalée à l'envers de son déplacement (background-position) : ses points restent
+     exactement sur ceux du panneau, on ne les voit pas glisser.
+   Le masque l'efface vers ses bords. Tant que le curseur n'a pas bougé (ou sur un écran tactile),
+   il reste hors du panneau : -999px. */
+.pegboard-light {
+  --half: 220px;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--half) * 2);
+  height: calc(var(--half) * 2);
+  transform: translate(
+    calc(var(--light-x, -999px) - var(--half)),
+    calc(var(--light-y, -999px) - var(--half))
+  );
+  background:
+    radial-gradient(circle, var(--peg-light) 1.5px, transparent 2.1px)
+      calc(var(--half) - var(--light-x, 0px)) calc(var(--half) - var(--light-y, 0px)) / var(--peg)
+      var(--peg),
+    radial-gradient(closest-side, rgba(var(--rgb-accent), 0.09), transparent);
+  mask-image: radial-gradient(closest-side, #000 20%, transparent);
+}
+.blueprint {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+  padding: 32px;
+  border: 1px dashed rgba(var(--rgb-accent), 0.3);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(rgba(var(--rgb-accent), 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.skills-tabs-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.tabs-arrow {
+  display: none;
+}
+
+@keyframes nudge-right {
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes nudge-left {
+  50% {
+    transform: translateX(-4px);
+  }
+}
+
+.skills-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skills-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  background-color: rgba(var(--rgb-bg), 0.6);
+  color: var(--color-muted);
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+  transition:
+    border-color 0.3s,
+    color 0.3s,
+    background-color 0.3s;
+}
+
+.skills-tab:hover {
+  color: var(--color-text);
+}
+
+.skills-tab.active {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+  background-color: rgba(var(--rgb-accent), 0.08);
+}
+
+.skills-tab-ref {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+}
+
+.skill-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
+  background-color: rgba(var(--rgb-bg), 0.7);
+
+  /* L'apparition du panneau, à chaque tiroir qu'on ouvre : le cadre arrive en fondu, puis son en-tête
+     et sa description, puis les outils se posent un par un (voir .tool-tile).
+     --panel-start : le moment où tout ça commence. 0s ici ; plus tard à l'arrivée de la boîte à outils,
+     pour laisser passer les tiroirs d'abord (voir reveal-drawers). Les enfants en héritent.
+     « backwards » : l'élément reste dans son état de départ (invisible) pendant qu'il attend son tour. */
+  --panel-start: 0s;
+  animation: panel-fade 0.25s ease-out var(--panel-start) backwards;
+}
+
+.skill-panel .cartouche-header,
+.skill-panel-description {
+  animation: panel-fade 0.3s ease-out calc(var(--panel-start) + 0.15s) backwards;
+}
+
+@keyframes panel-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.cartouche-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.3);
+}
+
+.cartouche-header span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+}
+
+.cartouche-header h3 {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.skill-panel-description {
+  padding: 0 24px;
+}
+
+.tool-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 0 24px;
+}
+
+.tool-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition:
+    border-color 0.3s,
+    transform 0.3s;
+  /* Chaque outil tombe à sa place, 0,11s après le précédent (--i est son rang, voir SkillPanel.jsx).
+     La courbe dépasse 1 : il descend un peu trop bas puis remonte, comme un outil qu'on pose.
+     min(…, 6) : à partir du 7e, les outils arrivent ensemble, pour qu'un tiroir bien rempli ne traîne pas. */
+  animation: tool-drop 0.45s cubic-bezier(0.3, 1.5, 0.5, 1)
+    calc(var(--panel-start) + 0.25s + min(var(--i, 0), 6) * 0.11s) backwards;
+}
+
+@keyframes tool-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.95);
+  }
+}
+
+.tool-tile:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-3px);
+}
+
+.tool-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tool-usage {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.cartouche-footer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: auto;
+  border-top: 1px solid rgba(var(--rgb-accent), 0.3);
+}
+
+.cartouche-footer span {
+  padding: 12px 24px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--color-muted);
+}
+
+.cartouche-footer span + span {
+  border-left: 1px solid rgba(var(--rgb-accent), 0.3);
+}
+
+/* La soudure */
+.weld {
+  --weld-side: 1s;
+  --weld-start: 0.2s;
+
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+}
+
+/* Variante bleue : l'arc blanc bleuté du soudage TIG */
+.weld-blue {
+  --weld-color: var(--color-steel);
+  --weld-glow: rgba(var(--rgb-arc), 0.8);
+  --spark-core: var(--hot-blue);
+  --spark-inner: var(--hot-blue-halo);
+  --spark-middle: rgba(var(--rgb-arc), 0.85);
+  --spark-outer: rgba(var(--rgb-arc-deep), 0.45);
+}
+
+/* Soudure du cartouche du footer : un long cadre, donc un tour un peu plus lent */
+.footer-cartouche .weld {
+  --weld-side: 0.8s;
+  --weld-start: 0.2s;
+}
+
+/* Soudure des tiroirs : réglage indépendant */
+.skills-tab .weld {
+  --weld-side: 0s;
+  --weld-start: 0s;
+}
+
+/* Soudure de l'ordre de fabrication : réglage indépendant */
+.work-order .weld {
+  --weld-side: 0.4s;
+  --weld-start: 0s;
+}
+
+.weld-line {
+  position: absolute;
+  background-color: var(--weld-color, var(--color-accent));
+  box-shadow: 0 0 8px var(--weld-glow, rgba(var(--rgb-accent), 0.7));
+}
+
+.weld-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation:
+    weld-grow-x var(--weld-side) linear var(--weld-start) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-right {
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: top;
+  animation:
+    weld-grow-y var(--weld-side) linear calc(var(--weld-start) + var(--weld-side)) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-bottom {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: right;
+  animation:
+    weld-grow-x var(--weld-side) linear calc(var(--weld-start) + var(--weld-side) * 2) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-left {
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation:
+    weld-grow-y var(--weld-side) linear calc(var(--weld-start) + var(--weld-side) * 3) forwards,
+    weld-cool 1.5s ease-out calc(var(--weld-start) + var(--weld-side) * 4) forwards;
+}
+
+.weld-spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background-color: var(--spark-core, var(--hot));
+  box-shadow:
+    0 0 6px 2px var(--spark-inner, var(--hot-halo)),
+    0 0 16px 6px var(--spark-middle, rgba(var(--rgb-accent), 0.8)),
+    0 0 32px 12px var(--spark-outer, rgba(214, 150, 60, 0.4));
+  opacity: 0;
+  animation:
+    weld-travel calc(var(--weld-side) * 4) linear var(--weld-start) forwards,
+    weld-flicker 0.08s steps(2) var(--weld-start) infinite;
+}
+
+/* Soudure déjà faite (voir Weld.jsx, isDone) : le cordon est en place et refroidi,
+   sans animation ni étincelle. C'est l'état où l'animation s'arrête d'habitude. */
+.weld-done .weld-line {
+  animation: none;
+  transform: none;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.weld-done .weld-spark {
+  display: none;
+}
+
+@keyframes weld-grow-x {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes weld-grow-y {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes weld-cool {
+  to {
+    box-shadow: none;
+    opacity: 0.6;
+  }
+}
+
+@keyframes weld-travel {
+  0% {
+    top: 0;
+    left: 0;
+    opacity: 1;
+  }
+  25% {
+    top: 0;
+    left: 100%;
+  }
+  50% {
+    top: 100%;
+    left: 100%;
+  }
+  75% {
+    top: 100%;
+    left: 0;
+  }
+  98% {
+    top: 0;
+    left: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes weld-flicker {
+  to {
+    transform: scale(1.5);
+  }
+}

@@ -1,0 +1,199 @@
+/* ===== Éléments réutilisables ===== */
+.accent {
+  color: var(--color-accent);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* Les boutons, façon plan technique */
+.btn {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  padding: 14px 24px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition:
+    color 0.35s,
+    border-color 0.35s,
+    background-color 0.35s;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.btn-primary {
+  border-color: var(--color-accent);
+  background-color: rgba(var(--rgb-accent), 0.08);
+  color: var(--color-accent);
+}
+
+/* Remplissage doré au survol, comme un cordon de soudure */
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  color: var(--color-bg);
+}
+
+.btn-primary:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}
+
+.btn-secondary {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  border-color: rgba(var(--rgb-accent), 0.5);
+  background-color: rgba(var(--rgb-accent), 0.06);
+}
+
+.btn-small {
+  padding: 10px 16px;
+  font-size: 0.72rem;
+}
+
+/* Le contour en laiton poli : pour les boutons qui comptent le plus, « Me contacter » dans la navbar,
+   « Voir mes projets » dans le Hero et « Lancer la fabrication » dans le formulaire.
+   C'est le contour des cartes projet, en plus fin :
+   une bordure en laiton (--metal-gold) sur laquelle deux lueurs font le tour, l'une dorée,
+   l'autre bleue comme l'arc TIG (voir .project-card::before).
+   Ici, pas de calques séparés comme sur les cartes : tout tient dans trois fonds superposés,
+   du dessus vers le dessous :
+   1. le fond sombre du bouton, limité à l'intérieur de la bordure (padding-box) ;
+   2. les deux lueurs, sur toute la surface, bordure comprise (border-box) ;
+   3. le métal, lui aussi jusqu'au bord.
+   La bordure elle-même est transparente : c'est à travers elle qu'on voit les fonds 2 et 3.
+   --metal-fill est la teinte d'un bouton principal (8 % de doré sur le fond du site), mais opaque,
+   pour cacher le métal au centre (et, dans le Hero, le quadrillage du sol derrière le bouton).
+   Le remplissage doré au survol (.btn-primary::before) ne change pas : il passe par-dessus ces fonds.
+   Cette règle doit rester APRÈS .btn-primary : à égalité, c'est la dernière écrite qui l'emporte. */
+.btn-metal {
+  --metal-fill: #1a191a;
+
+  /* 2px de bordure au lieu d'1 : on retire 1px de marge intérieure, le bouton garde sa taille */
+  padding: 13px 23px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--metal-fill), var(--metal-fill)) padding-box,
+    conic-gradient(
+        from var(--spark-angle),
+        transparent 0 32%,
+        rgba(var(--rgb-arc), 0.45) 44%,
+        var(--hot-blue) 48.5%,
+        transparent 50% 80%,
+        rgba(251, 232, 182, 0.55) 93%,
+        var(--hot) 98.5%,
+        transparent 100%
+      )
+      border-box,
+    var(--metal-gold) border-box;
+  /* Un tour en 8 secondes. Un bouton est bien plus petit qu'une carte : à leur rythme (15 secondes),
+     ses lueurs sembleraient presque immobiles. */
+  animation: spark-orbit 8s linear infinite;
+}
+
+/* Le petit bouton (celui de la navbar) : même calcul, 1px de moins que .btn-small */
+.btn-small.btn-metal {
+  padding: 9px 15px;
+}
+
+/* La variante bleue du contour (à ajouter à .btn-metal) : l'acier bleui, pour « Me contacter » dans le
+   Hero et le choix « Recrutement » du formulaire. Tout fonctionne comme sur le laiton, dans le bleu de l'arc TIG : la bordure (--metal-steel),
+   les deux lueurs (une bleu vif, une presque blanche), le texte, et le remplissage au survol.
+   Le fond du bouton est le bleu clair du site à 8 % posé sur le noir du site, opaque lui aussi.
+   Cette règle doit rester APRÈS .btn-metal : c'est elle qui remplace ses trois fonds. */
+.btn-metal-blue {
+  --metal-fill: #171b21;
+
+  color: var(--color-tig);
+  background:
+    linear-gradient(var(--metal-fill), var(--metal-fill)) padding-box,
+    conic-gradient(
+        from var(--spark-angle),
+        transparent 0 32%,
+        rgba(var(--rgb-arc-deep), 0.55) 44%,
+        var(--hot-blue-halo) 48.5%,
+        transparent 50% 80%,
+        rgba(var(--rgb-tig), 0.6) 93%,
+        var(--hot-blue) 98.5%,
+        transparent 100%
+      )
+      border-box,
+    var(--metal-steel) border-box;
+}
+
+/* Remplissage bleu au survol, de gauche à droite : le même geste que le remplissage doré de .btn-primary */
+.btn-metal-blue::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-tig);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.btn-metal-blue:hover:not(:disabled) {
+  color: var(--color-bg);
+}
+
+.btn-metal-blue:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}

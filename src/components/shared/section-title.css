@@ -1,0 +1,91 @@
+/* ===== En-tête de section ===== */
+.section-title {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 64px;
+}
+
+/* Le libellé de la section : un onglet posé sur un filet qui traverse le bloc, comme l'onglet d'un
+   tiroir de la boîte à outils. .section-label est le filet (sa bordure du bas), .section-name l'onglet. */
+.section-label {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.4);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--color-accent);
+}
+
+/* Pas de bordure en bas : l'onglet est fermé par le filet sur lequel il est posé */
+.section-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px 7px;
+  border: 1px solid rgba(var(--rgb-accent), 0.4);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background-color: var(--color-surface);
+}
+
+/* La poignée de l'onglet */
+.section-name::before {
+  content: "";
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--color-accent);
+  opacity: 0.7;
+}
+
+.section-title h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.section-title em {
+  display: block;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  color: var(--color-accent);
+}
+
+/* Un mot du titre souligné à la main : deux coups de crayon, de la couleur du mot (voir Contact.jsx).
+   Le dessin (un SVG) est en position absolue : il ne prend pas de place dans la ligne, il se cale sous
+   le mot en dépassant un peu de chaque côté (112 % de sa largeur). Sa hauteur et son décalage sont
+   en em : ils suivent la taille du titre, sur ordinateur comme sur téléphone.
+   padding-bottom : le mot réserve de la place sous lui pour son soulignage. La ligne où il se trouve
+   devient un peu plus haute, et la ligne suivante du titre descend d'autant : le dessin a ainsi toute
+   sa place, sans toucher ni les lettres du mot ni le texte du dessous. */
+.title-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.22em;
+}
+
+.title-underline svg {
+  position: absolute;
+  left: -6%;
+  bottom: 0;
+  width: 112%;
+  height: 0.4em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* stroke-dasharray: 1 = un seul tiret, aussi long que le trait entier (sa longueur vaut 1, voir pathLength).
+   En décalant ce tiret (stroke-dashoffset), on cache le trait, puis on le fait apparaître peu à peu :
+   c'est ce que fait l'animation d'apparition (voir « underline-draw », scroll-reveal.css). */
+/* Le soulignage est bleu (le bleu clair des mots « sécurité » et « qualité » du Hero) sous un mot doré :
+   il se détache du mot, comme tracé avec un autre crayon. */
+.title-underline path {
+  fill: none;
+  stroke: var(--color-tig);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}

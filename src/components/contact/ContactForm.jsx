@@ -248,7 +248,7 @@ function OptionGroup({ name, legend, options, labels, value, onSelect, error, op
             key={option.value}
             type="button"
             // Une option ordinaire est un bouton doré (btn-primary). La variante « steel » porte à la
-            // place le contour en acier bleui des boutons (btn-metal btn-metal-blue, voir le CSS, section 6).
+            // place le contour en acier bleui des boutons (btn-metal btn-metal-blue, voir le CSS, elements.css).
             className={`btn btn-small type-option ${
               option.variant === "steel"
                 ? "btn-metal btn-metal-blue type-option-steel"
@@ -538,7 +538,7 @@ function ContactForm() {
 
   return (
     <div className="work-order" ref={orderRef}>
-      {/* Le trait bleu qui balaie la feuille à son apparition (voir « ORDER » dans le CSS, section 19 bis) */}
+      {/* Le trait bleu qui balaie la feuille à son apparition (voir « ORDER » dans le CSS, scroll-reveal.css) */}
       <span className="work-order-scan" aria-hidden="true" />
 
       {status === "success" && <Weld />}

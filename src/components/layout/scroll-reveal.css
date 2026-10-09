@@ -1,0 +1,416 @@
+/* ===== Apparition au défilement : les effets « atelier » ===== */
+
+/* Classes posées par le composant ScrollReveal :
+   .reveal         → le bloc attend, caché
+   .reveal-xxx     → l'effet choisi pour ce bloc
+   .revealed       → il est arrivé à l'écran : l'effet se joue
+
+   fill-mode « backwards » : l'état de départ est tenu pendant le délai, puis, une fois
+   l'animation finie, le bloc retrouve ses styles normaux (plus de découpe ni de transformation
+   qui gênerait les soudures ou l'effet de survol des cartes). */
+.reveal {
+  opacity: 0;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  animation-delay: var(--reveal-delay, 0s);
+  animation-fill-mode: backwards;
+}
+
+/* 1. LASER : les titres sont découpés de gauche à droite, un trait lumineux en tête */
+.reveal-laser {
+  position: relative;
+}
+
+.reveal-laser.revealed {
+  animation-name: laser-cut;
+  animation-duration: 1.3s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.reveal-laser.revealed::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  margin-left: -2px; /* le trait reste juste à l'intérieur de la zone déjà découpée */
+  background-color: var(--hot);
+  box-shadow:
+    0 0 8px 2px var(--hot-halo),
+    0 0 24px 6px rgba(var(--rgb-accent), 0.7);
+  opacity: 0;
+  pointer-events: none;
+  animation: laser-beam 1.3s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+@keyframes laser-cut {
+  from {
+    clip-path: inset(-10px 100% -10px 0);
+  }
+  to {
+    clip-path: inset(-10px 0 -10px 0);
+  }
+}
+
+@keyframes laser-beam {
+  from {
+    left: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* Le soulignage d'un mot du titre (voir .title-underline, section-title.css) se trace une fois le laser passé
+   sur le mot : il est caché tant que le titre n'est pas apparu, puis ses deux traits partent l'un après
+   l'autre, comme deux coups de crayon.
+   « backwards » : pendant le délai, le trait garde l'état de départ de l'animation (caché). */
+.reveal-laser:not(.revealed) .title-underline path {
+  stroke-dashoffset: 1;
+}
+
+.reveal-laser.revealed .title-underline path {
+  animation: underline-draw 0.45s ease-out 0.8s backwards;
+}
+
+.reveal-laser.revealed .title-underline path + path {
+  animation-delay: 1.15s;
+}
+
+@keyframes underline-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* 2. CUT : le texte se révèle comme une découpe qui avance, avec un bord adouci */
+.reveal-cut.revealed {
+  animation-name: text-cut;
+  animation-duration: 1.6s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes text-cut {
+  from {
+    -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    -webkit-mask-size: 300% 100%;
+    mask-size: 300% 100%;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    opacity: 0.2;
+  }
+  to {
+    -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+    -webkit-mask-size: 300% 100%;
+    mask-size: 300% 100%;
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+    opacity: 1;
+  }
+}
+
+/* 3. UNFOLD : le bloc se déplie de haut en bas, comme un plan qu'on déroule */
+.reveal-unfold.revealed {
+  animation-name: plan-unfold;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+@keyframes plan-unfold {
+  from {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 -12px;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    translate: 0 0;
+  }
+}
+
+/* 4. SCAN : les cartes projet. Un trait doré balaie la carte de haut en bas et la révèle sur
+      son passage, comme un scanner ; chaque étage (le visuel, la référence, le titre, la description)
+      monte à sa place au moment où le trait arrive sur lui.
+      Trois animations de même durée et de même courbe, qui restent donc ensemble :
+      - la carte se découvre de haut en bas (clip-path) ;
+      - le trait (.project-scan, voir ProjectCard.jsx) descend avec le bord de la découpe ;
+      - les étages montent, chacun à son heure (--tier-at).
+      Les trois cartes partent l'une après l'autre (--reveal-delay, posé par ScrollReveal). */
+.reveal-scan.revealed {
+  animation-name: card-scan;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* inset(haut droite bas gauche) : ce qu'on retire de chaque côté. Au départ, on retire toute la
+   hauteur par le bas : la carte est entièrement cachée. À l'arrivée, -16px : la découpe prend peu à peu
+   16px d'avance sur le trait, pour que sa lueur, qui déborde en dessous de lui, ne soit pas coupée. */
+@keyframes card-scan {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 -16px 0);
+  }
+}
+
+/* Le trait : invisible en temps normal, il ne se montre que pendant le balayage.
+   Il est bleu, pas doré : c'est le blanc bleuté de l'arc TIG, les mêmes teintes que la soudure
+   bleue du pied de page (voir .weld-blue). Le bleu « fabrique » la carte, le doré est la pièce finie.
+   Le formulaire a le même trait (.work-order-scan, voir ContactForm.jsx et l'effet ORDER plus bas).
+
+   Le trait ne descend pas en changeant de position (top). L'élément est une glissière transparente,
+   haute comme la carte, qui porte le trait sur son bord du haut (::before) ; on la fait glisser de
+   sa propre hauteur avec translate. Changer « top » oblige le navigateur à recalculer la mise en page
+   à chaque image, et les outils de mesure (Lighthouse) comptent chaque pas comme un décalage de la
+   page. translate ne déplace que le dessin : rien n'est recalculé. */
+.project-scan,
+.work-order-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.project-scan::before,
+.work-order-scan::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--hot-blue);
+  box-shadow:
+    0 0 8px 2px var(--hot-blue-halo),
+    0 0 22px 6px rgba(var(--rgb-arc), 0.8);
+}
+
+.reveal-scan.revealed .project-scan {
+  animation: scan-line 0.9s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+@keyframes scan-line {
+  from {
+    translate: 0 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    translate: 0 100%;
+    opacity: 0;
+  }
+}
+
+/* Les étages : chacun monte quand le trait l'atteint. --tier-at est ce moment, compté depuis le
+   début du balayage (le trait va lentement au départ et à l'arrivée, vite au milieu : les trois
+   derniers étages se suivent donc de près).
+   « backwards » : l'étage reste à son point de départ tant que son tour n'est pas venu. */
+.reveal-scan.revealed > .project-image,
+.reveal-scan.revealed > .project-meta,
+.reveal-scan.revealed > .project-header,
+.reveal-scan.revealed > .project-body {
+  animation: tier-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + var(--tier-at, 0s));
+}
+
+.reveal-scan > .project-image {
+  --tier-at: 0.05s;
+}
+
+.reveal-scan > .project-meta {
+  --tier-at: 0.36s;
+}
+
+.reveal-scan > .project-header {
+  --tier-at: 0.44s;
+}
+
+.reveal-scan > .project-body {
+  --tier-at: 0.52s;
+}
+
+@keyframes tier-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* 5. ORDER : l'ordre de fabrication (le formulaire). Deux temps, l'un après l'autre :
+      0s      le trait bleu des cartes projet balaie la feuille de haut en bas et la révèle, encore vide
+              (mêmes animations que SCAN : card-scan pour la découpe, scan-line pour le trait) ;
+      0,8s    les champs sont soudés un par un, de haut en bas, un toutes les 0,12s : le libellé
+              s'allume, puis le champ s'étire depuis la gauche avec un éclat doré.
+   :not(.reveal-over) : ces règles ne valent que pendant l'apparition. ScrollReveal pose la classe
+   reveal-over quand tout est fini ; sans ça, un formulaire recréé à neuf (après un envoi) rejouerait
+   la soudure de ses champs.
+   Les « > » : seuls les champs présents à l'apparition sont concernés, pas ceux de la fiche de poste. */
+.reveal-order.revealed {
+  animation-name: card-scan;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.reveal-order.revealed .work-order-scan {
+  animation: scan-line 0.9s cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) backwards;
+}
+
+/* Le rang de chaque champ dans la soudure (data-field est posé par ContactForm.jsx).
+   Sans rang, c'est 0 : la légende de l'astérisque arrive avec le premier champ. */
+.reveal-order [data-field="firstName"] {
+  --field: 1;
+}
+
+.reveal-order [data-field="lastName"] {
+  --field: 2;
+}
+
+.reveal-order [data-field="email"] {
+  --field: 3;
+}
+
+.reveal-order [data-field="message"] {
+  --field: 4;
+}
+
+.reveal-order .form-privacy,
+.reveal-order .work-order-submit {
+  --field: 5;
+}
+
+/* Les textes : ils s'allument */
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-required-note,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > label,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > legend,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-row > .form-field > label,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-privacy {
+  animation: field-label 0.3s ease-out backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + 0.8s + var(--field, 0) * 0.12s);
+}
+
+/* Les champs et les boutons : ils s'étirent depuis la gauche, juste après leur libellé */
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > input,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field > textarea,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-row > .form-field > input,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field .type-option,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .work-order-submit {
+  transform-origin: left;
+  animation: field-weld 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-delay, 0s) + 0.88s + var(--field, 0) * 0.12s);
+}
+
+/* Un bouton a un texte : étiré avec le bouton, il serait écrasé. Il reste donc invisible le temps
+   de l'étirement (button-text), et n'apparaît qu'à la fin. */
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .form-field .type-option,
+.reveal-order.revealed:not(.reveal-over) .work-order-form > .work-order-submit {
+  animation-name: field-weld, button-text;
+}
+
+@keyframes field-label {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Pas d'étape « to » : l'animation finit sur le style normal du champ (sa bordure, son ombre) */
+@keyframes field-weld {
+  from {
+    transform: scaleX(0);
+    border-color: var(--hot);
+    box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.9);
+  }
+  60% {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 14px rgba(var(--rgb-accent), 0.5);
+  }
+}
+
+@keyframes button-text {
+  from,
+  70% {
+    color: transparent;
+  }
+}
+
+/* 6. RISE : monte doucement, avec un halo qui s'éteint */
+.reveal-rise.revealed {
+  animation-name: soft-rise;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes soft-rise {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+    filter: drop-shadow(0 0 24px rgba(var(--rgb-accent), 0.5));
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* 7. DRAWERS : la boîte à outils. Quatre temps, l'un après l'autre :
+      0s      l'encadré apparaît
+      0,15s   les tiroirs glissent à leur place, un toutes les 0,12s (--i est leur rang, voir Skills.jsx)
+      0,7s    le panneau apparaît et ses outils se posent un par un (voir .skill-panel, skills.css)
+      1,7s    la soudure fait le tour du panneau */
+.reveal-drawers.revealed {
+  animation-name: drawers-box;
+  animation-duration: 0.35s;
+}
+
+.reveal-drawers.revealed .skills-tab {
+  animation: drawer-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) calc(0.15s + var(--i, 0) * 0.12s) backwards;
+}
+
+/* Le panneau présent à l'arrivée (.skill-panel-first) joue la même apparition que les autres, mais
+   0,7s plus tard : il laisse passer les tiroirs. Ceux qu'on ouvre ensuite apparaissent tout de suite. */
+.reveal-drawers.revealed .skill-panel-first {
+  --panel-start: 0.7s;
+}
+
+/* Sa soudure attend que le dernier outil soit posé. Les soudures suivantes gardent leur départ normal. */
+.reveal-drawers.revealed .skill-panel-first .weld {
+  --weld-start: 1.7s;
+}
+
+/* Tant que la boîte n'est pas arrivée à l'écran, rien ne part à l'intérieur : ni l'apparition du panneau
+   et de ses outils, ni les soudures. Sans ça, tout se jouerait au chargement de la page, bien avant
+   qu'on arrive ici, et on ne le verrait jamais.
+   (.reveal est posée par ScrollReveal ; avec « animations réduites », elle n'existe pas et rien n'attend.) */
+.reveal-drawers:not(.revealed) .skill-panel,
+.reveal-drawers:not(.revealed) .cartouche-header,
+.reveal-drawers:not(.revealed) .skill-panel-description,
+.reveal-drawers:not(.revealed) .tool-tile,
+.reveal-drawers:not(.revealed) .weld-line,
+.reveal-drawers:not(.revealed) .weld-spark {
+  animation: none;
+}
+
+@keyframes drawers-box {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(-64px);
+  }
+}

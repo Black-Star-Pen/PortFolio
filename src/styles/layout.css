@@ -1,0 +1,110 @@
+/* ===== Mise en page ===== */
+section {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 100px 24px;
+  scroll-margin-top: 80px;
+}
+
+/* Le cordon de soudure entre deux sections (toutes sauf la première, le Hero).
+   « section + section » = une section précédée d'une autre section. */
+main > section + section {
+  /* La longueur du cordon : 1500px, plus large que le contenu (1100px), il dépasse donc de chaque côté.
+     Sur un écran plus étroit, il s'arrête à 92 % de la largeur de l'écran. */
+  --seam-width: min(1500px, 92vw);
+  /* Le temps que met le cordon à se souder. Presque deux fois plus court que la découpe du titre
+     juste en dessous (1,3s, voir .reveal-laser) : la soudure est finie quand le texte arrive. */
+  --seam-duration: 0.7s;
+  position: relative;
+  /* Plus d'air entre deux sections que les 100px de base. Le Hero n'est pas concerné (il n'est précédé
+     d'aucune section) : sa hauteur est calculée sur ces 100px, voir .hero-pin.
+     Le cordon reste au milieu de l'espace : il en a autant au-dessus (bas de la section d'avant) qu'en dessous,
+     sauf après le Hero, qui garde 100px en bas. */
+  padding-block: var(--section-space);
+}
+
+/* Le cordon : doré et lumineux au centre, il s'estompe vers les bords */
+main > section + section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(50% - var(--seam-width) / 2);
+  width: var(--seam-width);
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--rgb-accent), 0.2) 15%,
+    var(--color-accent) 50%,
+    rgba(var(--rgb-accent), 0.2) 85%,
+    transparent
+  );
+  filter: drop-shadow(0 0 6px rgba(var(--rgb-accent), 0.55));
+  transform-origin: left;
+  pointer-events: none;
+}
+
+/* Posées par ScrollReveal : le cordon attend (invisible), puis se soude de gauche à droite */
+main > section.seam-pending::before {
+  transform: scaleX(0);
+}
+
+main > section.seam-welded::before {
+  animation: seam-weld var(--seam-duration) cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+/* La pointe lumineuse qui avance en tête du cordon. ScrollReveal lit sa position à chaque image
+   pour en faire jaillir les étincelles (voir weldSeam) : c'est elle qui donne le rythme. */
+main > section.seam-welded::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background-color: var(--hot);
+  box-shadow:
+    0 0 6px 2px var(--hot-halo),
+    0 0 16px 6px rgba(var(--rgb-accent), 0.8),
+    0 0 32px 12px rgba(214, 150, 60, 0.4);
+  pointer-events: none;
+  animation:
+    seam-spark var(--seam-duration) cubic-bezier(0.6, 0, 0.3, 1) both,
+    weld-flicker 0.08s steps(2) infinite;
+}
+
+/* La toile des étincelles du cordon, posée par ScrollReveal le temps de la soudure.
+   Elle suit le cordon sur toute sa longueur, avec 40px de marge à chaque bout. Elle dépasse au-dessus
+   (les étincelles montent un peu) et surtout en dessous (elles retombent). */
+.seam-sparks {
+  position: absolute;
+  top: -80px;
+  left: calc(50% - var(--seam-width) / 2 - 40px);
+  width: calc(var(--seam-width) + 80px);
+  height: 300px;
+  pointer-events: none;
+}
+
+@keyframes seam-weld {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes seam-spark {
+  from {
+    left: calc(50% - var(--seam-width) / 2);
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  to {
+    left: calc(50% + var(--seam-width) / 2);
+    opacity: 0;
+  }
+}

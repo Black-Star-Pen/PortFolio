@@ -1,0 +1,178 @@
+/* ===== Navbar ===== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(var(--rgb-bg), 0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.navbar-logo {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 32px;
+}
+
+.navbar-links a {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  transition: color 0.3s;
+}
+
+.navbar-links a:hover {
+  color: var(--color-text);
+}
+
+/* Sur ordinateur seulement : au survol, le lien réagit comme un bouton (.btn-primary, elements.css) :
+   un contour doré, puis un remplissage doré de gauche à droite, comme un cordon de soudure.
+   En dessous de 900px, les liens deviennent le menu plein écran (voir plus bas) : pas de survol au doigt. */
+@media (min-width: 901px) {
+  .navbar-links {
+    /* Toujours 32px entre deux mots : 4px ici + 14px de chaque côté (13px de marge intérieure + 1px de bordure) */
+    gap: 4px;
+  }
+
+  .navbar-links a {
+    position: relative;
+    /* isolate : le remplissage (z-index: -1) passe derrière le texte du lien, pas derrière la navbar */
+    isolation: isolate;
+    padding: 7px 13px;
+    /* Bordure transparente au repos : elle réserve sa place, le lien ne bouge pas quand elle se colore */
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition:
+      color 0.35s,
+      border-color 0.35s;
+  }
+
+  .navbar-links a::before {
+    content: "";
+    position: absolute;
+    /* -1px : le remplissage déborde sur la bordure et la recouvre. Avec inset: 0, il s'arrêtait pile contre elle :
+       le lien a une taille à virgule (40,3px de haut), et pendant l'animation le navigateur n'arrondit pas
+       le remplissage et la bordure de la même façon. Un filet sombre restait entre les deux jusqu'à la fin. */
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+  }
+
+  .navbar-links a:hover {
+    border-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .navbar-links a:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Au clavier (touche Tab) : le même contour que les boutons */
+  .navbar-links a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
+
+.navbar-link-number {
+  display: none;
+}
+
+/* À droite de la navbar : les réglages du site (thème, langue) et le bouton « Me contacter », groupés */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Un réglage : un petit bouton carré, discret, qui se dore au survol */
+.navbar-tool {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+
+.navbar-tool:hover {
+  border-color: rgba(var(--rgb-accent), 0.6);
+  color: var(--color-accent);
+}
+
+.navbar-tool:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.navbar-tool svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Le bouton « Me contacter » de la navbar (.navbar-cta) porte le contour en laiton poli des boutons :
+   voir .btn-metal, elements.css. Il n'a pas d'autre style ici ; sur téléphone, il est masqué (mobile.css). */
+
+/* ===== Burger ===== */
+.navbar-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  appearance: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-burger span {
+  display: block;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 2px;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
+}
+
+.navbar-burger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.navbar-burger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-burger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}

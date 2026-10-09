@@ -1,0 +1,367 @@
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
+  /* À propos : tout est calé à gauche, comme dans la colonne du grand écran. Des paragraphes centrés
+     sur un écran étroit se lisent mal : chaque ligne commence à un endroit différent, l'œil doit la
+     chercher. Calées à gauche, les lignes partent toutes du même bord.
+     Le texte est aussi un peu plus petit et plus aéré entre deux paragraphes. */
+  .about-intro .section-title {
+    margin-bottom: 32px;
+    text-align: left;
+  }
+
+  .about-intro .section-label {
+    justify-content: flex-start;
+  }
+
+  .about-text {
+    gap: 20px;
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  /* Modales : un peu plus de largeur (16px de marge autour au lieu de 24) */
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  /* Modale projet : moins de marge, et un en-tête plus compact. Il reste en haut pendant tout le
+     défilement (voir .modal-heading) : chaque pixel qu'il prend est retiré au texte. */
+  .modal {
+    --modal-padding: 20px;
+  }
+
+  /* Sur téléphone, le visuel ne reste pas collé en haut : il part avec le défilement, et l'en-tête
+     prend sa place. C'est le montage le plus simple, donc le plus sûr : sur iPhone (Safari), le visuel
+     collé se retrouvait par-dessus le texte. */
+  .modal-image {
+    position: static;
+  }
+
+  .modal-heading {
+    gap: 12px;
+  }
+
+  /* La plaque : lettres un peu plus petites et plus serrées, pour tenir sur une ligne à côté du bouton
+     de fermeture sur la plupart des téléphones (sur les plus étroits, elle passe sur deux lignes) */
+  .modal-heading > .project-category {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
+
+  .modal-content h3 {
+    font-size: 1.45rem;
+  }
+
+  .modal-heading > .project-title {
+    padding-block: 14px;
+  }
+
+  /* La barre du bas : sur téléphone, seuls les boutons restent collés en bas, côte à côte sur une ligne.
+     Empilés avec la précision en dessous, ils prenaient un tiers de la hauteur de la modale.
+     display: contents fait « disparaître » la boîte .project-actions (pas son contenu) : ses deux enfants
+     se comportent comme s'ils étaient directement dans la modale. La précision se retrouve alors à la fin
+     du texte, et la rangée de boutons devient la barre collée en bas (elle reprend le style de la barre). */
+  .project-actions {
+    display: contents;
+  }
+
+  .project-actions-note {
+    padding: 0 var(--modal-padding) 20px;
+  }
+
+  .project-actions-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 12px var(--modal-padding);
+    border-top: 1px solid rgba(var(--rgb-accent), 0.25);
+    background-color: rgba(var(--rgb-surface), 0.92);
+    backdrop-filter: blur(8px);
+  }
+
+  /* flex: 1 1 0 : les boutons se partagent la largeur à parts égales (un seul bouton la prend toute).
+     Texte un peu plus petit et plus serré pour tenir à deux ; sur un écran très étroit, il passe
+     à la ligne au lieu d'être coupé (white-space). */
+  .project-actions-buttons .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+    padding: 13px 6px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* La navbar passe en menu burger dès 900px, plus tôt que le reste du mobile :
+   en dessous, le logo, les 4 liens et le bouton « Me contacter » ne tiennent plus sur une ligne */
+@media (max-width: 900px) {
+  .navbar-burger {
+    display: flex;
+  }
+
+  .navbar-cta {
+    display: none;
+  }
+
+  /* Les réglages (langue, thème) quittent la barre : à côté du burger, ils feraient passer le logo sur
+     deux lignes. On les retrouve en bas du menu ouvert, plus grands, faciles à toucher.
+     « top » et non « bottom » : à cause de son flou d'arrière-plan (backdrop-filter), la navbar sert de
+     repère à ses enfants « fixed » ; son haut est celui de l'écran, on compte donc à partir de lui. */
+  .navbar-actions {
+    position: fixed;
+    top: calc(100dvh - 112px);
+    right: 0;
+    left: 0;
+    z-index: 2;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
+  }
+
+  /* « ~ » : les réglages qui suivent un menu ouvert */
+  .navbar-links.open ~ .navbar-actions {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .navbar-tool {
+    width: 48px;
+    height: 48px;
+    font-size: 0.85rem;
+  }
+
+  .navbar-logo,
+  .navbar-burger {
+    position: relative;
+    z-index: 2;
+  }
+
+  .navbar-links {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100dvh;
+    z-index: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(var(--rgb-accent), 0.08), transparent 60%),
+      var(--color-bg);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
+  }
+
+  .navbar-links.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .navbar-links a {
+    width: min(80%, 320px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-title);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-text);
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.2s,
+      transform 0.2s,
+      color 0.3s;
+  }
+
+  .navbar-links a:first-child {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .navbar-links.open a {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.4s ease calc(0.1s + var(--i) * 0.08s),
+      transform 0.4s ease calc(0.1s + var(--i) * 0.08s),
+      color 0.3s;
+  }
+
+  .navbar-links a:hover {
+    color: var(--color-accent);
+  }
+
+  .navbar-link-number {
+    display: inline;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--color-accent);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Compétences */
+  .blueprint {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .skills-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 4px;
+  }
+
+  .skills-tab {
+    flex-shrink: 0;
+  }
+
+  .tabs-arrow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    width: 56px;
+    font-size: 2rem;
+    color: var(--color-accent);
+  }
+
+  .tabs-arrow-left {
+    left: 0;
+    justify-content: flex-start;
+    padding-left: 4px;
+    background: linear-gradient(to right, var(--color-surface) 45%, transparent);
+  }
+
+  .tabs-arrow-right {
+    right: 0;
+    justify-content: flex-end;
+    padding-right: 4px;
+    background: linear-gradient(to left, var(--color-surface) 45%, transparent);
+  }
+
+  .tabs-arrow-left span {
+    animation: nudge-left 1.2s ease-in-out infinite;
+  }
+
+  .tabs-arrow-right span {
+    animation: nudge-right 1.2s ease-in-out infinite;
+  }
+
+  .cartouche-header {
+    padding: 12px 16px;
+  }
+
+  .cartouche-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .skill-panel-description {
+    padding: 0 16px;
+  }
+
+  .tool-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 16px 32px;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
+    mask-image: linear-gradient(to bottom, black 85%, transparent);
+  }
+
+  .tool-tile {
+    padding: 12px;
+  }
+
+  .cartouche-footer span {
+    padding: 10px 12px;
+  }
+
+  /* Contact */
+  .work-order-header {
+    padding: 12px 16px;
+  }
+
+  .work-order-form {
+    padding: 24px 16px;
+  }
+
+  .work-order-submit {
+    align-self: stretch;
+  }
+
+  .contact-links {
+    padding: 24px 16px;
+  }
+
+  .copy-email {
+    flex-direction: column;
+  }
+
+  .annotation {
+    max-width: none;
+  }
+
+  .annotation svg {
+    transform: rotate(60deg);
+  }
+
+  .contact-modal {
+    max-height: 100dvh;
+  }
+
+  .contact-links.compact .contact-links-list {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Footer et pages légales sur mobile */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-cartouche {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-cartouche > span:nth-child(3) {
+    border-left: none;
+  }
+
+  .footer-cartouche > span:nth-child(n + 3) {
+    border-top: 1px solid rgba(var(--rgb-steel), 0.35);
+  }
+
+  .legal-content {
+    padding: 24px 20px;
+  }
+}

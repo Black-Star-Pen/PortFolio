@@ -1,0 +1,469 @@
+/* ===== Modale ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background-color: rgba(5, 6, 9, 0.75);
+  backdrop-filter: blur(8px);
+  animation: fade-in 0.25s ease-out;
+}
+
+.modal {
+  /* La marge intérieure est dans une variable : le contenu et la barre de boutons s'en servent */
+  --modal-padding: 32px;
+
+  position: relative;
+  width: 100%;
+  /* La largeur maximale, sur grand écran. En dessous, la modale prend toute la largeur disponible. */
+  max-width: 960px;
+  /* dvh = la hauteur de l'écran réellement visible (sur téléphone, elle change quand la barre d'adresse
+     se replie). Les navigateurs qui ne connaissent pas dvh gardent la ligne en vh. */
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  animation: pop-in 0.3s ease-out;
+  /* Le même fil doré que la barre de défilement de la page (voir base.css), un peu plus discret */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--rgb-accent), 0.5) transparent;
+}
+
+/* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
+   Le bloc de texte, posé au-dessus de lui, remonte et le recouvre peu à peu, comme une fiche
+   qu'on fait glisser sur une photo.
+   z-index: 0 ici et 1 sur .modal-content : l'ordre des couches est écrit en toutes lettres. Sans ça,
+   Safari dessinait le visuel PAR-DESSUS le texte (il dessine à part un élément sticky).
+   max-height : sur un écran peu haut (un ordinateur portable), le visuel en 16/9 prenait toute la
+   modale, et on ne voyait plus que lui et les boutons. Il a droit au plus à la hauteur de la modale
+   (90vh) moins 320px, la place de l'en-tête, des boutons et d'un début de texte ; jamais moins de 160px.
+   Quand il est raccourci, object-fit: cover le rogne, et object-position: top garde le haut de la capture. */
+.modal-image {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: max(160px, calc(90vh - 320px));
+  object-fit: cover;
+  object-position: top;
+}
+
+/* Le bloc de texte de la modale. Comme sur les cartes, il remonte de 16px sur le visuel avec deux
+   coins arrondis : une fiche posée par-dessus la photo. Son filet du haut est une ombre décalée d'1px
+   (box-shadow) : contrairement à une bordure posée sur un seul côté, elle suit l'arrondi des coins.
+   z-index: 1 : toujours au-dessus du visuel (voir .modal-image). */
+.modal-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: calc(var(--radius) * -1);
+  padding: var(--modal-padding);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background-color: var(--color-surface);
+  box-shadow: 0 -1px 0 rgba(var(--rgb-accent), 0.35);
+}
+
+.modal-content h3 {
+  font-size: 2rem;
+}
+
+/* L'en-tête de la fiche : la plaque de référence et le titre du projet, regroupés (voir ProjectModal.jsx).
+   sticky + top: 0 : quand on fait défiler au-delà, le bloc entier s'arrête en haut de la modale et y
+   reste, par-dessus le visuel : on sait toujours quel projet on est en train de lire, et le texte défile
+   en dessous. Il reçoit un fond plein pour que ce texte ne se voie pas à travers.
+   Il va d'un bord à l'autre de la modale et reprend les coins arrondis du bloc de texte : les marges
+   négatives annulent la marge intérieure de .modal-content (en haut et sur les côtés), et sa propre
+   marge intérieure du haut remet la plaque à sa place. */
+.modal-heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin: calc(var(--modal-padding) * -1) calc(var(--modal-padding) * -1) 0;
+  padding-top: var(--modal-padding);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background-color: var(--color-surface);
+}
+
+/* Sur un écran très bas (un téléphone tenu à l'horizontale), l'en-tête prendrait presque toute la
+   hauteur de la modale : il repart avec le texte, comme un bloc ordinaire. */
+@media (max-height: 560px) {
+  .modal-heading {
+    position: static;
+  }
+}
+
+/* Dans la modale, la référence n'est pas dans un étage comme sur les cartes : elle reçoit sa propre
+   petite plaque d'acier sombre, pour que ses lettres gravées aient un métal dans lequel se creuser.
+   La marge de droite, plus large, laisse la place au bouton de fermeture, qui reste en haut à droite
+   lui aussi (ses 44px, à 16px du bord, plus 12px d'écart). */
+.modal-heading > .project-category {
+  margin: 0 72px 0 var(--modal-padding);
+  padding: 8px 12px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--plate-top), var(--plate-bottom));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Le titre du projet : une bande qui va d'un bord à l'autre de la modale, avec le même fond
+   « cartouche » que sur les cartes (voir .project-header) : deux filets dorés, un voile, des hachures.
+   La marge intérieure de gauche aligne le texte avec le reste ; celle de droite l'arrête avant la
+   case hachurée (--cell, plus 16px d'écart). */
+.modal-heading > .project-title {
+  align-self: stretch;
+  width: auto;
+  padding: 18px calc(var(--cell) + 16px) 18px var(--modal-padding);
+}
+
+/* L'accroche du projet, juste sous le titre */
+.project-lead {
+  font-size: 1.05rem;
+  color: var(--color-text);
+}
+
+/* Les rubriques : Contexte, Mon rôle, Le défi, Ce que j'ai appris */
+.project-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  margin: 8px 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.project-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Titre de rubrique : doré discret, précédé d'un petit trait (comme les libellés du formulaire) */
+.project-detail h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.project-detail h4::before {
+  content: "";
+  width: 16px;
+  height: 1px;
+  background-color: currentColor;
+}
+
+/* La liste « Mon rôle » : de petits repères carrés à la place des puces */
+.project-role {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.project-role li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--color-muted);
+}
+
+.project-role li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--color-accent);
+  transform: rotate(45deg);
+}
+
+/* La rubrique « Stack technique » */
+.project-stack {
+  width: 100%;
+  gap: 12px;
+}
+
+/* La barre du bas : les boutons « Voir le site » et « Voir le code », et une précision facultative */
+.project-actions {
+  /* sticky + bottom: 0 : la barre reste collée en bas de la modale pendant tout le défilement,
+     puis se range à sa place, tout en bas, quand on y arrive.
+     Elle est placée directement dans .modal (la boîte qui défile) pour être visible dès l'ouverture. */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px var(--modal-padding);
+  border-top: 1px solid rgba(var(--rgb-accent), 0.25);
+  background-color: rgba(var(--rgb-surface), 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.project-actions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* La précision : petite et discrète. Dans le code elle est écrite avant les boutons (voir ProjectModal.jsx) ;
+   order: 1 la fait passer après eux (dans une boîte flex, les éléments sans « order » valent 0). */
+.project-actions-note {
+  order: 1;
+  font-size: 0.8rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(var(--rgb-ink), 0.2);
+  border-radius: 50%;
+  background-color: rgba(var(--rgb-bg), 0.85);
+  backdrop-filter: blur(4px);
+  color: var(--color-text);
+  font-size: 1.1rem;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    transform 0.3s;
+}
+
+.modal-close:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  transform: rotate(90deg);
+}
+
+/* Dans la modale d'un projet, le bouton de fermeture reste en haut à droite pendant tout le défilement
+   (sticky), au lieu de partir avec le visuel : il se retrouve à droite de la plaque quand l'en-tête s'arrête.
+   Un élément sticky reste dans le fil de la page, il prendrait donc sa hauteur au-dessus du visuel :
+   - margin-left: auto le pousse à droite ;
+   - la marge négative du bas (ses 44px + les 16px du haut) annule la place qu'il occupe. */
+.modal > .modal-close {
+  position: sticky;
+  z-index: 3;
+  margin: 16px 16px -60px auto;
+}
+
+/* ----- Passer d'un projet à l'autre sans fermer la modale (voir ProjectModal.jsx) ----- */
+
+/* Les deux flèches sont posées sur le fond, EN DEHORS de la fiche, de chaque côté.
+   .modal-nav est une boîte invisible, centrée, un peu plus large que la fiche : la fiche (960px) plus,
+   de chaque côté, 24px d'écart et les 44px d'une flèche. Les flèches se placent à ses deux bouts
+   (space-between), à mi-hauteur de l'écran.
+   pointer-events: none : cette boîte recouvre l'écran, elle ne doit pas intercepter les clics
+   (un clic à côté de la fiche doit toujours la fermer). Seules les flèches sont cliquables. */
+.modal-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(100%, 960px + 136px);
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.modal-nav-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(var(--rgb-accent), 0.6);
+  border-radius: 50%;
+  background-color: rgba(var(--rgb-bg), 0.85);
+  color: var(--color-accent);
+  pointer-events: auto;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    transform 0.3s;
+}
+
+.modal-nav-button svg {
+  width: 22px;
+  height: 22px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Au survol : la flèche se remplit de doré et avance d'un rien dans son sens.
+   @media (hover: hover) : seulement sur un appareil qui a un vrai survol (souris, pavé tactile).
+   Sur un téléphone, le « survol » reste collé au dernier élément touché : la flèche restait dorée
+   après chaque appui. */
+@media (hover: hover) {
+  .modal-nav-button:hover {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .modal-nav-button:first-child:hover {
+    transform: translateX(-3px);
+  }
+
+  .modal-nav-button:last-child:hover {
+    transform: translateX(3px);
+  }
+}
+
+/* Pendant l'appui (au doigt comme à la souris), la flèche se remplit : on voit que le geste est pris en compte */
+.modal-nav-button:active {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* La flèche qui vient de servir reste allumée un instant, puis s'éteint doucement : 0,9 seconde en tout,
+   dont la première moitié pleinement dorée. Sur téléphone, un appui est trop bref pour qu'on voie l'état
+   « :active » ci-dessus ; cette animation prend le relais. (Classe posée par ProjectModal.jsx.)
+   Pas d'étape « to » : l'animation finit sur l'apparence normale du bouton. */
+.modal-nav-button.is-lit {
+  animation: nav-lit 0.9s ease-out;
+}
+
+@keyframes nav-lit {
+  0%,
+  50% {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+}
+
+.modal-nav-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Le compteur « Projet 02 / 03 » : sur grand écran, il est centré sous la fiche, dans la marge du bas */
+.modal-nav-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.4vh;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Quand l'écran n'a pas la place pour les flèches de chaque côté de la fiche (moins de 1150px de large),
+   elles passent SOUS la fiche, sur une ligne, avec le compteur entre les deux.
+   Le fond devient une grille de deux rangées : la fiche, qui prend toute la hauteur restante
+   (minmax(0, 1fr)), puis cette ligne. La fiche ne dépasse pas sa rangée (max-height: 100%). */
+@media (max-width: 1149px) {
+  .project-overlay {
+    grid-template-rows: minmax(0, 1fr) auto;
+    row-gap: 10px;
+  }
+
+  .project-overlay > .modal {
+    max-height: 100%;
+  }
+
+  .modal-nav {
+    position: static;
+    justify-content: center;
+    gap: 18px;
+    width: auto;
+    margin: 0;
+  }
+
+  .modal-nav-count {
+    position: static;
+  }
+}
+
+/* La fiche d'un autre projet arrive du côté où on est allé la chercher : par la droite pour le projet
+   suivant, par la gauche pour le précédent. (À l'ouverture, c'est l'animation « pop-in » de .modal.) */
+.modal-from-next {
+  animation: modal-from-right 0.3s ease-out;
+}
+
+.modal-from-previous {
+  animation: modal-from-left 0.3s ease-out;
+}
+
+@keyframes modal-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+
+@keyframes modal-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+}
+
+/* Le glissement du doigt entre deux fiches (voir ProjectModal.jsx).
+   - grid-area: 1 / 1 : la fiche ouverte et celle du projet voisin occupent la même case de la grille du
+     fond. Elles sont donc exactement superposées, l'une derrière l'autre.
+   - touch-action : dans une fiche, le navigateur ne s'occupe que du défilement vertical et du zoom à
+     deux doigts ; les glissements horizontaux nous reviennent. */
+.project-overlay > .modal {
+  z-index: 1;
+  grid-area: 1 / 1;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* La fiche du projet voisin, derrière : sous l'autre, sans animation d'arrivée, et on ne peut pas y toucher.
+   Sa taille et sa transparence sont réglées par le JavaScript pendant le geste. */
+.project-overlay > .modal-behind {
+  z-index: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+/* La fiche qui était derrière et qui devient la fiche ouverte : elle est déjà en place, aucune animation */
+.modal-swiped {
+  animation: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

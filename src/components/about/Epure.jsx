@@ -1,7 +1,7 @@
 // L'épure : le fond de la section À propos. Un dessin technique de chaudronnier, tracé en traits fins :
 // à droite une bride vue de face (ses cercles, ses huit trous, ses axes, ses cotes), à gauche le
 // développé d'un tronc de cône (deux arcs et leurs génératrices).
-// Le dessin se trace quand la section arrive à l'écran (voir « L'épure » dans le CSS, section 9),
+// Le dessin se trace quand la section arrive à l'écran (voir « L'épure » dans le CSS, about.css),
 // puis ne bouge plus : il reste discret derrière le texte.
 //
 // Tout est dessiné dans un cadre de 1600 × 900 (le viewBox du SVG). Les formes sont calculées

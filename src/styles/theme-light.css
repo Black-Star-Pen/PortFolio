@@ -1,0 +1,93 @@
+/* ===== Thème clair : les retouches ===== */
+
+/* Les couleurs du thème clair sont dans variables.css. Ici, seulement ce que les variables ne suffisent pas
+   à régler : chaque règle commence par :root[data-theme="light"], elle ne vaut donc qu'en thème clair. */
+
+/* Le passage d'un thème à l'autre se fait en fondu, pas d'un coup */
+body {
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+/* L'intro reste une scène sombre (ses variables sont redonnées sur .intro, variables.css).
+   Elle reprend ici la couleur de texte du thème sombre : sinon elle hériterait de l'encre du <body>. */
+.intro {
+  color: var(--color-text);
+}
+
+/* Le fond des boutons au contour en métal : un papier légèrement teinté, doré ou bleu
+   (--paper-gold et --paper-blue, donnés avec les couleurs du thème clair) */
+:root[data-theme="light"] .btn-metal {
+  --metal-fill: var(--paper-gold);
+}
+
+:root[data-theme="light"] .btn-metal-blue {
+  --metal-fill: var(--paper-blue);
+}
+
+/* Les libellés du formulaire sont en doré à 70 % : sur le papier, ce doré pâli manque de contraste.
+   Ils prennent le doré plein. */
+:root[data-theme="light"] .form-field > label,
+:root[data-theme="light"] .form-field > legend {
+  color: var(--color-accent);
+}
+
+/* Les icônes (technos, GitHub) sont des images dorées, faites pour le fond sombre : on les fonce
+   pour qu'elles gardent du contraste sur le papier. (Une image ne peut pas changer de couleur par
+   une variable, d'où le filtre.) */
+:root[data-theme="light"] img[src^="/icons/"] {
+  filter: brightness(0.5) saturate(1.5);
+}
+
+/* La lampe des Réalisations : sur du papier, une lumière dorée ferait une ombre brune. Elle devient
+   une lumière blanche, qui éclaircit le papier, avec le même dessin (point chaud, trois cônes, flaque). */
+:root[data-theme="light"] .section-lamp::after {
+  background:
+    radial-gradient(ellipse 24% 13% at 50% 0, rgba(255, 255, 255, 0.95), transparent 72%),
+    conic-gradient(from 90deg at 50% 0, transparent 72deg, rgba(255, 255, 255, 0.6) 85deg, rgba(255, 255, 255, 0.6) 95deg, transparent 108deg),
+    conic-gradient(from 90deg at 50% 0, transparent 48deg, rgba(255, 255, 255, 0.45) 74deg, rgba(255, 255, 255, 0.45) 106deg, transparent 132deg),
+    conic-gradient(from 90deg at 50% 0, transparent 18deg, rgba(255, 255, 255, 0.3) 56deg, rgba(255, 255, 255, 0.3) 124deg, transparent 162deg),
+    radial-gradient(ellipse 30% 15% at 50% 34%, rgba(255, 255, 255, 0.5), transparent 72%);
+}
+
+/* L'épure : des traits un peu plus appuyés, l'encre claire se perd sur le papier */
+:root[data-theme="light"] .epure-shape {
+  stroke: rgba(var(--rgb-accent), 0.4);
+}
+
+:root[data-theme="light"] .epure-axis {
+  stroke: rgba(var(--rgb-accent), 0.32);
+}
+
+:root[data-theme="light"] .epure-dim {
+  stroke: rgba(var(--rgb-tig), 0.45);
+}
+
+:root[data-theme="light"] .epure text {
+  fill: rgba(var(--rgb-tig), 0.65);
+}
+
+/* La référence gravée des cartes projet (le type et le « N° 01 »). Sur la plaque sombre, la gravure
+   avait une ombre noire au-dessus des lettres ; sur une plaque claire, cette ombre les salit.
+   La gravure s'inverse : un filet blanc sous les lettres, une ombre à peine marquée au-dessus. */
+:root[data-theme="light"] .project-category,
+:root[data-theme="light"] .project-ref {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* La cuvette du numéro : un léger renfoncement dans le papier, au lieu d'un creux sombre */
+:root[data-theme="light"] .project-ref {
+  background-color: rgba(var(--rgb-ink), 0.05);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Le compteur « Projet 02 / 03 » est posé sur le voile sombre qui entoure la fiche (il reste sombre
+   dans les deux thèmes) : il garde donc un texte clair */
+:root[data-theme="light"] .modal-nav-count {
+  color: rgba(255, 255, 255, 0.82);
+}
