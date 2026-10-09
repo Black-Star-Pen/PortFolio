@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 // Le fond du Hero : le quadrillage du plan, couché en perspective, qui défile vers nous.
-// Tout le dessin est en CSS (voir « Le fond du Hero » dans index.css). Ce composant ne fait que
+// Tout le dessin est en CSS (voir « Le fond du Hero » dans hero.css). Ce composant ne fait que
 // donner au fond la hauteur du Hero, pour qu'il s'arrête net au cordon de soudure de la section suivante.
 //
 // Il est posé juste AVANT la section du Hero, pas dedans (voir Hero.jsx) : la section coupe ce qui

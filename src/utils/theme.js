@@ -1,6 +1,6 @@
 // Le thème du site : « dark » (sombre, celui d'origine, par défaut) ou « light » (clair).
 // Le thème clair est simplement l'attribut data-theme="light" posé sur <html> : c'est le CSS qui fait
-// tout le reste, en donnant d'autres valeurs aux variables de couleur (voir index.css, section 1).
+// tout le reste, en donnant d'autres valeurs aux variables de couleur (voir variables.css).
 // Le choix du visiteur est gardé dans le navigateur (localStorage) et retrouvé à sa prochaine visite :
 // un petit script dans index.html le relit avant même l'affichage, pour éviter un éclair de thème sombre.
 

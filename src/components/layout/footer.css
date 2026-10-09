@@ -1,0 +1,170 @@
+/* ===== Footer ===== */
+.footer {
+  /* relative : le bord découpé (.footer-edge) se place par rapport au pied de page */
+  position: relative;
+  margin-top: 40px;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(rgba(var(--rgb-accent), 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ----- Le bord découpé du pied de page : la tôle et sa languette (voir FooterEdge.jsx) ----- */
+
+/* La forme est posée juste AU-DESSUS du pied de page (bottom: 100%) et le prolonge vers le haut :
+   elle a sa couleur, et recouvre son trait droit (border-top). Sa hauteur est fixée ici ; le dessin
+   s'y adapte (voir preserveAspectRatio dans FooterEdge.jsx). */
+.footer-edge {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 30px;
+  pointer-events: none;
+}
+
+.footer-edge-fill {
+  fill: var(--color-surface);
+}
+
+/* Le trait doré qui suit le bord. non-scaling-stroke : il garde son épaisseur même quand le dessin
+   est réduit (sur téléphone). */
+.footer-edge-line {
+  fill: none;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Le trou de fixation de la languette : on voit le fond du site à travers */
+.footer-edge-hole {
+  fill: var(--color-bg);
+  stroke: rgba(var(--rgb-accent), 0.7);
+  stroke-width: 1;
+}
+
+/* Sur téléphone, la forme est moins haute (et la languette, du coup, moins large) */
+@media (max-width: 768px) {
+  .footer-edge {
+    height: 20px;
+  }
+}
+
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 56px 24px 32px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.footer-brand p {
+  max-width: 320px;
+  font-size: 0.95rem;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.footer-col-title {
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.footer-col a {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  transition: color 0.3s;
+}
+
+.footer-col a:hover {
+  color: var(--color-text);
+}
+
+/* Le cartouche du plan */
+.footer-cartouche {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid rgba(var(--rgb-steel), 0.35);
+}
+
+.footer-cartouche > span {
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.footer-cartouche > span + span {
+  border-left: 1px solid rgba(var(--rgb-steel), 0.35);
+}
+
+/* Les remerciements, sous la signature, dans la police du cartouche, entre quatre « repères de plan » :
+   quatre coins dorés, sans cadre fermé, comme les repères de cadrage d'un dessin technique.
+   Chaque coin est fait de deux petits traits (un horizontal, un vertical), dessinés en fond :
+   14px de long, 2px d'épaisseur. --corner est le doré d'un trait ; les huit lignes de « background »
+   le posent dans chaque coin, à l'horizontale (14px × 2px) puis à la verticale (2px × 14px).
+   width: fit-content : le bloc épouse son texte au lieu de prendre toute la largeur de la colonne ;
+   400px au plus, assez pour que la phrase tienne sur deux lignes sur ordinateur.
+   (.footer-brand devant : sans lui, la règle « .footer-brand p », plus haut, imposerait sa largeur
+   et sa taille de texte.) */
+.footer-brand .footer-thanks {
+  --corner: linear-gradient(var(--color-accent), var(--color-accent));
+
+  width: fit-content;
+  max-width: 400px;
+  margin-top: 8px;
+  padding: 14px 18px;
+  background:
+    var(--corner) top left / 14px 2px no-repeat,
+    var(--corner) top left / 2px 14px no-repeat,
+    var(--corner) top right / 14px 2px no-repeat,
+    var(--corner) top right / 2px 14px no-repeat,
+    var(--corner) bottom left / 14px 2px no-repeat,
+    var(--corner) bottom left / 2px 14px no-repeat,
+    var(--corner) bottom right / 14px 2px no-repeat,
+    var(--corner) bottom right / 2px 14px no-repeat;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  line-height: 1.7;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Le nom du site remercié est un lien doré, souligné au survol */
+.footer-thanks a {
+  color: var(--color-accent);
+  text-underline-offset: 4px;
+}
+
+.footer-thanks a:hover,
+.footer-thanks a:focus-visible {
+  text-decoration: underline;
+}

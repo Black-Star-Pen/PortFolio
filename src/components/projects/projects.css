@@ -1,0 +1,562 @@
+/* ===== Projets ===== */
+
+/* ----- La lampe d'atelier de la section (voir Projects.jsx) -----
+   La lumière tombe du cordon de soudure, tout en haut de la section, sur le titre et le haut des cartes :
+   le cordon sert de tube à la lampe.
+   z-index: -1 : la lumière passe derrière le contenu (on la voit derrière le titre et entre les cartes).
+   overflow: clip : rien ne dépasse au-dessus du cordon, la lumière reste dans sa section. */
+.section-lamp {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -1;
+  overflow: clip;
+  /* Aussi large que le cordon (il dépasse donc de la section, plus étroite), et haut d'un écran environ :
+     la lumière descend jusqu'aux cartes. */
+  width: min(1500px, 96vw);
+  height: min(900px, 115vh);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Le cœur de la lampe : le milieu du cordon chauffé à blanc, avec un halo serré autour de lui
+   (pas plus large : un grand halo dessinait une bande rectangulaire sous le cordon) */
+.section-lamp::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: min(700px, 64%);
+  height: 2px;
+  margin-inline: auto;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-accent) 18%,
+    var(--hot) 50%,
+    var(--color-accent) 82%,
+    transparent
+  );
+  box-shadow: 0 0 14px 2px rgba(var(--rgb-accent), 0.7);
+}
+
+/* La lumière. Cinq dégradés superposés lui donnent sa profondeur, du plus proche au plus lointain :
+   1. le point chaud, presque blanc, juste sous le cordon ;
+   2. le cœur du faisceau, étroit et clair ;
+   3. un cône moyen ;
+   4. un cône large et pâle : les trois cônes s'additionnent, la lumière est donc de plus en plus
+      dense vers le centre, comme dans un vrai faisceau ;
+   5. la flaque de lumière, là où le faisceau « touche » le titre.
+   Les cônes sont des dégradés « coniques » : ils tournent autour du milieu du cordon (0deg = vers la
+   droite, 90deg = droit vers le bas, 180deg = vers la gauche) et ne sont colorés qu'autour de la verticale.
+   Le masque efface le tout avec la distance, lentement : la lumière porte loin avant de s'éteindre,
+   et elle est à zéro avant d'atteindre les bords du bloc (pas de coupure visible). */
+.section-lamp::after {
+  content: "";
+  position: absolute;
+  inset: 1px 0 0;
+  background:
+    radial-gradient(ellipse 24% 13% at 50% 0, rgba(255, 246, 220, 0.42), transparent 72%),
+    conic-gradient(
+      from 90deg at 50% 0,
+      transparent 72deg,
+      rgba(255, 240, 205, 0.17) 85deg,
+      rgba(255, 240, 205, 0.17) 95deg,
+      transparent 108deg
+    ),
+    conic-gradient(
+      from 90deg at 50% 0,
+      transparent 48deg,
+      rgba(var(--rgb-accent), 0.15) 74deg,
+      rgba(var(--rgb-accent), 0.15) 106deg,
+      transparent 132deg
+    ),
+    conic-gradient(
+      from 90deg at 50% 0,
+      transparent 18deg,
+      rgba(var(--rgb-accent), 0.08) 56deg,
+      rgba(var(--rgb-accent), 0.08) 124deg,
+      transparent 162deg
+    ),
+    radial-gradient(ellipse 30% 15% at 50% 34%, rgba(var(--rgb-accent), 0.14), transparent 72%);
+  mask-image: radial-gradient(
+    ellipse 50% 100% at 50% 0,
+    #000 6%,
+    rgba(0, 0, 0, 0.62) 38%,
+    transparent 96%
+  );
+}
+
+/* La lampe s'allume une fois le cordon soudé (classes posées par ScrollReveal, voir « section + section ») :
+   éteinte tant que le cordon attend, puis le cœur s'étire depuis son milieu et la lumière s'ouvre.
+   Ensuite elle « respire » à peine, comme un néon.
+   Sans ces classes (réglage « réduire les animations »), la lampe est simplement allumée. */
+main > section.seam-pending .section-lamp {
+  opacity: 0;
+}
+
+main > section.seam-welded .section-lamp::before {
+  animation: lamp-on 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+}
+
+main > section.seam-welded .section-lamp::after {
+  animation:
+    lamp-glow 1.8s ease-out 0.6s both,
+    lamp-breathe 7s ease-in-out 2.4s infinite alternate;
+}
+
+@keyframes lamp-on {
+  from {
+    opacity: 0;
+    transform: scaleX(0.25);
+  }
+}
+
+@keyframes lamp-glow {
+  from {
+    opacity: 0;
+    transform: scaleX(0.5);
+  }
+}
+
+@keyframes lamp-breathe {
+  to {
+    opacity: 0.8;
+  }
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* La carte se lit en quatre étages : le visuel, la référence, le titre, puis la description et les technos.
+   Un filet doré les sépare (--project-line).
+   subgrid : la carte n'a pas ses propres rangées, elle emprunte celles de la grille des projets
+   (« span 4 » = elle en occupe quatre). Les cartes d'une même ligne partagent donc les mêmes rangées :
+   si un titre passe sur deux lignes, son étage grandit sur toutes les cartes, et les filets restent alignés. */
+.project-card {
+  --project-line: rgba(var(--rgb-accent), 0.2);
+  /* Le métal de la bordure : le dégradé de laiton poli défini dans les variables (variables.css) */
+  --project-metal: var(--metal-gold);
+
+  /* L'épaisseur de la bordure métallique, et l'arrondi qui reste à l'intérieur d'elle */
+  --project-border: 3px;
+  --project-inner-radius: calc(var(--radius) - var(--project-border));
+
+  position: relative;
+  /* isolate : les deux calques ci-dessous (z-index: -1) restent dans la carte, derrière son contenu */
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 4;
+  /* Pas d'écart entre les étages : sans ça, la carte reprendrait les 24px d'écart de la grille */
+  row-gap: 0;
+  /* La bordure métallique n'est pas une vraie bordure : la carte entière est en métal, et sa marge
+     intérieure (padding) laisse dépasser ce métal tout autour d'un fond sombre (::after).
+     Trois calques, du fond vers le dessus : le métal, les lueurs qui tournent (::before), le fond sombre. */
+  padding: var(--project-border);
+  border-radius: var(--radius);
+  background: var(--project-metal);
+  /* Le métal est deux fois plus grand que la carte : au survol, on le fait glisser (voir plus bas) */
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    transform 0.4s,
+    background-position 0.8s ease;
+}
+
+/* Le fond sombre de la carte, en retrait de l'épaisseur de la bordure */
+.project-card::after {
+  content: "";
+  position: absolute;
+  inset: var(--project-border);
+  z-index: -1;
+  border-radius: var(--project-inner-radius);
+  background-color: var(--color-surface);
+}
+
+/* Les deux lueurs qui parcourent le contour : un dégradé « en cône », transparent sur presque tout le tour,
+   avec deux traînes qui s'éclaircissent jusqu'à une tête presque blanche. La principale, dorée, finit à
+   98,5 % du tour ; la seconde est en face (elle finit à 48,5 %) et elle est bleue, comme l'arc TIG :
+   il y a toujours de la lumière quelque part, et les deux couleurs du site se répondent.
+   On fait tourner l'angle de départ du dégradé (--spark-angle) : les deux têtes font le tour de la carte.
+   Seule la partie sous la bordure se voit, le reste est caché par le fond sombre (::after), posé juste au-dessus. */
+.project-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: conic-gradient(
+    from var(--spark-angle),
+    transparent 0 32%,
+    rgba(var(--rgb-arc), 0.45) 44%,
+    var(--hot-blue) 48.5%,
+    transparent 50% 80%,
+    rgba(251, 232, 182, 0.55) 93%,
+    var(--hot) 98.5%,
+    transparent 100%
+  );
+  /* Un tour en 15 secondes, et un scintillement sur 4,5 secondes : les lueurs se promènent, elles ne courent pas */
+  animation:
+    spark-orbit 15s linear infinite,
+    spark-twinkle 4.5s ease-in-out infinite;
+}
+
+/* Chaque carte a ses lueurs à un endroit différent du tour (un délai négatif = une animation déjà entamée) */
+.project-card:nth-child(3n + 2)::before {
+  animation-delay: -5s, -1.5s;
+}
+
+.project-card:nth-child(3n)::before {
+  animation-delay: -10s, -3s;
+}
+
+/* @property déclare --spark-angle comme un angle : sans ça, le navigateur ne saurait pas l'animer
+   progressivement de 0 à 360 degrés, il sauterait d'une valeur à l'autre */
+@property --spark-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes spark-orbit {
+  to {
+    --spark-angle: 360deg;
+  }
+}
+
+/* Le scintillement, doux : les lueurs faiblissent un peu puis reprennent, lentement */
+@keyframes spark-twinkle {
+  50% {
+    opacity: 0.72;
+  }
+}
+
+/* Au survol, la carte se soulève et les reflets du métal glissent le long de la bordure */
+.project-card:hover {
+  transform: translateY(-7px);
+  background-position: 100% 100%;
+}
+
+/* Les coins du haut suivent l'arrondi intérieur de la bordure */
+.project-image {
+  aspect-ratio: 16 / 10;
+  border-radius: var(--project-inner-radius) var(--project-inner-radius) 0 0;
+  overflow: hidden;
+}
+
+.project-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.project-card:hover .project-image img,
+.project-card:hover .project-image .project-placeholder {
+  transform: scale(1.05);
+}
+
+/* Le bouton du titre : sa zone cliquable (::after) recouvre toute la carte */
+.project-open {
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+}
+
+.project-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.project-open:focus-visible {
+  outline: none;
+}
+
+/* Au clavier, c'est toute la carte qui s'entoure */
+.project-card:has(.project-open:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* Le visuel de remplacement : un plan quadrillé, en attendant les captures */
+.project-placeholder {
+  /* Le visuel devient un « conteneur » : ses textes peuvent se régler sur SA largeur (unité cqi) */
+  container-type: inline-size;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  background-color: var(--color-deep);
+  background-image:
+    linear-gradient(rgba(var(--rgb-steel), 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-steel), 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: center;
+  transition: transform 0.5s;
+}
+
+/* Le cadre en pointillés du plan */
+.project-placeholder::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border: 1px dashed rgba(var(--rgb-accent), 0.3);
+  pointer-events: none;
+}
+
+.project-placeholder-ref,
+.project-placeholder-note {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.project-placeholder-ref {
+  color: var(--color-steel);
+}
+
+.project-placeholder-title {
+  font-family: var(--font-title);
+  /* 8cqi = 8 % de la largeur du visuel (et non de la fenêtre) : le titre tient dans la carte comme dans la modale */
+  font-size: clamp(1.1rem, 8cqi, 2.6rem);
+  line-height: 1.1;
+  text-wrap: balance;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-accent);
+}
+
+.project-placeholder-note {
+  color: var(--color-muted);
+}
+
+/* Étage 2, la référence : le numéro à gauche, le type de projet à droite.
+   C'est le haut du bloc de texte : il remonte de 16px sur le visuel, avec deux coins arrondis,
+   comme une fiche posée par-dessus la photo.
+   Le filet du haut est une ombre décalée d'1px vers le haut (box-shadow) et pas une bordure :
+   une ombre suit l'arrondi des coins, une bordure posée sur un seul côté s'y arrêterait net. */
+.project-meta {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: calc(var(--radius) * -1);
+  padding: 14px 24px 12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  /* La plaque d'acier sombre dans laquelle la référence est gravée (voir .project-category) :
+     un peu plus claire en haut qu'en bas, avec un filet de lumière sous son bord haut et une ombre
+     au-dessus de son bord bas (les deux ombres « inset », à l'intérieur de la plaque). */
+  background: linear-gradient(180deg, var(--plate-top), var(--plate-bottom));
+  box-shadow:
+    0 -1px 0 var(--project-line),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Sur la carte, le type est un peu plus petit et plus serré que dans la modale :
+   il doit tenir sur une ligne à côté du numéro, même dans une carte étroite */
+.project-meta .project-category {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-align: right;
+}
+
+.project-meta .project-ref {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+/* Étage 3, le titre : un cartouche de plan, fait de deux cases.
+   À gauche, la case du titre, avec un voile doré. À droite, une petite case hachurée, séparée par
+   un trait vertical net : sur une carte elle contient la flèche, dans la modale elle reste vide
+   (le bouton de fermeture est au-dessus, sur la ligne de la plaque). Les hachures ont ainsi une raison
+   d'être : elles remplissent une case, elles ne commencent plus au milieu de nulle part.
+   Tout est fait avec des fonds superposés (du dessus vers le dessous), sans élément en plus :
+   1 et 2. les deux filets, en haut et en bas ;
+   3. le trait vertical, à --cell du bord droit (la largeur de la case) ;
+   4. les hachures en bleu acier, limitées à la case : calées à droite, larges de --cell ;
+   5. le voile doré, qui part du bord gauche et s'éteint avant la case.
+   (Pas de position: relative ici : la zone cliquable du titre doit continuer de recouvrir toute la carte.)
+   Ce fond sert à deux endroits : l'étage du titre d'une carte, et le titre dans la modale du projet.
+   ESSAI en cours : les deux versions précédentes sont notées dans feuille-de-route.md. */
+.project-header,
+.modal-content .project-title {
+  --title-line: linear-gradient(rgba(var(--rgb-accent), 0.35), rgba(var(--rgb-accent), 0.35));
+  /* La case fait la largeur de ce qu'elle contient (44px : la flèche, ou le bouton de fermeture)
+     plus 16px de chaque côté */
+  --cell: 76px;
+
+  background:
+    var(--title-line) top / 100% 1px no-repeat,
+    var(--title-line) bottom / 100% 1px no-repeat,
+    var(--title-line) calc(100% - var(--cell)) 0 / 1px 100% no-repeat,
+    repeating-linear-gradient(135deg, rgba(var(--rgb-steel), 0.3) 0 1px, transparent 1px 7px) right / var(--cell)
+      100% no-repeat,
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.1), rgba(var(--rgb-accent), 0) 70%);
+}
+
+/* 16px à droite (et non 24) : la flèche est ainsi au milieu de sa case de 76px */
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 16px 18px 24px;
+}
+
+.project-category {
+  /* flex : le numéro et la catégorie restent alignés, même quand la ligne se coupe */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  /* La référence (le type et le numéro) est gravée dans une plaque d'acier sombre, et la gravure
+     est remplie d'or, comme les lettres dorées d'une plaque d'atelier : le doré se lit bien sur
+     l'acier, là où des lettres simplement en creux (sombres sur sombre) étaient trop difficiles à lire.
+     Deux ombres nettes, sans flou, décalées d'1px, donnent le creux : une ombre noire au-dessus des
+     lettres (le bord de la gravure, à l'ombre) et un filet clair en dessous (le bord d'en face,
+     qui prend la lumière). */
+  color: var(--color-accent);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.project-header h3 {
+  font-size: 1.4rem;
+}
+
+/* Le numéro du projet, comme une référence de plan : « N° 01 » */
+.project-ref {
+  display: inline-block;
+  margin-right: 10px;
+  padding: 1px 8px;
+  /* Le numéro est gravé et doré comme le type (voir .project-category). Son cadre est une petite
+     cuvette dans la plaque : un fond plus sombre, une ombre à l'intérieur sous le bord du haut (inset),
+     et un filet clair sous le bord du bas. */
+  border: 1px solid rgba(var(--rgb-accent), 0.55);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  background-color: rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* Le titre d'un projet */
+.project-title {
+  width: fit-content;
+  line-height: 1.2;
+}
+
+/* Les mots importants, écrits **ainsi** dans le JSON : la couleur dorée des boutons principaux */
+.highlight {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.project-link {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(var(--rgb-accent), 0.35);
+  border-radius: 50%;
+  /* Un fond plein : les hachures de l'étage du titre ne traversent pas la pastille */
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.project-card:hover .project-link {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* Étage 4 : la description, et les technos poussées tout en bas de la carte */
+.project-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 24px 24px;
+}
+
+.project-technos {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* Sur une carte, les technos passent au-dessus de la zone cliquable du titre, qui recouvre toute la carte
+   (voir .project-open::after) : sans ça, la souris ne les « touche » jamais et leur survol ne se voit pas.
+   Cliquer sur une techno ouvre quand même le projet : le clic remonte jusqu'à la carte (ProjectCard.jsx). */
+.project-card .project-technos {
+  position: relative;
+  z-index: 2;
+}
+
+.project-technos li {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  background-color: rgba(var(--rgb-ink), 0.04);
+  border: 1px solid rgba(var(--rgb-accent), 0.25);
+  border-radius: 999px;
+  color: var(--color-muted);
+}
+
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 8px;
+  transition:
+    border-color 0.3s,
+    color 0.3s,
+    background-color 0.3s;
+}
+
+.tech-badge:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+  background-color: rgba(var(--rgb-accent), 0.08);
+}
+
+/* Le badge « +8 » : les technos restantes, visibles dans la modale */
+.project-technos .tech-badge-more {
+  padding: 4px 12px;
+  border-style: dashed;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}

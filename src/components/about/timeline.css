@@ -1,0 +1,174 @@
+/* ===== Parcours : la gamme de fabrication ===== */
+.timeline {
+  max-width: 760px;
+  margin: 80px auto 0;
+}
+
+.timeline-heading {
+  margin-bottom: 40px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed rgba(var(--rgb-accent), 0.3);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.timeline-body {
+  position: relative;
+  padding-left: 48px;
+}
+
+.timeline-track {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 11px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(var(--rgb-accent), 0.3) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+.timeline-weld {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-accent);
+  box-shadow: 0 0 8px rgba(var(--rgb-accent), 0.6);
+  transform: scaleY(var(--progress));
+  transform-origin: top;
+}
+
+.timeline-spark {
+  position: absolute;
+  top: calc(var(--progress) * 100%);
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background-color: var(--hot);
+  box-shadow:
+    0 0 6px 2px var(--hot-halo),
+    0 0 16px 6px rgba(var(--rgb-accent), 0.8),
+    0 0 32px 12px rgba(214, 150, 60, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s;
+  animation: weld-flicker 0.08s steps(2) infinite;
+}
+
+.timeline-body.welding .timeline-spark {
+  opacity: 1;
+}
+
+.timeline-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.timeline-item {
+  position: relative;
+}
+
+.timeline-dot {
+  position: absolute;
+  top: 6px;
+  left: -43px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(var(--rgb-accent), 0.4);
+  border-radius: 50%;
+  background-color: var(--color-bg);
+  transition:
+    border-color 0.4s,
+    background-color 0.4s,
+    box-shadow 0.4s;
+}
+
+.timeline-item.reached .timeline-dot {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  box-shadow: 0 0 12px rgba(var(--rgb-accent), 0.7);
+}
+
+.timeline-item:last-child .timeline-dot {
+  outline: 1px solid rgba(var(--rgb-accent), 0.4);
+  outline-offset: 3px;
+}
+
+.timeline-content {
+  opacity: 0.35;
+  transform: translateX(-8px);
+  transition:
+    opacity 0.5s,
+    transform 0.5s;
+}
+
+.timeline-item.reached .timeline-content {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.timeline-op {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.timeline-date {
+  color: var(--color-muted);
+}
+
+.timeline-type {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.timeline-type.formation {
+  border-color: rgba(var(--rgb-accent), 0.45);
+  background-color: rgba(var(--rgb-accent), 0.06);
+  color: var(--color-accent);
+}
+
+.timeline-type.experience {
+  border-color: rgba(var(--rgb-steel), 0.45);
+  background-color: rgba(var(--rgb-steel), 0.06);
+  color: var(--color-steel);
+}
+
+.timeline-type.timeline-status {
+  border-style: dashed;
+  border-color: rgba(var(--rgb-muted), 0.45);
+  color: var(--color-muted);
+}
+
+.timeline-content h3 {
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+}
+
+.timeline-place {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.7;
+}

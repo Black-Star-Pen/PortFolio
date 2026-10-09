@@ -65,7 +65,7 @@ PortFolio/
 ├── images-source/      les captures d'origine, avant conversion
 ├── scripts/            quatre outils : convertir les captures, télécharger les logos, dessiner l'image de partage, dessiner l'icône du site
 ├── src/
-│   ├── components/     les composants React, un dossier par partie du site
+│   ├── components/     les composants React et leur CSS, un dossier par partie du site
 │   │   ├── layout/     ce qui entoure toutes les pages : navbar, pied de page, thème, langue, apparitions au défilement
 │   │   ├── intro/      l'intro et son film
 │   │   ├── hero/       les cinq sections de l'accueil : hero/, about/, skills/, projects/ et contact/
@@ -75,8 +75,9 @@ PortFolio/
 │   ├── i18n/           les deux langues : les textes de l'interface et le choix de la langue
 │   ├── hooks/          le titre de l'onglet
 │   ├── utils/          les outils sans affichage : défilement fluide, thème, étincelles, son de l'intro, adresse de l'API
+│   ├── styles/         les styles communs à tout le site : variables des deux thèmes, base, boutons, modale, petits écrans
 │   ├── App.jsx         les routes et la mise en page commune
-│   └── index.css       tous les styles, rangés par sections numérotées
+│   └── index.css       la liste des fichiers de styles, dans l'ordre où ils sont lus
 └── server/             l'API Express du formulaire de contact
     ├── index.js          les routes, la limite d'envois et les protections
     ├── validation.js     la vérification des données

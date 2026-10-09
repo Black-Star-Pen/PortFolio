@@ -1,0 +1,68 @@
+/* ===== Accessibilité : animations réduites ===== */
+@media (prefers-reduced-motion: reduce) {
+
+  .weld-line {
+    animation: none;
+    transform: none;
+    opacity: 0.6;
+    box-shadow: none;
+  }
+
+  .weld-spark {
+    display: none;
+  }
+
+  .tabs-arrow span {
+    animation: none;
+  }
+
+  .badge-available::before,
+  .hero-floor,
+  .hero-floor span,
+  .section-lamp::before,
+  .section-lamp::after,
+  .hero-reveal,
+  .reveal-word,
+  .reveal-word-highlight,
+  .reveal-word-steel,
+  .weld-letter {
+    animation: none;
+  }
+
+  .timeline-spark {
+    display: none;
+  }
+
+  .stamp {
+    animation: none;
+  }
+
+  /* D'un projet à l'autre, la fiche s'affiche directement, sans glisser */
+  .modal-from-next,
+  .modal-from-previous {
+    animation: none;
+  }
+
+  .form-error,
+  .recruit-block {
+    animation: none;
+  }
+
+  /* Les lueurs qui tournent autour des cartes projet sont retirées : il reste la bordure métallique, fixe */
+  .project-card::before {
+    display: none;
+  }
+
+  /* Même chose pour les boutons au contour en laiton : leurs lueurs ne tournent plus */
+  .btn-metal {
+    animation: none;
+  }
+
+  /* Le panneau d'un tiroir et ses outils s'affichent directement, sans fondu ni chute */
+  .skill-panel,
+  .skill-panel .cartouche-header,
+  .skill-panel-description,
+  .tool-tile {
+    animation: none;
+  }
+}

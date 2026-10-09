@@ -1,7 +1,7 @@
 // Le bord du haut du pied de page : au lieu d'un trait droit, une tôle découpée, avec une languette
 // au milieu et son trou de fixation. La forme est dessinée deux fois : une fois pleine, de la couleur
 // du pied de page (elle le prolonge vers le haut), et une fois en trait doré, qui suit son bord.
-// Sa place et sa taille sont dans le CSS (voir .footer-edge, section 17).
+// Sa place et sa taille sont dans le CSS (voir .footer-edge, footer.css).
 
 // Une étape du dégradé du trait doré : offset = sa position le long du trait (de 0 à 1), opacity = sa
 // transparence. La couleur vient du CSS (var(--color-accent)), pour suivre le thème, clair ou sombre.

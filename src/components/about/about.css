@@ -1,0 +1,217 @@
+/* ===== À propos ===== */
+
+/* ----- Le fond d'une section (À propos, Compétences) ----- */
+
+/* Un fond reste dans sa section : il commence à son cordon de soudure (top: 0) et s'arrête à celui de
+   la section suivante (bottom: 0). Il fait toute la largeur de l'écran (100vw, recentré sur la section
+   qui, elle, est plus étroite). overflow: clip coupe tout ce qui dépasserait ; « clip » et pas « hidden »,
+   sinon la vue ci-dessous ne pourrait plus rester à l'écran. z-index: -1 : derrière le contenu. */
+.section-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: -1;
+  overflow: clip;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* La « vue » : un écran de haut, qui reste en place sous la navbar pendant qu'on parcourt la section.
+   Le dessin qu'elle contient ne défile donc pas avec le texte : il reste derrière, comme un calque. */
+.section-bg-view {
+  position: sticky;
+  top: var(--navbar-h, 73px);
+  height: calc(100vh - var(--navbar-h, 73px));
+}
+
+/* ----- L'épure : le fond de l'À propos (voir Epure.jsx) ----- */
+
+.epure {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+}
+
+/* Les formes, en doré ; les axes, plus fins, en « trait mixte » (un long tiret, un point) ;
+   les cotes, en bleu clair. Tout est très transparent : le texte de la section reste le premier lu. */
+.epure-shape {
+  stroke: rgba(var(--rgb-accent), 0.26);
+  stroke-width: 1.2;
+}
+
+.epure-axis {
+  stroke: rgba(var(--rgb-accent), 0.2);
+  stroke-width: 0.8;
+  stroke-dasharray: 26 6 4 6;
+}
+
+.epure-dim {
+  stroke: rgba(var(--rgb-tig), 0.3);
+  stroke-width: 0.8;
+}
+
+.epure text {
+  fill: rgba(var(--rgb-tig), 0.45);
+  stroke: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.epure-arrow {
+  fill: rgba(var(--rgb-tig), 0.5);
+  stroke: none;
+}
+
+/* Un trait qui se trace : sa longueur vaut 1 (pathLength dans le SVG), son tiret aussi. En décalant
+   ce tiret de 1, le trait est entièrement caché ; l'animation ramène le décalage à 0. */
+.epure-line {
+  stroke-dasharray: 1;
+}
+
+/* L'épure se trace une fois le cordon de la section soudé (classes posées par ScrollReveal, voir
+   « section + section ») : cachée tant que le cordon attend, puis les formes se tracent l'une après
+   l'autre (--i = leur ordre de passage), et les axes et les cotes arrivent en fondu, comme on cote
+   un dessin une fois qu'il est tracé.
+   Sans ces classes (réglage « réduire les animations »), l'épure est simplement dessinée. */
+main > section.seam-pending .epure {
+  opacity: 0;
+}
+
+main > section.seam-welded .epure-line {
+  animation: epure-draw 2.4s cubic-bezier(0.6, 0, 0.3, 1) calc(0.5s + var(--i, 0) * 0.18s) both;
+}
+
+main > section.seam-welded .epure-fade {
+  animation: epure-fade 1.2s ease-out calc(2.4s + var(--i, 0) * 0.2s) both;
+}
+
+@keyframes epure-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes epure-fade {
+  from {
+    opacity: 0;
+  }
+}
+.about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+/* Sur grand écran, l'À propos se lit en deux colonnes : la présentation à gauche, le parcours à droite.
+   Les deux s'arrêtent sous la navbar et restent en place pendant que le cordon du parcours se soude
+   au défilement (voir Timeline.jsx), puis repartent ensemble.
+   Sur un écran trop étroit ou trop bas pour ça, les deux blocs s'empilent, centrés, avec les styles de base.
+   (La même condition est écrite dans Timeline.jsx : PINNED_SCREEN.)
+   820px de haut au moins : la présentation de gauche fait jusqu'à 650px, elle doit tenir dans le cadre.
+   Deuxième condition, après la virgule (« ou ») : un écran d'ordinateur portable, large mais moins haut.
+   La présentation y tient aussi, parce que ses marges et son texte se resserrent avec la hauteur :
+   voir les valeurs en vh plus bas (1vh = 1 % de la hauteur de l'écran). Elles sont calculées pour
+   redonner exactement les tailles d'origine à partir de 820px de haut : rien ne change sur grand écran. */
+@media (min-width: 1000px) and (min-height: 820px), (min-width: 1100px) and (min-height: 640px) {
+  .about-layout {
+    /* Le cadre où les colonnes s'arrêtent : 40px sous la navbar, et jusqu'à 40px du bas de l'écran
+       (moins sur un écran bas : 4.9vh valent 40px à 820px de haut) */
+    --frame-gap: min(40px, 4.9vh);
+    --frame-top: calc(var(--navbar-h, 73px) + var(--frame-gap));
+    --frame-height: calc(100vh - var(--frame-top) - var(--frame-gap));
+    /* La distance de défilement pendant laquelle elles restent en place, le temps de souder le cordon.
+       Pour que ça dure plus ou moins longtemps, change cette valeur. */
+    --about-hold: 110vh;
+
+    display: grid;
+    /* La présentation a un peu plus de place que le parcours : ses paragraphes s'étalent en largeur
+       et prennent moins de lignes. Le parcours, lui, est repoussé vers la droite.
+       minmax(0, …) : une colonne garde sa part, elle ne s'élargit pas pour un mot trop long. */
+    grid-template-columns: minmax(0, 10fr) minmax(0, 9fr);
+    /* Une seule rangée, plus haute que le cadre : c'est dans cette hauteur en plus que les colonnes
+       « tiennent » (un élément sticky ne peut se déplacer que dans la place que lui laisse son parent) */
+    grid-template-rows: calc(var(--frame-height) + var(--about-hold));
+    /* L'écart entre les deux colonnes : assez large pour qu'on lise deux blocs distincts */
+    column-gap: 104px;
+    align-items: start;
+  }
+
+  /* Même arrêt et même hauteur pour les deux colonnes : elles s'arrêtent et repartent au même moment */
+  .about-intro,
+  .about-layout .timeline {
+    position: sticky;
+    top: var(--frame-top);
+    height: var(--frame-height);
+  }
+
+  .about-intro .section-title {
+    max-width: none;
+    margin: 0 0 min(32px, 3.9vh);
+    text-align: left;
+  }
+
+  /* Un titre un peu plus petit que dans les autres sections : dans une demi-largeur,
+     « le goût du travail bien fait. » doit tenir sur une seule ligne.
+     Le min(…, 4.5vh) le réduit encore sur un écran bas. */
+  .about-intro .section-title h2 {
+    font-size: min(clamp(1.9rem, 2.9vw, 2.3rem), 4.5vh);
+  }
+
+  /* Aligné à gauche, l'onglet du libellé se cale au bord, comme le titre */
+  .about-intro .section-label {
+    justify-content: flex-start;
+    margin-bottom: min(24px, 2.95vh);
+  }
+
+  /* Le texte rétrécit avec la hauteur de l'écran, sans descendre sous 0.92rem pour rester lisible */
+  .about-intro .about-text {
+    gap: min(16px, 1.95vh);
+    max-width: none;
+    margin: 0;
+    text-align: left;
+    font-size: clamp(0.92rem, 2.15vh, 1.1rem);
+  }
+
+  /* Le parcours : son titre en haut, et en dessous une fenêtre qui prend toute la hauteur restante */
+  .about-layout .timeline {
+    display: flex;
+    flex-direction: column;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* Il se déplie un peu après l'arrivée du texte de gauche : on lit d'abord la présentation */
+  .about-layout .timeline.revealed {
+    animation-delay: 0.4s;
+  }
+
+  .about-layout .timeline-heading {
+    margin-bottom: 0;
+  }
+
+  /* La fenêtre : la gamme est plus haute qu'elle et glisse derrière (--shift, calculé par Timeline.jsx).
+     Le masque la fait disparaître en fondu en haut et en bas, au lieu d'une coupure nette.
+     Les marges intérieures du haut (40px) et du bas (72px) ont la hauteur des deux fondus : au début
+     comme à la fin, la gamme s'arrête donc juste avant, et sa première et sa dernière étape restent nettes.
+     La marge négative à gauche élargit la fenêtre : la lueur de la pointe déborde de ce côté. */
+  .about-layout .timeline-window {
+    flex: 1;
+    min-height: 0;
+    margin-left: -40px;
+    padding: 40px 0 72px 40px;
+    mask-image: linear-gradient(to bottom, transparent, #000 40px, #000 calc(100% - 72px), transparent);
+  }
+
+  .about-layout .timeline-body {
+    transform: translateY(calc(var(--shift, 0) * -1px));
+  }
+}

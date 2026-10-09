@@ -1,0 +1,645 @@
+/* ===== Contact ===== */
+
+/* ----- Le fond de la section : la poussière d'or (voir GoldDust.jsx) ----- */
+
+/* Le fond reste dans sa section : il commence au cordon de soudure (top: 0) et s'arrête au trait du
+   pied de page (les -40px du bas rattrapent la marge qui sépare la section du pied de page, voir .footer).
+   Il fait toute la largeur de l'écran (100vw, recentré sur la section qui, elle, est plus étroite).
+   overflow: clip coupe tout ce qui dépasserait ; z-index: -1 le fait passer derrière le contenu. */
+.gold-dust {
+  position: absolute;
+  top: 0;
+  bottom: -40px;
+  left: 50%;
+  z-index: -1;
+  overflow: clip;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* La toile où sont dessinés les grains : elle remplit le fond */
+.gold-dust canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* L'ordre de fabrication (en premier) */
+.work-order {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(rgba(var(--rgb-accent), 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--rgb-accent), 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.work-order-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.3);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.work-order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 32px 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  border: none;
+}
+
+/* Les libellés : doré discret, précédé d'un petit trait */
+.form-field > label,
+.form-field > legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(var(--rgb-accent), 0.7);
+  transition: color 0.3s;
+}
+
+.form-field > label::before,
+.form-field > legend::before {
+  content: "";
+  flex-shrink: 0;
+  width: 8px;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.3s;
+}
+
+.form-field legend {
+  margin-bottom: 8px;
+}
+
+/* L'astérisque des champs obligatoires : rouge partout, le code que tout le monde connaît.
+   La marge négative le rapproche du mot : sans elle, il serait à 8px, l'écart prévu pour le petit trait. */
+.form-required {
+  margin-left: -5px;
+  color: var(--color-required);
+}
+
+/* La légende de l'astérisque, en haut à droite du formulaire.
+   La marge négative la rapproche du premier champ (l'écart normal entre deux blocs est de 28px). */
+.form-required-note {
+  align-self: flex-end;
+  margin-bottom: -12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.form-required-note .form-required {
+  margin-left: 0;
+}
+
+/* Quand on remplit le champ : le libellé s'allume et le trait s'allonge */
+.form-field:focus-within > label,
+.form-field:focus-within > legend {
+  color: var(--color-accent);
+}
+
+.form-field:focus-within > label::before,
+.form-field:focus-within > legend::before {
+  width: 18px;
+}
+
+/* Dans la fiche de poste : bleu acier */
+.recruit-block .form-field > label,
+.recruit-block .form-field > legend {
+  color: rgba(var(--rgb-steel), 0.75);
+}
+
+.recruit-block .form-field:focus-within > label,
+.recruit-block .form-field:focus-within > legend {
+  color: var(--color-steel);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--color-text);
+  color-scheme: var(--scheme);
+  background-color: rgba(var(--rgb-bg), 0.7);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.form-field input:disabled,
+.form-field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-field select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.form-field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: rgba(var(--rgb-muted), 0.5);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--rgb-accent), 0.15);
+}
+
+/* Saisie automatique de Chrome : on garde le fond sombre au lieu du bleu clair */
+.form-field input:-webkit-autofill,
+.form-field input:-webkit-autofill:hover,
+.form-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-deep) inset;
+  caret-color: var(--color-text);
+  transition: background-color 9999s;
+}
+
+.form-field [aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: var(--color-error);
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
+
+/* La mention de confidentialité sous le formulaire */
+.form-privacy {
+  font-size: 0.8rem;
+}
+
+.form-privacy a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Le message d'échec d'envoi */
+.form-alert {
+  padding: 12px 16px;
+  border: 1px solid rgba(var(--rgb-error), 0.5);
+  border-left-width: 3px;
+  background-color: rgba(var(--rgb-error), 0.08);
+  font-size: 0.9rem;
+  color: var(--color-error);
+  animation: error-in 0.3s ease-out;
+}
+
+/* La suggestion de correction d'email */
+.form-suggestion {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.form-suggestion button {
+  padding: 0;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.form-suggestion button:hover {
+  color: var(--color-text);
+}
+
+/* Le champ piège : hors de l'écran, invisible pour un humain */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form-status {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+/* Un champ en erreur : son libellé passe aussi en couleur d'erreur */
+.form-field.has-error > label,
+.form-field.has-error > legend,
+.recruit-block .form-field.has-error > label,
+.recruit-block .form-field.has-error > legend {
+  color: var(--color-error);
+}
+
+.form-error {
+  animation: error-in 0.3s ease-out;
+}
+
+@keyframes error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-optional {
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.7;
+}
+
+/* La fiche de poste (recrutement) */
+.recruit-block {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 20px;
+  border: 1px dashed rgba(var(--rgb-steel), 0.45);
+  background-color: rgba(var(--rgb-steel), 0.04);
+  animation: recruit-in 0.4s ease-out;
+}
+
+.recruit-block-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+
+@keyframes recruit-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Les types de demande (accessibles avec Tab) */
+.type-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.type-option {
+  /* Le style vient de .btn .btn-primary .btn-small : ici, seulement l'état « choisi » */
+  letter-spacing: 0.1em;
+}
+
+/* L'option choisie reste remplie de doré, comme un bouton survolé */
+.type-option.selected {
+  color: var(--color-bg);
+}
+
+.type-option.selected::before {
+  transform: scaleX(1);
+}
+
+/* « Recrutement » ressort : il porte le contour en acier bleui des boutons (.btn-metal-blue, elements.css,
+   ajouté dans ContactForm.jsx), qui lui donne sa bordure, ses lueurs, son texte bleu et son remplissage
+   bleu au survol et à la sélection. Ici, seulement un léger halo bleu en plus (et sa mallette). */
+.type-option-steel {
+  box-shadow: 0 0 18px -4px rgba(var(--rgb-arc), 0.5);
+}
+
+.type-option-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Un choix affiché mais pas proposé pour le moment (ex. : Freelance) : gris, en pointillés, comme
+   le badge « formation suivie » du parcours. Le bouton est désactivé (voir ContactForm.jsx).
+   opacity: 1 : un bouton désactivé est à 60 % d'opacité (.btn:disabled) ; ici le gris suffit, et le mot
+   « indisponible » doit rester lisible. */
+.type-option-unavailable:disabled {
+  border-style: dashed;
+  border-color: rgba(var(--rgb-muted), 0.45);
+  background-color: transparent;
+  color: var(--color-muted);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* La mention « indisponible », à côté du nom : en minuscules et plus légère */
+.type-option-note {
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: none;
+}
+
+.work-order-submit {
+  align-self: flex-end;
+}
+
+/* La validation */
+.work-order-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.stamp {
+  padding: 8px 24px;
+  border: 4px double var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  transform: rotate(-8deg);
+  animation: stamp-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(2.2);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+.work-order-success h3 {
+  font-size: 1.6rem;
+}
+
+/* Le séparateur */
+.contact-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 760px;
+  margin: 48px auto 24px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.contact-divider::before,
+.contact-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* Le contact direct : un panneau surélevé (en dessous) */
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  border: 1px solid rgba(var(--rgb-accent), 0.3);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(var(--rgb-accent), 0.07), transparent 70%),
+    var(--color-surface);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 48px -20px rgba(0, 0, 0, 0.8),
+    0 0 40px -10px rgba(var(--rgb-accent), 0.15);
+}
+
+.contact-links-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.contact-links-title::before,
+.contact-links-title::after {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background-color: var(--color-accent);
+  opacity: 0.5;
+}
+
+.contact-links-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.contact-links .btn {
+  padding: 12px 20px;
+  font-size: 0.78rem;
+  background-color: rgba(var(--rgb-bg), 0.6);
+}
+
+.contact-links .btn:hover {
+  border-color: var(--color-accent);
+  background-color: rgba(var(--rgb-accent), 0.1);
+}
+
+.link-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.icon-in {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.copy-email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.annotation {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 190px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  opacity: 0.8;
+}
+
+.annotation svg {
+  flex-shrink: 0;
+  width: 44px;
+  height: 22px;
+}
+
+/* La précision sous les liens (le lien vers le code source) : discrète, dans la police des annotations.
+   Le petit « </> » devant est doré, comme un repère. */
+.contact-links-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* « > span » : seulement le « </> » du début, pas la flèche du lien */
+.contact-links-note > span {
+  margin-right: 4px;
+  color: var(--color-accent);
+}
+
+/* Le lien vers le dépôt : discret comme le reste de la ligne, doré et souligné au survol */
+.contact-links-note a {
+  color: inherit;
+  text-underline-offset: 4px;
+  transition: color 0.3s;
+}
+
+.contact-links-note a:hover,
+.contact-links-note a:focus-visible {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+/* Liens en version compacte (dans la modale) */
+.contact-links.compact {
+  max-width: none;
+  gap: 14px;
+  padding: 20px 24px 24px;
+  border: none;
+  border-top: 1px dashed rgba(var(--rgb-accent), 0.3);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.contact-links.compact .contact-links-title {
+  color: var(--color-muted);
+}
+
+/* La modale de contact rapide */
+.contact-modal {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(var(--rgb-accent), 0.4);
+  background-color: var(--color-surface);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  animation: pop-in 0.3s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--rgb-accent), 0.4) transparent;
+}
+
+.contact-modal-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px 12px 24px;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid rgba(var(--rgb-accent), 0.3);
+}
+
+.contact-modal-bar p {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.contact-modal-bar .modal-close {
+  position: static;
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+}
+
+.contact-modal .work-order {
+  max-width: none;
+  border: none;
+}

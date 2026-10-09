@@ -1,0 +1,168 @@
+/* ===== Variables ===== */
+/* Deux thèmes : sombre (celui d'origine, par défaut) et clair. Toutes les couleurs du site passent par
+   les variables ci-dessous ; le thème clair, plus bas, ne fait que leur donner d'autres valeurs.
+   Le thème est choisi avec le bouton de la navbar, qui pose data-theme="light" sur <html>
+   (voir src/utils/theme.js).
+   « :root, .intro » : ces valeurs sombres valent pour tout le site, ET sont redonnées à l'intro.
+   L'intro reste ainsi une scène sombre même en thème clair : son film est fait pour le noir. */
+:root,
+.intro {
+  --color-bg: #0a0b0f;
+  --color-surface: #111318;
+  --color-border: rgba(var(--rgb-ink), 0.08);
+  --color-text: #f2efe9;
+  --color-muted: #9a9ca5;
+  --color-accent: #d6bf94;
+  --color-steel: #8fb3c9;
+  --color-error: #e3a08f;
+  --color-required: #f87171; /* rouge de l'astérisque des champs obligatoires */
+  --color-available: #4ade80;
+  --color-tig: #a8d4f5; /* bleu clair de l'arc TIG, pour les mots mis en valeur en bleu */
+
+  /* Les mêmes couleurs écrites « rouge, vert, bleu », pour pouvoir régler leur transparence :
+     rgba(var(--rgb-accent), 0.3) donne le doré à 30 %. */
+  --rgb-accent: 214, 191, 148;
+  --rgb-steel: 143, 179, 201;
+  --rgb-tig: 168, 212, 245;
+  --rgb-arc: 120, 190, 255; /* le bleu vif de l'arc, pour les lueurs */
+  --rgb-arc-deep: 60, 130, 255;
+  --rgb-bg: 10, 11, 15;
+  --rgb-surface: 17, 19, 24;
+  --rgb-ink: 255, 255, 255; /* ce qu'on pose PAR-DESSUS le fond pour le nuancer : du blanc sur le sombre */
+  --rgb-muted: 154, 156, 165;
+  --rgb-error: 227, 160, 143;
+
+  /* Le métal « chauffé à blanc » des soudures et des traits lumineux, et son halo ; puis leur version bleue */
+  --hot: #fffbe8;
+  --hot-halo: #fff1c1;
+  --hot-white: #fff;
+  --hot-blue: #f2f9ff;
+  --hot-blue-halo: #d6ecff;
+
+  /* Les plaques d'acier (la référence des cartes projet et de la modale) et le fond le plus profond */
+  --plate-top: #171c22;
+  --plate-bottom: #0c0f13;
+  --color-deep: #0d0f14;
+
+  /* Les points éclairés du panneau perforé (skills.css) */
+  --peg-light: rgba(255, 236, 190, 0.95);
+
+  /* Le jeu de couleurs des éléments dessinés par le navigateur (listes déroulantes, cases…) */
+  --scheme: dark;
+
+  /* Le métal des bordures (cartes projet, boutons au contour en laiton) : un dégradé en biais
+     qui alterne reflets clairs et creux sombres, comme une baguette de laiton poli.
+     Ce sont les ors de l'intro (#fbe8b6, #e2bf78, #b08542). */
+  --metal-gold: linear-gradient(
+    135deg,
+    #b08542 0%,
+    #fbe8b6 14%,
+    #d6bf94 28%,
+    #8f6c33 46%,
+    #e2bf78 62%,
+    #fbe8b6 76%,
+    #a57c3c 100%
+  );
+
+  /* Le même métal en bleu : l'acier bleui par l'arc TIG (bouton « Me contacter » du Hero).
+     Les reflets et les creux tombent aux mêmes endroits que sur le laiton : seules les teintes changent,
+     autour du bleu clair du site (--color-tig, #a8d4f5). */
+  --metal-steel: linear-gradient(
+    135deg,
+    #4a7fa8 0%,
+    #e3f2ff 14%,
+    #a8d4f5 28%,
+    #2f5f85 46%,
+    #8fc1e8 62%,
+    #e3f2ff 76%,
+    #44779f 100%
+  );
+
+  /* Les trois premières sont installées dans le projet (voir les imports dans main.jsx).
+     Leur nom se termine par « Variable » : c'est celui que leur donnent les paquets @fontsource. */
+  --font-body: "Inter Variable", system-ui, sans-serif;
+  --font-title: "Space Grotesk Variable", system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
+
+  --radius: 16px;
+  --max-width: 1100px;
+
+  /* L'espace au-dessus et au-dessous de chaque section de l'accueil, sauf le Hero (voir layout.css).
+     clamp(mini, idéal, maxi) : 100px sur téléphone, 160px à partir de 1280px de large,
+     et entre les deux l'espace suit la largeur de l'écran. Pour aérer plus ou moins : change le 160px. */
+  --section-space: clamp(100px, 12.5vw, 160px);
+}
+
+/* ----- Le thème clair : « ivoire doré », le plan sur papier -----
+   Le fond devient un papier ivoire, chaud et lumineux, le texte une encre presque noire.
+   Le doré est dédoublé, parce qu'un doré clair est illisible sur du papier :
+   - --color-accent, foncé, sert au TEXTE : il garde un contraste d'au moins 4,5 avec le fond, le seuil
+     de lisibilité d'un texte (les bleus aussi) ;
+   - --rgb-accent, plus lumineux, sert aux TRAITS et aux bordures, qui peuvent briller davantage.
+   Le métal « chauffé » ne peut plus être blanc sur du blanc : il devient orange, la couleur d'une
+   pièce qu'on chauffe. Les retouches section par section sont dans theme-light.css. */
+:root[data-theme="light"] {
+  --color-bg: #faf6ee;
+  --color-surface: #ffffff;
+  --color-border: rgba(var(--rgb-ink), 0.14);
+  --color-text: #1b1a17;
+  --color-muted: #5f5b52;
+  --color-accent: #8a6410;
+  --color-steel: #356a92;
+  --color-error: #b24a31;
+  --color-required: #c53030;
+  --color-available: #137236;
+  --color-tig: #17609c;
+
+  --rgb-accent: 176, 134, 46;
+  --rgb-steel: 53, 106, 146;
+  --rgb-tig: 23, 96, 156;
+  --rgb-arc: 30, 120, 220;
+  --rgb-arc-deep: 20, 80, 190;
+  --rgb-bg: 250, 246, 238;
+  --rgb-surface: 255, 255, 255;
+  --rgb-ink: 27, 26, 23; /* ici, on nuance le fond avec de l'encre */
+  --rgb-muted: 95, 91, 82;
+  --rgb-error: 178, 74, 49;
+
+  --hot: #c2620c;
+  --hot-halo: #f0a030;
+  --hot-white: #c2620c;
+  --hot-blue: #0f62c4;
+  --hot-blue-halo: #4c9ff0;
+
+  --plate-top: #ffffff;
+  --plate-bottom: #f0eadc;
+  --color-deep: #f1ecdf;
+
+  /* Le fond des boutons au contour en métal : le papier, à peine teinté de doré ou de bleu */
+  --paper-gold: #fbf5e6;
+  --paper-blue: #eef4fa;
+
+  --peg-light: rgba(var(--rgb-accent), 0.95);
+
+  --scheme: light;
+
+  /* Les deux métaux, plus soutenus : sur du papier, un laiton pâle disparaîtrait */
+  --metal-gold: linear-gradient(
+    135deg,
+    #8a6410 0%,
+    #f0d48a 14%,
+    #c9a24a 28%,
+    #7a560a 46%,
+    #d8b25a 62%,
+    #f0d48a 76%,
+    #946c14 100%
+  );
+  --metal-steel: linear-gradient(
+    135deg,
+    #2f5f85 0%,
+    #9fd0f2 14%,
+    #4a7fa8 28%,
+    #1f4a6e 46%,
+    #5f9cc8 62%,
+    #9fd0f2 76%,
+    #2c5878 100%
+  );
+}

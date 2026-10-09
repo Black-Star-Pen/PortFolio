@@ -9,7 +9,7 @@ import { wantsSmoothScroll } from "../../utils/smoothScroll";
 // et le hook useGSAP (qui range tout proprement quand le composant disparaît).
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// La gamme se parcourt de deux façons, selon l'écran (la même condition est écrite dans le CSS, section 9) :
+// La gamme se parcourt de deux façons, selon l'écran (la même condition est écrite dans le CSS, about.css) :
 // - grand écran : l'À propos est en deux colonnes qui restent en place le temps que le cordon se soude ;
 // - sinon : la gamme défile avec la page, et le cordon suit une ligne aux 60 % de la hauteur de l'écran.
 // La virgule veut dire « ou » : un grand écran, ou un écran d'ordinateur portable (large mais moins haut).

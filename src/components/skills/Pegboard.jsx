@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 // Le panneau perforé : le fond de la section Compétences. C'est le panneau à trous sur lequel on
 // accroche les outils dans un atelier : une grille de points discrets, qui s'éclairent autour du curseur.
-// Les points sont dessinés en CSS (voir « Le panneau perforé », section 12). Ce composant ne fait que
+// Les points sont dessinés en CSS (voir « Le panneau perforé », skills.css). Ce composant ne fait que
 // dire au CSS où se trouve le curseur, avec deux variables : --light-x et --light-y.
 function Pegboard() {
   const boardRef = useRef(null);

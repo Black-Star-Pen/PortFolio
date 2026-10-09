@@ -28,7 +28,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
    - une « timeline » GSAP décrit le déroulé de l'intro, étape par étape, sur une durée de 1 ;
    - ScrollTrigger fait avancer cette timeline avec le défilement, en lissant le mouvement ;
    - la timeline ne fait que changer des variables CSS (--t, --u, --land…) : c'est le CSS qui
-     décide de l'apparence correspondante (voir la section « 19 ter » de index.css).
+     décide de l'apparence correspondante (voir intro.css).
 
    Affichée sur l'accueil à chaque chargement de la page : elle fait partie de la page, tout en haut,
    au-dessus du Hero, et on peut toujours remonter la revoir. Après une actualisation, le navigateur
@@ -657,7 +657,7 @@ function Intro() {
   if (!isVisible) return null;
 
   return (
-    // --bead : l'épaisseur des lettres, transmise au CSS (voir --w dans index.css)
+    // --bead : l'épaisseur des lettres, transmise au CSS (voir --w dans intro.css)
     // has-film : sur un écran large, l'intro est plus longue, pour laisser le temps de voir le film (voir le CSS)
     <div className={`intro ${hasFilm ? "has-film" : ""}`} ref={introRef} style={{ "--bead": BEAD_WIDTH }}>
       <div className="intro-sticky">
