@@ -6,6 +6,11 @@ import { useLanguage } from "../../i18n/LanguageContext";
 // Sur la carte, on ne montre que les premières technos : la liste complète est dans la modale
 const MAX_TECHNOS = 4;
 
+// La largeur du visuel d'une carte, pour que le navigateur choisisse la bonne version de l'image
+// (voir ProjectImage.jsx). Elle suit la grille des projets : une colonne sur un téléphone (toute la
+// largeur de l'écran), deux sur une tablette (la moitié), trois sur un grand écran (350 pixels au plus).
+const IMAGE_SIZES = "(max-width: 680px) 100vw, (max-width: 1040px) 50vw, 350px";
+
 // La carte se lit en quatre étages, séparés par un filet (voir .project-card dans le CSS) :
 //   1. le visuel
 //   2. la référence : le numéro du projet et son type
@@ -26,7 +31,7 @@ function ProjectCard({ number, title, category, description, technos, image, onC
       <span className="project-scan" aria-hidden="true"></span>
 
       <div className="project-image">
-        <ProjectImage image={image} title={title} />
+        <ProjectImage image={image} title={title} sizes={IMAGE_SIZES} />
       </div>
 
       <div className="project-meta">

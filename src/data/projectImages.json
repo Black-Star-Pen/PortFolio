@@ -1,0 +1,44 @@
+{
+  "/projects/askvera.webp": [
+    {
+      "src": "/projects/askvera-480.webp",
+      "width": 480
+    },
+    {
+      "src": "/projects/askvera-960.webp",
+      "width": 960
+    },
+    {
+      "src": "/projects/askvera.webp",
+      "width": 1600
+    }
+  ],
+  "/projects/hero-experience.webp": [
+    {
+      "src": "/projects/hero-experience-480.webp",
+      "width": 480
+    },
+    {
+      "src": "/projects/hero-experience-960.webp",
+      "width": 960
+    },
+    {
+      "src": "/projects/hero-experience.webp",
+      "width": 1396
+    }
+  ],
+  "/projects/portfolio.webp": [
+    {
+      "src": "/projects/portfolio-480.webp",
+      "width": 480
+    },
+    {
+      "src": "/projects/portfolio-960.webp",
+      "width": 960
+    },
+    {
+      "src": "/projects/portfolio.webp",
+      "width": 1600
+    }
+  ]
+}
