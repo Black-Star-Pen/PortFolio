@@ -132,7 +132,7 @@ Sans l'API, le site s'affiche normalement : seul l'envoi du formulaire échoue.
 | `npm run build` | construit la version de production dans `dist/` |
 | `npm run preview` | sert cette version en local, pour la vérifier |
 | `npm run lint` | vérifie le code avec ESLint |
-| `npm run images` | convertit les captures de `images-source/projects/` en WebP dans `public/projects/` |
+| `npm run images` | convertit les captures de `images-source/projects/` en WebP dans `public/projects/`, en trois largeurs |
 | `npm run icons` | télécharge dans `public/icons/` les logos listés dans `src/data/technoIcons.js` |
 
 ## Contact

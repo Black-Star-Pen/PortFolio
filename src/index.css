@@ -4440,21 +4440,34 @@ main > section.seam-welded .section-lamp::after {
 /* Le trait : invisible en temps normal, il ne se montre que pendant le balayage.
    Il est bleu, pas doré : c'est le blanc bleuté de l'arc TIG, les mêmes teintes que la soudure
    bleue du pied de page (voir .weld-blue). Le bleu « fabrique » la carte, le doré est la pièce finie.
-   Le formulaire a le même trait (.work-order-scan, voir ContactForm.jsx et l'effet ORDER plus bas). */
+   Le formulaire a le même trait (.work-order-scan, voir ContactForm.jsx et l'effet ORDER plus bas).
+
+   Le trait ne descend pas en changeant de position (top). L'élément est une glissière transparente,
+   haute comme la carte, qui porte le trait sur son bord du haut (::before) ; on la fait glisser de
+   sa propre hauteur avec translate. Changer « top » oblige le navigateur à recalculer la mise en page
+   à chaque image, et les outils de mesure (Lighthouse) comptent chaque pas comme un décalage de la
+   page. translate ne déplace que le dessin : rien n'est recalculé. */
 .project-scan,
 .work-order-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.project-scan::before,
+.work-order-scan::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 3;
   height: 2px;
   background-color: var(--hot-blue);
   box-shadow:
     0 0 8px 2px var(--hot-blue-halo),
     0 0 22px 6px rgba(var(--rgb-arc), 0.8);
-  opacity: 0;
-  pointer-events: none;
 }
 
 .reveal-scan.revealed .project-scan {
@@ -4463,14 +4476,14 @@ main > section.seam-welded .section-lamp::after {
 
 @keyframes scan-line {
   from {
-    top: 0;
+    translate: 0 0;
     opacity: 1;
   }
   90% {
     opacity: 1;
   }
   to {
-    top: 100%;
+    translate: 0 100%;
     opacity: 0;
   }
 }

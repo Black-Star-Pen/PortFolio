@@ -5,6 +5,10 @@ import RichText from "../shared/RichText";
 import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../../utils/smoothScroll";
 import { useLanguage } from "../../i18n/LanguageContext";
 
+// La largeur du visuel dans la fiche, pour que le navigateur choisisse la bonne version de l'image
+// (voir ProjectImage.jsx) : toute la largeur de la modale, qui ne dépasse jamais 960 pixels.
+const IMAGE_SIZES = "(max-width: 1000px) 100vw, 960px";
+
 // Le glissement du doigt qui fait changer de projet (sur téléphone), comme une pile de cartes :
 // la fiche suit le doigt en penchant, et celle du projet voisin apparaît derrière elle.
 // - on attend que le doigt ait bougé de SWIPE_START pixels pour savoir ce qu'il fait ;
@@ -55,7 +59,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
         ✕
       </button>
 
-      <ProjectImage image={image} title={title} className="modal-image" />
+      <ProjectImage image={image} title={title} sizes={IMAGE_SIZES} className="modal-image" />
 
       <div className="modal-content">
         {/* L'en-tête de la fiche : la plaque de référence et le titre, regroupés. C'est ce bloc entier
