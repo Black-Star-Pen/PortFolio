@@ -25,8 +25,6 @@ const briefcaseIcon = (
 // Le texte affiché, lui, dépend de la langue : il est dans src/i18n/texts.js (t.form.types, etc.),
 // rangé sous la même « value ».
 const requestTypes = [
-  { value: "site" },
-  { value: "application" },
   // variant : un style à part (bleu acier, la couleur de la fiche de poste) ; icon : l'icône affichée devant
   { value: "recrutement", variant: "steel", icon: briefcaseIcon },
   { value: "autre" },
@@ -37,8 +35,7 @@ const requestTypes = [
 const contractTypes = [
   { value: "cdi" },
   { value: "cdd" },
-  // unavailable : affiché, mais grisé et non cliquable, avec la mention « indisponible »
-  { value: "freelance", unavailable: true },
+  { value: "freelance" },
 ];
 
 const remoteOptions = [{ value: "site" }, { value: "hybride" }, { value: "remote" }];

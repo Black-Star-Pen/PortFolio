@@ -627,7 +627,10 @@ function Intro() {
     },
     // scope : les sélecteurs comme ".intro-hint" ne cherchent qu'à l'intérieur de l'intro.
     // dependencies : on recrée tout si l'intro apparaît ou disparaît.
-    { scope: introRef, dependencies: [isVisible] },
+    // revertOnUpdate : sans lui, useGSAP ne nettoie qu'à la disparition du composant, pas quand
+    // isVisible change. En quittant l'accueil, l'intro continuerait alors de tourner en coulisse et
+    // remettrait intro-playing sur <html>, ce qui cache les initiales du logo.
+    { scope: introRef, dependencies: [isVisible], revertOnUpdate: true },
   );
 
   // Le bouton « Son » : active ou coupe le crépitement de la soudure.

@@ -1,10 +1,9 @@
 import { resolveMx } from "node:dns/promises";
 
 // Les valeurs autorisées pour les champs à choix
-const REQUEST_TYPES = ["site", "application", "recrutement", "autre"];
-// Les contrats : la même liste que dans le formulaire (contractTypes, src/components/contact/ContactForm.jsx),
-// sans « freelance », qui y est affiché comme indisponible
-const CONTRACT_TYPES = ["cdi", "cdd"];
+const REQUEST_TYPES = ["recrutement", "autre"];
+// Les contrats : la même liste que dans le formulaire (contractTypes, src/components/contact/ContactForm.jsx)
+const CONTRACT_TYPES = ["cdi", "cdd", "freelance"];
 const REMOTE_OPTIONS = ["", "site", "hybride", "remote"];
 // Les langues du site (les mêmes que dans src/i18n/texts.js)
 const LANGUAGES = ["fr", "en"];
