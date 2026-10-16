@@ -31,8 +31,6 @@ const MONO = "ui-monospace, 'SF Mono', Consolas, 'Courier New', monospace";
 
 // Les libellés lisibles des choix du formulaire (le formulaire envoie leurs « value », voir ContactForm.jsx)
 const TYPE_LABELS = {
-  site: "Site vitrine",
-  application: "Application",
   recrutement: "Recrutement",
   autre: "Autre",
 };
@@ -40,6 +38,7 @@ const TYPE_LABELS = {
 const CONTRACT_LABELS = {
   cdi: "CDI",
   cdd: "CDD",
+  freelance: "Freelance",
 };
 
 const REMOTE_LABELS = {
