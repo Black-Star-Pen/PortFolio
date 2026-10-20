@@ -4,7 +4,8 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import { validateContact } from "./validation.js";
 
-export function createApp({ allowedOrigins, trustProxy, sendEmail, validate = validateContact }) {
+export function createApp({ allowedOrigins, trustProxy, sendEmail, verifyChallenge, validate = validateContact }) {
+  if (typeof verifyChallenge !== "function") throw new Error("La vérification anti-bots est obligatoire.");
   const app = express();
 
   // Ne révèle pas qu'Express tourne derrière le serveur
@@ -85,6 +86,14 @@ export function createApp({ allowedOrigins, trustProxy, sendEmail, validate = va
     // On fait semblant d'accepter, sans rien envoyer.
     if (req.body?.website) {
       return res.status(201).json({ ok: true });
+    }
+
+    const verification = await verifyChallenge(req.body.turnstileToken);
+    if (!verification.ok) {
+      return res.status(verification.status).json({ ok: false, code: verification.code,
+        error: verification.code === "ANTIBOT_UNAVAILABLE"
+          ? "La vérification anti-bots est indisponible. Réessayez ou contactez-moi directement."
+          : "Validez à nouveau la vérification anti-bots." });
     }
 
     const { data, errors } = await validate(req.body);

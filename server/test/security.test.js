@@ -27,7 +27,8 @@ test("configuration de production et proxys invalides refusés", () => {
     { CORS_ORIGIN: "https://example.com/path" }, { CORS_ORIGIN: "https://user@example.com" },
     { NODE_ENV: "production", CORS_ORIGIN: "http://example.com" },
   ]) assert.throws(() => readServerConfig(env));
-  assert.equal(readServerConfig({ NODE_ENV: "production", CORS_ORIGIN: "https://example.com", TRUST_PROXY: "3" }).trustProxy, 3);
+  assert.equal(readServerConfig({ NODE_ENV: "production", CORS_ORIGIN: "https://example.com", TRUST_PROXY: "3",
+    TURNSTILE_SECRET_KEY: "production_placeholder" }).trustProxy, 3);
 });
 
 test("corps absents, null et tableaux refusés sans erreur interne", async () => {
@@ -88,6 +89,7 @@ async function api(t, overrides = {}) {
   const sent = [];
   const app = createApp({
     allowedOrigins: ["https://portfolio.example.com"], trustProxy: 0,
+    verifyChallenge: async () => ({ ok: true }),
     validate: (body) => validateContact(body, checks), sendEmail: async (data) => { sent.push(data); },
     ...overrides,
   });
@@ -168,4 +170,27 @@ test("une erreur du fournisseur reste une erreur 502 sans exposer ses détails",
   const response = await post();
   assert.equal(response.status, 502);
   assert.ok(!JSON.stringify(await response.json()).includes("provider failure"));
+});
+
+test("la protection anti-bots ne peut pas être omise lors de la création de l'API", () => {
+  assert.throws(() => createApp({}), /obligatoire/);
+});
+test("un jeton refusé bloque validation et envoi", async (t) => {
+  const { post, sent } = await api(t, {
+    verifyChallenge: async () => ({ ok: false, status: 403, code: "ANTIBOT_REQUIRED" }),
+    validate: async () => assert.fail("Validation appelée avant réussite anti-bots"),
+  });
+  const response = await post();
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).code, "ANTIBOT_REQUIRED");
+  assert.equal(sent.length, 0);
+});
+test("si Cloudflare est indisponible, aucun email n'est envoyé", async (t) => {
+  const { post, sent } = await api(t, {
+    verifyChallenge: async () => ({ ok: false, status: 503, code: "ANTIBOT_UNAVAILABLE" }),
+  });
+  const response = await post();
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).code, "ANTIBOT_UNAVAILABLE");
+  assert.equal(sent.length, 0);
 });

@@ -1,3 +1,5 @@
+import { TEST_TURNSTILE_SECRET, TEST_TURNSTILE_SECRETS } from "./turnstile.js";
+
 const LOCAL_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 export function readServerConfig(env = process.env) {
@@ -26,5 +28,12 @@ export function readServerConfig(env = process.env) {
       throw new Error("CORS_ORIGIN doit contenir des origines HTTP(S), sans chemin ni slash final, et HTTPS en production.");
     }
   }
-  return { port, trustProxy, allowedOrigins: configuredOrigins.length ? configuredOrigins : LOCAL_ORIGINS };
+  const allowedOrigins = configuredOrigins.length ? configuredOrigins : LOCAL_ORIGINS;
+  const turnstileSecretKey = env.TURNSTILE_SECRET_KEY?.trim() || (production ? "" : TEST_TURNSTILE_SECRET);
+  if (!turnstileSecretKey || /\s/.test(turnstileSecretKey) ||
+      (production && TEST_TURNSTILE_SECRETS.includes(turnstileSecretKey))) {
+    throw new Error("TURNSTILE_SECRET_KEY doit être renseignée avec une vraie clé en production.");
+  }
+  return { port, trustProxy, allowedOrigins, turnstileSecretKey,
+    turnstileHostnames: [...new Set(allowedOrigins.map((origin) => new URL(origin).hostname))] };
 }

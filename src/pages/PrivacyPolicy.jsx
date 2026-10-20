@@ -15,7 +15,7 @@ function FrenchPolicy() {
       </p>
 
       <h3>Données collectées</h3>
-      <p>Ce site ne collecte des données que lorsque vous remplissez le formulaire de contact :</p>
+      <p>Lorsque vous remplissez le formulaire de contact, vous transmettez :</p>
       <ul>
         <li>vos prénom, nom et adresse email ;</li>
         <li>le type de votre demande et votre message ;</li>
@@ -25,6 +25,10 @@ function FrenchPolicy() {
         </li>
       </ul>
       <p>Aucun compte n'est créé et aucun cookie de suivi ou de publicité n'est utilisé.</p>
+      <p>
+        Dès le chargement du formulaire, une vérification anti-bots peut traiter des informations
+        techniques, notamment votre adresse IP et des caractéristiques de votre navigateur.
+      </p>
       <p>
         Vos réglages (thème clair ou sombre, langue) sont gardés dans votre navigateur uniquement,
         pour votre prochaine visite : ils ne sont envoyés à personne. Une seule exception : quand
@@ -48,6 +52,13 @@ function FrenchPolicy() {
           Votre message m'est transmis par email par le service <strong>Resend</strong>{" "}
           (États-Unis), puis il est stocké dans ma boîte de réception <strong>Gmail</strong>{" "}
           (Google).
+        </li>
+        <li>
+          <strong>Cloudflare Turnstile</strong> protège le formulaire contre les envois automatisés.
+          Le navigateur charge son module de vérification ; le serveur lui transmet ensuite le jeton
+          obtenu pour le valider avant d'envoyer le message. Le nom, l'adresse email et le contenu
+          du message ne sont pas inclus dans cette requête de validation. Voir les{" "}
+          <a href="https://www.cloudflare.com/turnstile-privacy-policy/">informations de confidentialité de Turnstile</a>.
         </li>
         <li>
           Pour éviter les abus, le serveur limite le nombre d'envois par adresse IP. Cette adresse
@@ -93,7 +104,7 @@ function EnglishPolicy() {
       </p>
 
       <h3>Data collected</h3>
-      <p>This site only collects data when you fill in the contact form:</p>
+      <p>When you fill in the contact form, you provide:</p>
       <ul>
         <li>your first name, last name and email address;</li>
         <li>the type of your request and your message;</li>
@@ -103,6 +114,10 @@ function EnglishPolicy() {
         </li>
       </ul>
       <p>No account is created and no tracking or advertising cookie is used.</p>
+      <p>
+        When the form loads, an anti-bot check may process technical information,
+        including your IP address and browser characteristics.
+      </p>
       <p>
         Your settings (light or dark theme, language) are kept in your browser only, for your next
         visit: they are not sent to anyone. One exception: when you send the form, the language
@@ -125,6 +140,13 @@ function EnglishPolicy() {
         <li>
           Your message is forwarded to me by email by the <strong>Resend</strong> service (United
           States), then stored in my <strong>Gmail</strong> inbox (Google).
+        </li>
+        <li>
+          <strong>Cloudflare Turnstile</strong> protects the form against automated submissions.
+          Your browser loads its verification widget; the server then validates the resulting token
+          before sending the message. Your name, email address and message content are not included
+          in this validation request. See the{" "}
+          <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Turnstile privacy information</a>.
         </li>
         <li>
           To prevent abuse, the server limits the number of submissions per IP address. That address

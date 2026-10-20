@@ -55,6 +55,7 @@ jobs:
           CORS_ORIGIN: https://portfolio.example.com
           MAIL_TO: owner@example.com
           RESEND_API_KEY: re_factice_pour_le_controle
+          TURNSTILE_SECRET_KEY: cle_factice_uniquement_pour_la_route_de_sante
         run: |
           node index.js &
           sleep 3

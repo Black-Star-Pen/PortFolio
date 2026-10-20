@@ -1,5 +1,6 @@
 import { useState, useId, useRef, useEffect, useLayoutEffect } from "react";
 import Weld from "../shared/Weld";
+import TurnstileChallenge from "./TurnstileChallenge";
 import { API_URL } from "../../utils/api";
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -283,6 +284,8 @@ function ContactForm() {
   const [status, setStatus] = useState("idle");
   const [submitError, setSubmitError] = useState("");
   const [retryIn, setRetryIn] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [challengeVersion, setChallengeVersion] = useState(0);
 
   useEffect(() => () => {
     lookupRef.current?.abort();
@@ -404,6 +407,10 @@ function ContactForm() {
       showFirstError(newErrors);
       return;
     }
+    if (!turnstileToken) {
+      setSubmitError(f.antibotRequired);
+      return;
+    }
 
     // On garde le message d'erreur affiché pendant l'envoi :
     // l'effacer puis le réafficher ferait "sauter" la page
@@ -417,7 +424,7 @@ function ContactForm() {
         headers: { "Content-Type": "application/json" },
         // lang : la langue du site au moment de l'envoi. Elle est indiquée dans l'email reçu,
         // pour savoir dans quelle langue répondre au visiteur.
-        body: JSON.stringify({ ...form, email: form.email.trim(), lang }),
+        body: JSON.stringify({ ...form, email: form.email.trim(), lang, turnstileToken }),
         // Laisse aussi le temps à l'API hébergée de redémarrer après une période d'inactivité.
         signal: AbortSignal.any([controller.signal, AbortSignal.timeout(90000)]),
       });
@@ -432,6 +439,11 @@ function ContactForm() {
       }
 
       setStatus("idle");
+
+      if (result.code === "ANTIBOT_REQUIRED" || result.code === "ANTIBOT_UNAVAILABLE") {
+        setSubmitError(result.code === "ANTIBOT_REQUIRED" ? f.antibotRequired : f.antibotUnavailable);
+        return;
+      }
 
       // Le serveur écrit ses messages en français. En anglais, f.serverErrors donne leur équivalent
       // (un par champ) ; en français, f.serverErrors vaut null et on garde les messages du serveur.
@@ -470,6 +482,10 @@ function ContactForm() {
       setSubmitError(error.name === "TimeoutError" ? f.errors.timeout : f.errors.network);
     } finally {
       if (submissionRef.current === controller) submissionRef.current = null;
+      if (!controller.signal.aborted) {
+        setTurnstileToken("");
+        setChallengeVersion((value) => value + 1);
+      }
     }
   }
 
@@ -760,6 +776,8 @@ function ContactForm() {
             </a>
           </p>
 
+          <TurnstileChallenge key={challengeVersion} onTokenChange={setTurnstileToken} />
+
           {submitError && (
             <p className="form-alert" role="alert">
               {submitError}
@@ -769,7 +787,7 @@ function ContactForm() {
           <button
             type="submit"
             className="btn btn-primary btn-metal work-order-submit"
-            disabled={status === "sending" || retryIn > 0}
+            disabled={status === "sending" || retryIn > 0 || !turnstileToken}
           >
             {status === "sending"
               ? f.sending

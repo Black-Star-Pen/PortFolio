@@ -36,10 +36,14 @@ pour tester les routes avec un transport email simulé, sans charger les secrets
 
 - `npm run lint` : réussi.
 - `npm run build` : réussi. Vite signale encore un bundle principal supérieur à 500 Ko avant compression.
-- `npm test --prefix server` : 23 tests réussis, incluant les requêtes malformées, CORS,
-  les tailles UTF-8, le piège anti-robots, la limite d'envoi, l'échappement HTML et Resend simulé.
+- `npm test --prefix server` : 31 tests réussis, incluant les requêtes malformées, CORS,
+  les tailles UTF-8, le piège anti-robots, la limite d'envoi, l'échappement HTML, Resend simulé
+  et la validation obligatoire des jetons Turnstile.
 - Essais Chromium locaux : formulaire avec succès et réponse HTML inattendue, clavier des modales
   et des onglets, ancres invalides, menu mobile, pages légales et page introuvable.
+- Essais Turnstile supplémentaires : blocage avant vérification, expiration, renouvellement après
+  refus du serveur, deux formulaires simultanés, reprise après erreur et affichage mobile.
+  Le widget officiel et Siteverify ont aussi été vérifiés avec les clés de test Cloudflare.
 - `npm audit --json`, à la racine et dans `server/` : aucune vulnérabilité connue signalée.
 - Configuration de `server/.env` chargée et contrôlée sans afficher ses secrets : valide en mode Resend.
 - Contrôle des fichiers actuellement suivis par Git : aucun `.env` privé suivi ; aucun motif de clé
@@ -55,12 +59,18 @@ CORS_ORIGIN=https://adam-boulkhedert.onrender.com
 TRUST_PROXY=3
 MAIL_TO=adresse_destinataire
 RESEND_API_KEY=cle_privee_resend
+TURNSTILE_SECRET_KEY=cle_secrete_cloudflare
 ```
 
-Les deux dernières valeurs sont à saisir dans l'environnement du service, jamais dans Git ni dans
+Les trois dernières valeurs sont à saisir dans l'environnement du service, jamais dans Git ni dans
 une variable `VITE_`. Le fichier `render.yaml` définit déjà `NODE_ENV`, l'origine et le nombre de proxys.
 Sans domaine vérifié, laisser `MAIL_FROM` vide et utiliser l'adresse du compte Resend comme destinataire
-pour les tests. L'acceptation et la livraison réelles par Resend restent à vérifier séparément.
+pour les tests. La réception des emails du formulaire a été confirmée.
+
+Le site statique doit également recevoir `VITE_TURNSTILE_SITE_KEY` (clé publique du même widget)
+avant sa reconstruction. Le code de protection est intégré ; son activation en production attend
+les clés du compte Cloudflare. Le développement utilise les clés de test officielles, qui ne filtrent
+pas réellement les robots. La configuration complète est décrite dans le README.
 
 `TRUST_PROXY=3` reprend la topologie documentée dans le dépôt. Elle doit être vérifiée si le chemin
 réseau change : un nombre de proxys incorrect peut fausser l'adresse IP utilisée par la limite d'envoi.
@@ -68,9 +78,6 @@ Voir [Express derrière des proxys](https://expressjs.com/en/guide/behind-proxie
 
 ## Évolutions proposées
 
-- **Challenge anti-bots** : utile si des robots contournent le champ piège et la limite par IP.
-  Il ajoute un service externe, des clés de configuration et une information à intégrer dans la
-  politique de confidentialité. À décider selon le spam réellement reçu.
 - **Déduplication des envois Resend** : une clé d'idempotence permettrait de retenter une demande
   dont la confirmation a été perdue, en évitant un second email. Il faut définir la durée et
   la réutilisation de cette clé pour permettre aussi deux demandes volontaires identiques.
