@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import Pegboard from "./Pegboard";
 import SectionTitle from "../shared/SectionTitle";
 import SkillPanel from "./SkillPanel";
@@ -16,6 +16,7 @@ function Skills() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const tabsRef = useRef(null);
+  const tabsId = useId();
   const activeSkill = skillsData[activeIndex];
 
   function updateScrollState() {
@@ -86,6 +87,20 @@ function Skills() {
                 onClick={() => openDrawer(index)}
                 role="tab"
                 aria-selected={index === activeIndex}
+                id={`${tabsId}-tab-${skill.id}`}
+                aria-controls={`${tabsId}-panel-${skill.id}`}
+                tabIndex={index === activeIndex ? 0 : -1}
+                onKeyDown={(event) => {
+                  let next;
+                  if (event.key === "ArrowRight") next = (index + 1) % skillsData.length;
+                  else if (event.key === "ArrowLeft") next = (index - 1 + skillsData.length) % skillsData.length;
+                  else if (event.key === "Home") next = 0;
+                  else if (event.key === "End") next = skillsData.length - 1;
+                  else return;
+                  event.preventDefault();
+                  openDrawer(next);
+                  tabsRef.current.querySelectorAll('[role="tab"]')[next]?.focus();
+                }}
                 // --i : le rang du tiroir, pour qu'ils arrivent l'un après l'autre (voir reveal-drawers)
                 style={{ "--i": index }}
               >
@@ -112,6 +127,8 @@ function Skills() {
         <SkillPanel
           key={activeSkill.id}
           skill={activeSkill}
+          id={`${tabsId}-panel-${activeSkill.id}`}
+          labelledBy={`${tabsId}-tab-${activeSkill.id}`}
           reference={activeIndex + 1}
           isWelded={weldedIds.includes(activeSkill.id)}
           // Tant qu'on n'a changé de tiroir aucune fois, c'est le panneau présent à l'arrivée de la boîte

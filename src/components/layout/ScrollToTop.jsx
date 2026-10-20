@@ -19,11 +19,17 @@ function ScrollToTop() {
 
     if (hash) {
       // On attend que React ait affiché la page avant de chercher la section
-      requestAnimationFrame(() => {
-        const section = document.querySelector(hash);
+      const frame = requestAnimationFrame(() => {
+        let id;
+        try {
+          id = decodeURIComponent(hash.slice(1));
+        } catch {
+          return;
+        }
+        const section = document.getElementById(id);
         if (section) scrollToElement(section);
       });
-      return;
+      return () => cancelAnimationFrame(frame);
     }
 
     if (isSamePage) scrollToSiteTop();

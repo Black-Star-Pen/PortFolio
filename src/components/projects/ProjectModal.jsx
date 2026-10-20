@@ -2,7 +2,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import TechBadge from "./TechBadge";
 import ProjectImage from "./ProjectImage";
 import RichText from "../shared/RichText";
-import { lockPageScroll, startSmoothScrollIn, unlockPageScroll } from "../../utils/smoothScroll";
+import { startSmoothScrollIn } from "../../utils/smoothScroll";
+import { useDialog } from "../../hooks/useDialog";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 // La largeur du visuel dans la fiche, pour que le navigateur choisisse la bonne version de l'image
@@ -185,6 +186,7 @@ function ProjectModal({
   const modalRef = useRef(null);
   const behindRef = useRef(null);
   const closeButtonRef = useRef(null);
+  useDialog(overlayRef, onClose, '.modal:not(.modal-behind) .modal-close');
   // Le dernier changement de projet (voir « toward », plus haut).
   // direction : de quel côté arrive la fiche, "next" (par la droite) ou "previous" (par la gauche),
   // ou null à l'ouverture (elle apparaît alors normalement). Voir .modal-from-… dans le CSS.
@@ -218,35 +220,25 @@ function ProjectModal({
   useEffect(() => startSmoothScrollIn(modalRef.current), [slug]);
 
   useEffect(() => {
-    // On retient l'élément qui avait le focus (la carte cliquée)...
-    const previousFocus = document.activeElement;
-    // ...et on place le focus dans la modale (preventScroll : sans faire défiler la fiche,
-    // sinon le navigateur la décale de quelques pixels pour « montrer » le bouton)
-    closeButtonRef.current.focus({ preventScroll: true });
-    // La page derrière ne défile plus tant que la modale est ouverte
-    lockPageScroll();
+    closeButtonRef.current?.focus({ preventScroll: true });
+  }, [slug]);
 
-    // Au clavier : Échap ferme, les flèches gauche et droite changent de projet
+  useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === "Escape") {
-        onClose();
-      } else if (hasNavigation && event.key === "ArrowLeft") {
+      if (overlayRef.current?.closest("[inert]")) return;
+      if (hasNavigation && event.key === "ArrowLeft") {
+        event.preventDefault();
         setMove(toward("previous"));
         onPrevious();
       } else if (hasNavigation && event.key === "ArrowRight") {
+        event.preventDefault();
         setMove(toward("next"));
         onNext();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      unlockPageScroll();
-      window.removeEventListener("keydown", handleKeyDown);
-      // À la fermeture, le focus revient sur la carte
-      previousFocus?.focus();
-    };
-  }, [onClose, onPrevious, onNext, hasNavigation]);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onPrevious, onNext, hasNavigation]);
 
   // Au doigt, comme une pile de cartes. Vers la gauche : le projet suivant. Vers la droite : le précédent.
   // - La fiche suit le doigt en penchant : elle pivote autour du milieu de son bord bas, son haut part
@@ -398,6 +390,7 @@ function ProjectModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
+      tabIndex={-1}
       onClick={onClose}
     >
       {/* La fiche du projet voisin, visible seulement pendant un glissement du doigt, derrière la fiche

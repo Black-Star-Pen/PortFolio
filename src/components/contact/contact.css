@@ -643,3 +643,12 @@
   max-width: none;
   border: none;
 }
+.form-antibot {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.form-antibot > div {
+  min-height: 65px;
+}

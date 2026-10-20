@@ -22,7 +22,8 @@ const DURATION = 1.1;
 // L'instance de Lenis quand le défilement fluide est actif, sinon null
 let lenis = null;
 // La page est-elle bloquée en ce moment (une modale ou le menu est ouvert) ?
-let isLocked = false;
+let scrollLocks = 0;
+let previousOverflow = "";
 
 // Le défilement fluide n'est activé que pour une souris ou un pavé tactile.
 // - Au doigt (« pointer: coarse »), le téléphone a déjà son propre élan : y toucher le rend moins naturel.
@@ -45,7 +46,7 @@ export function startSmoothScroll() {
   });
   lenis = instance;
   // Une modale était déjà ouverte à l'arrivée (adresse avec ?projet=…) : la page reste bloquée
-  if (isLocked) instance.stop();
+  if (scrollLocks > 0) instance.stop();
 
   // Lenis et GSAP avancent ensemble :
   // - à chaque déplacement de la page, ScrollTrigger recalcule où en sont l'intro et le parcours ;
@@ -125,13 +126,16 @@ export function stopGlide() {
 // overflow: hidden suffit pour le navigateur, mais pas pour Lenis, qui déplace la page elle-même :
 // il faut aussi l'arrêter. (L'intérieur d'une modale reste défilable : voir data-lenis-prevent.)
 export function lockPageScroll() {
-  isLocked = true;
+  if (scrollLocks === 0) previousOverflow = document.body.style.overflow;
+  scrollLocks += 1;
   document.body.style.overflow = "hidden";
   lenis?.stop();
 }
 
 export function unlockPageScroll() {
-  isLocked = false;
-  document.body.style.overflow = "";
+  if (scrollLocks === 0) return;
+  scrollLocks -= 1;
+  if (scrollLocks > 0) return;
+  document.body.style.overflow = previousOverflow;
   lenis?.start();
 }

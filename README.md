@@ -87,7 +87,7 @@ PortFolio/
 
 ## Lancer le projet en local
 
-Il faut Node.js 20.6 ou plus récent.
+Il faut Node.js 22.12 ou plus récent (Node 22 est utilisé en CI et chez Render).
 
 ### Le site
 
@@ -111,20 +111,62 @@ npm run dev
 
 L'API écoute sur http://localhost:3001. En développement, Vite lui transmet toutes les requêtes qui commencent par `/api`.
 
-Le fichier `.env` attend quatre valeurs, et quelques autres pour la mise en ligne :
+Le fichier `.env` configure l'API. Pour Resend, renseigne `RESEND_API_KEY` et `MAIL_TO` ;
+pour Gmail, renseigne `MAIL_USER`, `MAIL_PASS` et `MAIL_TO`.
+En mode test Resend (`MAIL_FROM` vide), `MAIL_TO` doit être l'adresse du compte Resend.
+Pour un expéditeur personnalisé, utilise une adresse d'un domaine vérifié dans Resend.
 
 | Variable | Rôle |
 | --- | --- |
 | `PORT` | le port du serveur |
+| `NODE_ENV` | `development` en local, `production` chez l'hébergeur |
 | `MAIL_USER` | le compte Gmail qui envoie les emails |
 | `MAIL_PASS` | son mot de passe d'application |
 | `MAIL_TO` | l'adresse qui reçoit les demandes |
-| `RESEND_API_KEY` | en ligne : la clé Resend ; dès qu'elle est remplie, l'envoi passe par Resend au lieu de Gmail |
+| `RESEND_API_KEY` | la clé Resend, en local ou en ligne ; dès qu'elle est remplie, l'envoi passe par Resend au lieu de Gmail |
 | `MAIL_FROM` | en ligne : l'expéditeur des emails envoyés par Resend (facultatif) |
-| `CORS_ORIGIN` | en ligne : l'adresse du site autorisé à appeler l'API (vide en local) |
+| `CORS_ORIGIN` | origines autorisées, séparées par des virgules ; vide en développement = localhost:5173 et 127.0.0.1:5173 ; obligatoire en production, en HTTPS |
 | `TRUST_PROXY` | en ligne : le nombre d'intermédiaires devant le serveur, 3 chez Render (vide en local) |
+| `TURNSTILE_SECRET_KEY` | clé secrète Cloudflare Turnstile ; obligatoire en production, clé de test officielle par défaut en développement |
 
 Sans l'API, le site s'affiche normalement : seul l'envoi du formulaire échoue.
+
+L'API refuse de démarrer si la configuration des emails est incomplète ou si les origines et
+le nombre de proxys sont invalides. Le fichier `.env` local n'est pas chargé par Render :
+renseigne ses variables dans le service API. N'ajoute jamais une clé privée à une variable `VITE_`.
+
+Les tests de l'API se lancent avec `npm test --prefix server`. Ils vérifient la validation,
+les restrictions d'origine, les limites d'envoi et les erreurs HTTP sans envoyer d'email.
+
+### Protection anti-bots avec Turnstile
+
+Le formulaire utilise [Cloudflare Turnstile Free](https://developers.cloudflare.com/turnstile/plans/).
+La vérification est obligatoire côté serveur avant la validation du formulaire et l'envoi de l'email.
+Le serveur vérifie aussi le domaine d'origine du jeton et l'action `contact` ; un jeton absent,
+expiré ou déjà utilisé est refusé. Une panne de vérification bloque l'envoi et propose le contact direct.
+
+Pour activer la protection en ligne :
+
+1. Dans Cloudflare → Turnstile, créer un widget **Managed** sur l'offre **Free**.
+2. Autoriser `adam-boulkhedert.onrender.com` comme hostname (sans `https://` ni chemin).
+   Laisser la prévalidation « pre-clearance » désactivée.
+3. Dans Render, service **site statique**, définir `VITE_TURNSTILE_SITE_KEY` avec la **sitekey publique**.
+4. Dans Render, service **API**, définir `TURNSTILE_SECRET_KEY` avec la **clé secrète** du même widget.
+5. Reconstruire le site statique et redéployer l'API. Les variables figurent aussi dans `render.yaml`.
+
+En production, l'API refuse de démarrer sans vraie clé secrète. Sans sitekey publique, le formulaire
+affiche que la vérification est indisponible et ne permet pas l'envoi. Définir les deux clés avant
+de déployer cette version ; ne pas utiliser de clés de test en production.
+
+En local, aucune inscription n'est nécessaire pour essayer l'intégration : `npm run dev` utilise
+la sitekey de test officielle et l'API utilise la clé secrète de test tant que `NODE_ENV` n'est pas
+`production` et que `TURNSTILE_SECRET_KEY` est vide. Ces clés testent le fonctionnement du formulaire,
+sans bloquer réellement les robots. L'accès à Cloudflare reste nécessaire.
+
+Pour employer de vraies clés en local, copier le fichier `.env.example` de la racine en `.env.local`,
+y définir `VITE_TURNSTILE_SITE_KEY`, et renseigner `TURNSTILE_SECRET_KEY` dans `server/.env`.
+Il faut alors un widget de développement autorisant `localhost` et/ou `127.0.0.1`.
+Utiliser un widget distinct pour la production. Redémarrer les deux serveurs après modification.
 
 ### Les autres commandes
 

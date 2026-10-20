@@ -11,6 +11,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   # ----- Le site : le code respecte-t-il les règles d'ESLint, et la construction passe-t-elle ? -----
   site:
@@ -41,13 +44,18 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
+      - run: npm test
       # On démarre le serveur, on lui laisse 3 secondes, puis on appelle sa route de santé.
       # « curl --fail » échoue si la réponse n'est pas un succès : l'étape passe alors au rouge.
       # La fausse clé RESEND_API_KEY met le serveur en mode « envoi par Resend » : il ne tente ainsi
       # aucune connexion à Gmail. Aucun email n'est envoyé pendant ce contrôle.
       - name: Démarrage du serveur et route de santé
         env:
-          RESEND_API_KEY: cle-factice-pour-le-controle
+          NODE_ENV: production
+          CORS_ORIGIN: https://portfolio.example.com
+          MAIL_TO: owner@example.com
+          RESEND_API_KEY: re_factice_pour_le_controle
+          TURNSTILE_SECRET_KEY: cle_factice_uniquement_pour_la_route_de_sante
         run: |
           node index.js &
           sleep 3

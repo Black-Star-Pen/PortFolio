@@ -1,5 +1,6 @@
 import { useState, useId, useRef, useEffect, useLayoutEffect } from "react";
 import Weld from "../shared/Weld";
+import TurnstileChallenge from "./TurnstileChallenge";
 import { API_URL } from "../../utils/api";
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -146,7 +147,7 @@ function validate(form, cityLookup, messages) {
   if (!NAME_PATTERN.test(form.lastName.trim())) {
     errors.lastName = messages.lastName;
   }
-  if (!isEmailValid(form.email)) {
+  if (!isEmailValid(form.email.trim())) {
     errors.email = messages.email;
   }
 
@@ -277,11 +278,19 @@ function ContactForm() {
   const orderRef = useRef(null);
   const formRef = useRef(null);
   const lookupRef = useRef(null);
+  const submissionRef = useRef(null);
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("idle");
   const [submitError, setSubmitError] = useState("");
   const [retryIn, setRetryIn] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [challengeVersion, setChallengeVersion] = useState(0);
+
+  useEffect(() => () => {
+    lookupRef.current?.abort();
+    submissionRef.current?.abort();
+  }, []);
 
   // Quand la demande est validée, le long formulaire laisse la place à un petit message : la page
   // raccourcit d'un coup. Sans rien faire, l'écran resterait où il était (tout en bas du formulaire) :
@@ -325,19 +334,20 @@ function ContactForm() {
     try {
       const response = await fetch(
         `https://geo.api.gouv.fr/communes?codePostal=${postalCode}&fields=nom&format=json`,
-        { signal: controller.signal }
+        { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(8000)]) }
       );
       if (!response.ok) throw new Error("Réponse invalide");
 
       const data = await response.json();
+      if (controller.signal.aborted || lookupRef.current !== controller) return;
       const communes = data.map((commune) => commune.nom).sort((a, b) => a.localeCompare(b, "fr"));
 
       setCityLookup({ status: communes.length > 0 ? "found" : "notfound", communes });
       // Une seule commune : on la sélectionne automatiquement
       setForm((previous) => ({ ...previous, city: communes.length === 1 ? communes[0] : "" }));
-    } catch (error) {
+    } catch {
       // Une recherche annulée n'est pas une vraie erreur
-      if (error.name === "AbortError") return;
+      if (controller.signal.aborted || lookupRef.current !== controller) return;
       // Service indisponible : on laissera la saisie libre
       setCityLookup({ status: "error", communes: [] });
     }
@@ -389,6 +399,7 @@ function ContactForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (submissionRef.current || retryIn > 0) return;
 
     const newErrors = validate(form, cityLookup, f.errors);
     setErrors(newErrors);
@@ -396,10 +407,16 @@ function ContactForm() {
       showFirstError(newErrors);
       return;
     }
+    if (!turnstileToken) {
+      setSubmitError(f.antibotRequired);
+      return;
+    }
 
     // On garde le message d'erreur affiché pendant l'envoi :
     // l'effacer puis le réafficher ferait "sauter" la page
     setStatus("sending");
+    const controller = new AbortController();
+    submissionRef.current = controller;
 
     try {
       const response = await fetch(`${API_URL}/api/contact`, {
@@ -407,18 +424,26 @@ function ContactForm() {
         headers: { "Content-Type": "application/json" },
         // lang : la langue du site au moment de l'envoi. Elle est indiquée dans l'email reçu,
         // pour savoir dans quelle langue répondre au visiteur.
-        body: JSON.stringify({ ...form, lang }),
+        body: JSON.stringify({ ...form, email: form.email.trim(), lang, turnstileToken }),
+        // Laisse aussi le temps à l'API hébergée de redémarrer après une période d'inactivité.
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(90000)]),
       });
-      const result = await response.json().catch(() => ({}));
+      const result = await response.json();
+      if (!result || typeof result !== "object") throw new Error("Réponse invalide");
 
       // 201 : message envoyé
-      if (response.ok) {
+      if (response.status === 201 && result.ok === true) {
         setSubmitError("");
         setStatus("success");
         return;
       }
 
       setStatus("idle");
+
+      if (result.code === "ANTIBOT_REQUIRED" || result.code === "ANTIBOT_UNAVAILABLE") {
+        setSubmitError(result.code === "ANTIBOT_REQUIRED" ? f.antibotRequired : f.antibotUnavailable);
+        return;
+      }
 
       // Le serveur écrit ses messages en français. En anglais, f.serverErrors donne leur équivalent
       // (un par champ) ; en français, f.serverErrors vaut null et on garde les messages du serveur.
@@ -441,7 +466,8 @@ function ContactForm() {
       // 429 (trop d'envois), 502 (Gmail indisponible) ou autre erreur
       // 429 : le serveur indique dans combien de secondes réessayer
       if (response.status === 429) {
-        setRetryIn(Number(response.headers.get("Retry-After")) || 60);
+        const seconds = Number(response.headers.get("Retry-After"));
+        setRetryIn(Number.isFinite(seconds) && seconds > 0 ? Math.min(Math.ceil(seconds), 3600) : 60);
       }
 
       if (serverErrors) {
@@ -449,10 +475,17 @@ function ContactForm() {
       } else {
         setSubmitError(result.error || f.errors.generic);
       }
-    } catch {
+    } catch (error) {
+      if (controller.signal.aborted) return;
       // Le serveur ne répond pas du tout (éteint, pas de connexion...)
       setStatus("idle");
-      setSubmitError(f.errors.network);
+      setSubmitError(error.name === "TimeoutError" ? f.errors.timeout : f.errors.network);
+    } finally {
+      if (submissionRef.current === controller) submissionRef.current = null;
+      if (!controller.signal.aborted) {
+        setTurnstileToken("");
+        setChallengeVersion((value) => value + 1);
+      }
     }
   }
 
@@ -557,7 +590,7 @@ function ContactForm() {
           </button>
         </div>
       ) : (
-        <form className="work-order-form" ref={formRef} onSubmit={handleSubmit} noValidate>
+        <form className="work-order-form" ref={formRef} onSubmit={handleSubmit} aria-busy={status === "sending"} noValidate>
           {/* Champ piège : caché aux humains et aux lecteurs d'écran, rempli par les robots */}
           <div className="honeypot" aria-hidden="true">
             <label htmlFor={`${id}-website`}>{f.honeypot}</label>
@@ -743,6 +776,8 @@ function ContactForm() {
             </a>
           </p>
 
+          <TurnstileChallenge key={challengeVersion} onTokenChange={setTurnstileToken} />
+
           {submitError && (
             <p className="form-alert" role="alert">
               {submitError}
@@ -752,7 +787,7 @@ function ContactForm() {
           <button
             type="submit"
             className="btn btn-primary btn-metal work-order-submit"
-            disabled={status === "sending" || retryIn > 0}
+            disabled={status === "sending" || retryIn > 0 || !turnstileToken}
           >
             {status === "sending"
               ? f.sending

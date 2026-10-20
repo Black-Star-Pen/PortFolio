@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --env-file=.env --watch index.js",
-    "start": "node --env-file=.env index.js"
+    "start": "node --env-file-if-exists=.env index.js",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "Adam Boulkhedert",

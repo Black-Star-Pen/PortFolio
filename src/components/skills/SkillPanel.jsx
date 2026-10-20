@@ -1,17 +1,16 @@
 import technoIcons from "../../data/technoIcons";
-import projectsData from "../../data/projectsData.json";
 import Weld from "../shared/Weld";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 // isWelded : ce tiroir a déjà été ouvert, son encadré est donc déjà soudé (voir Skills.jsx)
 // isFirst : c'est le panneau affiché quand la boîte à outils apparaît. Lui seul joue l'animation
 //           d'arrivée (voir reveal-drawers dans le CSS) ; les suivants s'affichent normalement.
-function SkillPanel({ skill, reference, isWelded, isFirst }) {
-  const { t } = useLanguage();
+function SkillPanel({ skill, reference, isWelded, isFirst, id, labelledBy }) {
+  const { t, data } = useLanguage();
   const refNumber = String(reference).padStart(2, "0");
 
   return (
-    <div className={`skill-panel ${isFirst ? "skill-panel-first" : ""}`} role="tabpanel">
+    <div id={id} aria-labelledby={labelledBy} tabIndex={0} className={`skill-panel ${isFirst ? "skill-panel-first" : ""}`} role="tabpanel">
       <Weld isDone={isWelded} />
       <div className="cartouche-header">
         <span>REF. {refNumber}</span>
@@ -23,7 +22,7 @@ function SkillPanel({ skill, reference, isWelded, isFirst }) {
       <ul className="tool-grid">
         {skill.technos.map((techno, index) => {
           const slug = technoIcons[techno];
-          const usedIn = projectsData.filter((project) =>
+          const usedIn = data.projects.filter((project) =>
             project.technos.includes(techno),
           );
 
