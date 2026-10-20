@@ -18,6 +18,8 @@ gsap.registerPlugin(ScrollTrigger);
 // POUR RÉGLER LE RESSENTI : change ce nombre. Plus il est grand, plus la page glisse longtemps
 // (0.8 = plus vif, 1.1 = fluide, 1.5 = très coulé).
 const DURATION = 1.1;
+// Les fiches sont courtes : un élan plus bref évite une sensation de retard à la molette.
+const MODAL_DURATION = 0.65;
 
 // L'instance de Lenis quand le défilement fluide est actif, sinon null
 let lenis = null;
@@ -69,28 +71,21 @@ export function startSmoothScroll() {
 }
 
 // Le même défilement fluide, mais à l'intérieur d'une zone qui défile toute seule : une modale.
-// Lenis accepte plusieurs instances : celle-ci ne s'occupe que de cette zone (« wrapper »), avec la même
-// durée de glisse que la page. Renvoie la fonction qui l'arrête (pour le nettoyage de useEffect).
+// Le premier enfant contient toute la fiche : ResizeObserver suit ainsi les images, les textes
+// et les champs qui apparaissent. Renvoie la fonction de nettoyage de useEffect.
 export function startSmoothScrollIn(wrapper) {
   if (!wrapper || !wantsSmoothScroll()) return () => {};
 
   const instance = new Lenis({
     wrapper,
     content: wrapper.firstElementChild,
-    duration: DURATION,
+    duration: MODAL_DURATION,
+    overscroll: false,
   });
 
-  // La hauteur du contenu peut changer pendant que la modale est ouverte (une image qui arrive, des
-  // champs de formulaire qui apparaissent). Lenis ne le voit pas toujours : on le lui signale, sinon il
-  // s'arrêterait avant le vrai bas de la zone.
-  let knownHeight = wrapper.scrollHeight;
-  const tick = (time) => {
-    if (wrapper.scrollHeight !== knownHeight) {
-      knownHeight = wrapper.scrollHeight;
-      instance.resize();
-    }
-    instance.raf(time * 1000);
-  };
+  // Lenis observe le conteneur et son contenu. La boucle d'animation n'interroge plus
+  // la mise en page à chaque image, même quand la modale est au repos.
+  const tick = (time) => instance.raf(time * 1000);
   gsap.ticker.add(tick);
 
   return () => {

@@ -33,6 +33,17 @@
   scrollbar-color: rgba(var(--rgb-accent), 0.5) transparent;
 }
 
+/* Toute la fiche est mesurée comme un bloc, sans effondrement des marges du bouton de fermeture. */
+.modal-scroll-content {
+  display: flow-root;
+}
+
+.modal,
+.contact-modal {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
 /* Le visuel. sticky + top: 0 : il reste en place en haut de la modale pendant qu'on fait défiler.
    Le bloc de texte, posé au-dessus de lui, remonte et le recouvre peu à peu, comme une fiche
    qu'on fait glisser sur une photo.
@@ -207,7 +218,7 @@
 .project-actions {
   /* sticky + bottom: 0 : la barre reste collée en bas de la modale pendant tout le défilement,
      puis se range à sa place, tout en bas, quand on y arrive.
-     Elle est placée directement dans .modal (la boîte qui défile) pour être visible dès l'ouverture. */
+     Elle appartient au bloc complet .modal-scroll-content pour être visible dès l'ouverture. */
   position: sticky;
   bottom: 0;
   z-index: 2;
@@ -265,7 +276,7 @@
    Un élément sticky reste dans le fil de la page, il prendrait donc sa hauteur au-dessus du visuel :
    - margin-left: auto le pousse à droite ;
    - la marge négative du bas (ses 44px + les 16px du haut) annule la place qu'il occupe. */
-.modal > .modal-close {
+.modal-scroll-content > .modal-close {
   position: sticky;
   z-index: 3;
   margin: 16px 16px -60px auto;
