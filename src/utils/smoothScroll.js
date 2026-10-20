@@ -14,12 +14,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Le temps que met la page à rejoindre sa nouvelle position après un cran de molette, en secondes.
+// Le même élan pour la page et les modales après un cran de molette, en secondes.
 // POUR RÉGLER LE RESSENTI : change ce nombre. Plus il est grand, plus la page glisse longtemps
 // (0.8 = plus vif, 1.1 = fluide, 1.5 = très coulé).
 const DURATION = 1.1;
-// Les fiches sont courtes : un élan plus bref évite une sensation de retard à la molette.
-const MODAL_DURATION = 0.65;
 
 // L'instance de Lenis quand le défilement fluide est actif, sinon null
 let lenis = null;
@@ -79,7 +77,7 @@ export function startSmoothScrollIn(wrapper) {
   const instance = new Lenis({
     wrapper,
     content: wrapper.firstElementChild,
-    duration: MODAL_DURATION,
+    duration: DURATION,
     overscroll: false,
   });
 
