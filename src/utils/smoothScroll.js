@@ -18,8 +18,8 @@ gsap.registerPlugin(ScrollTrigger);
 // POUR RÉGLER LE RESSENTI : change ce nombre. Plus il est grand, plus la page glisse longtemps
 // (0.8 = plus vif, 1.1 = fluide, 1.5 = très coulé).
 const DURATION = 1.1;
-// Les fiches sont courtes : un même geste parcourt 40 % de la distance de la page.
-const MODAL_WHEEL_MULTIPLIER = 0.4;
+// Les fiches sont courtes : un même geste parcourt 50 % de la distance de la page.
+const MODAL_WHEEL_MULTIPLIER = 0.5;
 
 // L'instance de Lenis quand le défilement fluide est actif, sinon null
 let lenis = null;
