@@ -87,7 +87,7 @@ PortFolio/
 
 ## Lancer le projet en local
 
-Il faut Node.js 20.6 ou plus récent.
+Il faut Node.js 22.12 ou plus récent (Node 22 est utilisé en CI et chez Render).
 
 ### Le site
 
@@ -111,20 +111,31 @@ npm run dev
 
 L'API écoute sur http://localhost:3001. En développement, Vite lui transmet toutes les requêtes qui commencent par `/api`.
 
-Le fichier `.env` attend quatre valeurs, et quelques autres pour la mise en ligne :
+Le fichier `.env` configure l'API. Pour Resend, renseigne `RESEND_API_KEY` et `MAIL_TO` ;
+pour Gmail, renseigne `MAIL_USER`, `MAIL_PASS` et `MAIL_TO`.
+En mode test Resend (`MAIL_FROM` vide), `MAIL_TO` doit être l'adresse du compte Resend.
+Pour un expéditeur personnalisé, utilise une adresse d'un domaine vérifié dans Resend.
 
 | Variable | Rôle |
 | --- | --- |
 | `PORT` | le port du serveur |
+| `NODE_ENV` | `development` en local, `production` chez l'hébergeur |
 | `MAIL_USER` | le compte Gmail qui envoie les emails |
 | `MAIL_PASS` | son mot de passe d'application |
 | `MAIL_TO` | l'adresse qui reçoit les demandes |
-| `RESEND_API_KEY` | en ligne : la clé Resend ; dès qu'elle est remplie, l'envoi passe par Resend au lieu de Gmail |
+| `RESEND_API_KEY` | la clé Resend, en local ou en ligne ; dès qu'elle est remplie, l'envoi passe par Resend au lieu de Gmail |
 | `MAIL_FROM` | en ligne : l'expéditeur des emails envoyés par Resend (facultatif) |
-| `CORS_ORIGIN` | en ligne : l'adresse du site autorisé à appeler l'API (vide en local) |
+| `CORS_ORIGIN` | origines autorisées, séparées par des virgules ; vide en développement = localhost:5173 et 127.0.0.1:5173 ; obligatoire en production, en HTTPS |
 | `TRUST_PROXY` | en ligne : le nombre d'intermédiaires devant le serveur, 3 chez Render (vide en local) |
 
 Sans l'API, le site s'affiche normalement : seul l'envoi du formulaire échoue.
+
+L'API refuse de démarrer si la configuration des emails est incomplète ou si les origines et
+le nombre de proxys sont invalides. Le fichier `.env` local n'est pas chargé par Render :
+renseigne ses variables dans le service API. N'ajoute jamais une clé privée à une variable `VITE_`.
+
+Les tests de l'API se lancent avec `npm test --prefix server`. Ils vérifient la validation,
+les restrictions d'origine, les limites d'envoi et les erreurs HTTP sans envoyer d'email.
 
 ### Les autres commandes
 

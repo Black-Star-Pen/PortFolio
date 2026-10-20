@@ -1,8 +1,23 @@
 import nodemailer from "nodemailer";
 import { buildContactEmail } from "./emailTemplate.js";
+import { isEmailValid } from "./validation.js";
 
 // Les secrets viennent du fichier .env (ou des réglages de l'hébergeur), jamais du code
 const { MAIL_USER, MAIL_PASS, MAIL_TO, MAIL_FROM, RESEND_API_KEY } = process.env;
+
+// Une configuration incomplète doit être détectée avant d’accepter des demandes.
+if (!isEmailValid(MAIL_TO)) throw new Error("MAIL_TO doit contenir une adresse email valide.");
+if (RESEND_API_KEY) {
+  if (!RESEND_API_KEY.startsWith("re_") || /\s/.test(RESEND_API_KEY)) {
+    throw new Error("RESEND_API_KEY doit être une clé Resend sans espaces.");
+  }
+  if (MAIL_FROM && (/[\r\n]/.test(MAIL_FROM) ||
+      !isEmailValid(MAIL_FROM.match(/<([^<>]+)>$/)?.[1] || MAIL_FROM))) {
+    throw new Error("MAIL_FROM doit contenir un expéditeur valide.");
+  }
+} else if (!isEmailValid(MAIL_USER) || !MAIL_PASS) {
+  throw new Error("Renseigne RESEND_API_KEY, ou MAIL_USER et MAIL_PASS pour Gmail.");
+}
 
 // Deux façons d'envoyer un email, selon l'endroit où tourne le serveur :
 // - en ligne, par Resend : un service qu'on appelle par une simple requête HTTPS. L'hébergeur (Render,
@@ -21,6 +36,9 @@ const transporter = useResend
   ? null
   : nodemailer.createTransport({
       service: "gmail",
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
       auth: {
         user: MAIL_USER,
         pass: MAIL_PASS,
@@ -83,7 +101,7 @@ export async function sendContactEmail(data) {
   await transporter.sendMail({
     from: `"Portfolio" <${MAIL_USER}>`,
     to: MAIL_TO,
-    replyTo: `"${data.firstName} ${data.lastName}" <${data.email}>`,
+    replyTo: { name: `${data.firstName} ${data.lastName}`, address: data.email },
     subject,
     text,
     html,

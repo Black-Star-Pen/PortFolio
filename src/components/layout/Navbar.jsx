@@ -24,7 +24,20 @@ function Navbar({ onContactClick }) {
     if (!isOpen) return;
 
     lockPageScroll();
-    return unlockPageScroll;
+    const desktop = window.matchMedia("(min-width: 901px)");
+    function onResize() {
+      if (desktop.matches) setIsOpen(false);
+    }
+    function onKeyDown(event) {
+      if (event.key === "Escape") setIsOpen(false);
+    }
+    desktop.addEventListener("change", onResize);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      unlockPageScroll();
+      desktop.removeEventListener("change", onResize);
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [isOpen]);
 
   function closeMenu() {
@@ -51,7 +64,7 @@ function Navbar({ onContactClick }) {
           </span>
         </Link>
 
-        <nav className={`navbar-links ${isOpen ? "open" : ""}`}>
+        <nav id="main-navigation" className={`navbar-links ${isOpen ? "open" : ""}`}>
           {links.map((link, index) => (
             <a key={link.href} href={link.href} onClick={closeMenu} style={{ "--i": index }}>
               <span className="navbar-link-number">{String(index + 1).padStart(2, "0")}</span>
@@ -68,7 +81,7 @@ function Navbar({ onContactClick }) {
           <button
             type="button"
             className="btn btn-primary btn-small btn-metal navbar-cta"
-            onClick={onContactClick}
+            onClick={() => { closeMenu(); onContactClick(); }}
           >
             {t.nav.cta}
           </button>
@@ -80,6 +93,7 @@ function Navbar({ onContactClick }) {
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? t.nav.closeMenu : t.nav.openMenu}
           aria-expanded={isOpen}
+          aria-controls="main-navigation"
         >
           <span></span>
           <span></span>

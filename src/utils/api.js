@@ -8,5 +8,5 @@ export const API_URL = import.meta.env.VITE_API_URL || "";
 // le temps que le visiteur lise la page et remplisse le formulaire, il est prêt.
 // On n'attend pas la réponse, et un échec n'a aucune importance.
 export function wakeApi() {
-  fetch(`${API_URL}/api/health`).catch(() => {});
+  fetch(`${API_URL}/api/health`, { signal: AbortSignal.timeout(90000) }).catch(() => {});
 }

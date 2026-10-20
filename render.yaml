@@ -90,6 +90,8 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
+      - key: NODE_ENV
+        value: production
       # Seul ce site a le droit d'appeler l'API
       - key: CORS_ORIGIN
         value: https://adam-boulkhedert.onrender.com

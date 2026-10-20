@@ -23,8 +23,12 @@ const NAME_PATTERN = /^\p{L}[\p{L}\s'’-]*$/u;
 // Forme stricte : caractères autorisés, un seul @, et une extension d'au moins 2 lettres
 const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
-function isEmailValid(email) {
-  return EMAIL_PATTERN.test(email) && !email.includes("..") && !email.startsWith(".") && !email.includes(".@");
+export function isEmailValid(email) {
+  if (typeof email !== "string" || email.length > 254 || !EMAIL_PATTERN.test(email)) return false;
+  const [local, domain] = email.split("@");
+  return local.length <= 64 && !local.startsWith(".") && !local.endsWith(".") &&
+    !local.includes("..") && domain.split(".").every((label) =>
+      label.length <= 63 && !label.startsWith("-") && !label.endsWith("-"));
 }
 
 // Garde en mémoire les domaines déjà vérifiés, pour ne pas interroger le DNS à chaque fois.
@@ -42,21 +46,21 @@ function remember(domain, result) {
 const DNS_TIMEOUT = 3000;
 const GEO_TIMEOUT = 4000;
 
-// Une promesse qui échoue toute seule au bout du délai donné
-function timeout(milliseconds) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => reject(new Error("Délai dépassé")), milliseconds);
-  });
-}
-
 // Le domaine de l'adresse possède-t-il un serveur de messagerie ?
 async function hasMailServer(domain) {
   if (mailServerCache.has(domain)) return mailServerCache.get(domain);
 
+  let timer;
   try {
     // Promise.race : la première des deux qui se termine l'emporte (la réponse du DNS, ou le délai)
-    const records = await Promise.race([resolveMx(domain), timeout(DNS_TIMEOUT)]);
-    const result = records.length > 0;
+    const records = await Promise.race([
+      resolveMx(domain),
+      new Promise((resolve, reject) => {
+        timer = setTimeout(() => reject(new Error("Délai dépassé")), DNS_TIMEOUT);
+      }),
+    ]);
+    // Un MX vide (« null MX ») annonce que le domaine ne reçoit pas de courrier.
+    const result = records.some((record) => record.exchange && record.exchange !== ".");
     remember(domain, result);
     return result;
   } catch (error) {
@@ -67,6 +71,8 @@ async function hasMailServer(domain) {
     }
     // DNS injoignable ou trop lent : on ne bloque pas un vrai visiteur
     return true;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -108,7 +114,13 @@ async function isCityValid(postalCode, city) {
 }
 
 // Reçoit le corps brut de la requête, renvoie { data, errors }
-export async function validateContact(body = {}) {
+export async function validateContact(body = {}, {
+  checkMailServer = hasMailServer,
+  checkCity = isCityValid,
+} = {}) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { data: {}, errors: { type: "Requête invalide." } };
+  }
   // 1. On ne garde QUE les champs attendus, nettoyés
   const data = {
     type: clean(body.type),
@@ -135,8 +147,6 @@ export async function validateContact(body = {}) {
   }
   if (!isEmailValid(data.email)) {
     errors.email = "Adresse email invalide.";
-  } else if (!(await hasMailServer(data.email.split("@")[1]))) {
-    errors.email = "Ce domaine ne reçoit pas d'emails. Vérifiez l'adresse.";
   }
   if (data.message.length < 20) {
     errors.message = "Le message doit contenir au moins 20 caractères.";
@@ -165,8 +175,9 @@ export async function validateContact(body = {}) {
     }
     if (!/^\d{5}$/.test(data.postalCode)) {
       errors.postalCode = "Le code postal doit contenir 5 chiffres.";
-    } else if (!(await isCityValid(data.postalCode, data.city))) {
-      errors.city = "La ville ne correspond pas au code postal.";
+    }
+    if (data.city.length < 2) {
+      errors.city = "Ville manquante.";
     }
   }
 
@@ -174,6 +185,17 @@ export async function validateContact(body = {}) {
   for (const [field, max] of Object.entries(MAX_LENGTH)) {
     if (data[field] && data[field].length > max) {
       errors[field] = `Ce champ ne doit pas dépasser ${max} caractères.`;
+    }
+  }
+
+  // Les appels extérieurs ne commencent qu'après les contrôles locaux : une requête
+  // malformée ne doit pas consommer du DNS ou appeler le service des communes.
+  if (Object.keys(errors).length === 0) {
+    if (!(await checkMailServer(data.email.split("@")[1]))) {
+      errors.email = "Ce domaine ne reçoit pas d'emails. Vérifiez l'adresse.";
+    }
+    if (data.type === "recrutement" && !(await checkCity(data.postalCode, data.city))) {
+      errors.city = "La ville ne correspond pas au code postal.";
     }
   }
 
