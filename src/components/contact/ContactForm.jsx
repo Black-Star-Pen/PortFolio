@@ -408,6 +408,8 @@ function ContactForm() {
         // lang : la langue du site au moment de l'envoi. Elle est indiquée dans l'email reçu,
         // pour savoir dans quelle langue répondre au visiteur.
         body: JSON.stringify({ ...form, lang }),
+        // Laisse aussi le temps à l'API hébergée de redémarrer après une période d'inactivité.
+        signal: AbortSignal.timeout(90000),
       });
       const result = await response.json().catch(() => ({}));
 
@@ -449,10 +451,10 @@ function ContactForm() {
       } else {
         setSubmitError(result.error || f.errors.generic);
       }
-    } catch {
+    } catch (error) {
       // Le serveur ne répond pas du tout (éteint, pas de connexion...)
       setStatus("idle");
-      setSubmitError(f.errors.network);
+      setSubmitError(error.name === "TimeoutError" ? f.errors.timeout : f.errors.network);
     }
   }
 

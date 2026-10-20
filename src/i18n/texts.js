@@ -173,6 +173,7 @@ const fr = {
       message: "Détaillez un peu votre demande (20 caractères minimum).",
       generic: "Une erreur est survenue. Réessayez dans quelques instants.",
       network: "Impossible de joindre le serveur. Vérifiez votre connexion ou écrivez-moi directement.",
+      timeout: "Le serveur met trop de temps à confirmer l’envoi. Vous pouvez me contacter directement par email.",
     },
     // Le serveur répond en français. En anglais, on remplace ses messages par ceux-ci (voir ContactForm.jsx) ;
     // en français, null : on garde les siens.
@@ -403,6 +404,7 @@ const en = {
       message: "Tell me a bit more about your request (20 characters minimum).",
       generic: "Something went wrong. Try again in a moment.",
       network: "Unable to reach the server. Check your connection or write to me directly.",
+      timeout: "The server is taking too long to confirm delivery. You can contact me directly by email.",
     },
     serverErrors: {
       type: "Invalid type of request.",
