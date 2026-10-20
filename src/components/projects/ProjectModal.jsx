@@ -135,7 +135,7 @@ function ProjectSheet({ project, number, titleId, closeButtonRef, onClose }) {
         </div>
       </div>
 
-      {/* Les boutons sont en dehors de .modal-content, directement dans la boîte qui défile :
+      {/* Les boutons sont en dehors de .modal-content, dans le bloc complet de la fiche :
           ainsi, ils restent collés en bas pendant tout le défilement (voir .project-actions) */}
       {links && links.length > 0 && (
         <div className="project-actions">
@@ -404,10 +404,12 @@ function ProjectModal({
           style={{ transform: `scale(${BEHIND_SCALE})`, opacity: BEHIND_OPACITY }}
           inert
         >
-          <ProjectSheet
-            project={behindProject}
-            number={peekSide === "next" ? nextNumber : previousNumber}
-          />
+          <div className="modal-scroll-content">
+            <ProjectSheet
+              project={behindProject}
+              number={peekSide === "next" ? nextNumber : previousNumber}
+            />
+          </div>
         </div>
       )}
 
@@ -426,13 +428,15 @@ function ProjectModal({
         data-lenis-prevent
         onClick={(event) => event.stopPropagation()}
       >
-        <ProjectSheet
-          project={project}
-          number={number}
-          titleId={titleId}
-          closeButtonRef={closeButtonRef}
-          onClose={onClose}
-        />
+        <div className="modal-scroll-content">
+          <ProjectSheet
+            project={project}
+            number={number}
+            titleId={titleId}
+            closeButtonRef={closeButtonRef}
+            onClose={onClose}
+          />
+        </div>
       </div>
 
       {/* Les flèches pour passer d'un projet à l'autre, posées sur le fond, en dehors de la fiche :

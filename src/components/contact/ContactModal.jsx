@@ -10,10 +10,8 @@ function ContactModal({ onClose }) {
   const dialogRef = useRef(null);
   useDialog(dialogRef, onClose, 'input[name="firstName"]');
 
-  // Le défilement fluide à l'intérieur de la modale, le même que celui de la page (voir startSmoothScrollIn)
+  // Le défilement de la modale suit les dimensions de l'ensemble de son contenu.
   useEffect(() => startSmoothScrollIn(dialogRef.current), []);
-
-
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -28,15 +26,17 @@ function ContactModal({ onClose }) {
         data-lenis-prevent
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="contact-modal-bar">
-          <p id="contact-modal-title">{t.contact.modalTitle}</p>
-          <button type="button" className="modal-close" onClick={onClose} aria-label={t.common.close}>
-            ✕
-          </button>
-        </div>
+        <div className="modal-scroll-content">
+          <div className="contact-modal-bar">
+            <p id="contact-modal-title">{t.contact.modalTitle}</p>
+            <button type="button" className="modal-close" onClick={onClose} aria-label={t.common.close}>
+              ✕
+            </button>
+          </div>
 
-        <ContactForm />
-        <ContactLinks compact />
+          <ContactForm />
+          <ContactLinks compact />
+        </div>
       </div>
     </div>
   );
