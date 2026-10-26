@@ -248,6 +248,39 @@
   }
 }
 
+/* Sur mobile, la carte arrive d'un seul mouvement : fondu et légère montée.
+   Le tactile couvre aussi le téléphone en paysage, au-delà du seuil de 768px. */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .reveal-scan.revealed {
+    animation-name: project-mobile-in;
+    animation-duration: 0.56s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-delay: 0s;
+  }
+
+  .reveal-scan .project-scan {
+    display: none;
+  }
+
+  .reveal-scan.revealed > .project-image,
+  .reveal-scan.revealed > .project-meta,
+  .reveal-scan.revealed > .project-header,
+  .reveal-scan.revealed > .project-body {
+    animation: none;
+  }
+}
+
+@keyframes project-mobile-in {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 /* 5. ORDER : l'ordre de fabrication (le formulaire). Deux temps, l'un après l'autre :
       0s      le trait bleu des cartes projet balaie la feuille de haut en bas et la révèle, encore vide
               (mêmes animations que SCAN : card-scan pour la découpe, scan-line pour le trait) ;

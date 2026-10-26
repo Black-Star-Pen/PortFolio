@@ -104,7 +104,7 @@ function Skills() {
                 // --i : le rang du tiroir, pour qu'ils arrivent l'un après l'autre (voir reveal-drawers)
                 style={{ "--i": index }}
               >
-                {index === activeIndex && <Weld />}
+                {index === activeIndex && <Weld isDone />}
                 <span className="skills-tab-ref">
                   REF. {String(index + 1).padStart(2, "0")}
                 </span>

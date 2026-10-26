@@ -16,7 +16,8 @@ html {
    voir src/utils/smoothScroll.js), c'est elle qui anime tous les déplacements de la page.
    Le défilement doux du navigateur doit se taire : sinon les deux animations se superposent. */
 html.lenis {
-  scroll-behavior: auto;
+  /* ScrollTrigger peut restaurer « smooth » en style inline après un recalcul de la page. */
+  scroll-behavior: auto !important;
 }
 
 /* La barre de défilement : un fil doré, fin, sur le fond du site.

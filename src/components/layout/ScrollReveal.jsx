@@ -38,7 +38,7 @@ const TARGETS = [
   { selector: ".timeline", effect: "unfold" },
   { selector: ".blueprint", effect: "drawers", replay: true },
   { selector: ".projects-grid > *", effect: "scan", visible: 0.35, replay: true },
-  { selector: ".work-order", effect: "order", visible: 0.35, replay: true },
+  { selector: ".work-order", effect: "order", visible: 0.35 },
   { selector: ".contact-divider", effect: "cut" },
   { selector: ".contact-links", effect: "rise" },
   { selector: ".legal-content", effect: "unfold" },
@@ -177,21 +177,19 @@ function speedUp(element, rate) {
 // Note la fin de l'apparition d'un bloc (classe reveal-over), une fois toutes ses animations terminées.
 // Le CSS s'en sert pour ne pas rejouer l'apparition sur ce qui arrive plus tard dans le bloc
 // (ex. : le formulaire, recréé à neuf après un envoi : ses champs ne sont pas ressoudés).
+const revealRuns = new WeakMap();
+
 function markWhenOver(element) {
+  const run = Symbol();
+  revealRuns.set(element, run);
   // allSettled (et pas all) : une animation interrompue ne doit pas empêcher de noter la fin
   Promise.allSettled(revealAnimations(element).map((animation) => animation.finished)).then(() => {
     // Un bloc « replay » sorti de l'écran en pleine apparition a été remis en attente entre-temps :
     // son apparition n'est pas finie, elle a été interrompue
-    if (element.classList.contains("revealed")) element.classList.add("reveal-over");
+    if (revealRuns.get(element) === run && element.classList.contains("revealed")) {
+      element.classList.add("reveal-over");
+    }
   });
-}
-
-// Le visiteur a-t-il commencé à écrire dans ce bloc ? (Seul le formulaire a des champs de saisie.)
-// Dans ce cas, le bloc ne rejoue pas son apparition : on ne fait pas disparaître puis réapparaître
-// champ par champ un message en cours d'écriture.
-function isBeingFilled(element) {
-  // [...liste] change la liste d'éléments en tableau, pour pouvoir utiliser some()
-  return [...element.querySelectorAll("input, textarea")].some((field) => field.value.trim() !== "");
 }
 
 // Fait apparaître chaque bloc la première fois qu'il arrive à l'écran (et à chaque retour, pour les
@@ -207,7 +205,7 @@ function ScrollReveal() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     // Les réglages du téléphone (voir SMALL_SCREEN plus haut)
-    const isSmallScreen = window.matchMedia(SMALL_SCREEN).matches;
+    let isSmallScreen = window.matchMedia(SMALL_SCREEN).matches;
     const stagger = isSmallScreen ? SMALL_SCREEN_STAGGER : STAGGER;
 
     // Pour chaque bloc à faire apparaître : la part de lui-même qui doit être visible (une Map
@@ -225,45 +223,69 @@ function ScrollReveal() {
         const order = Math.min(siblings.indexOf(element), 4);
         element.style.setProperty("--reveal-delay", `${order * stagger}s`);
         element.classList.add("reveal", `reveal-${effect}`);
-        // Sur téléphone, 10 % suffisent pour tous : un tiers d'une carte, c'est déjà un tiers de l'écran
-        visibleNeeded.set(element, isSmallScreen ? DEFAULT_VISIBLE : visible);
+        visibleNeeded.set(element, visible);
         if (replay) replayed.add(element);
       });
     });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          // Le -0.01 : le navigateur annonce parfois 0.0999 au lieu de 0.1, on ne rate pas le coche pour si peu
-          if (entry.intersectionRatio >= visibleNeeded.get(entry.target) - 0.01) {
-            // Un bloc « replay » reste surveillé : s'il est déjà apparu, il n'y a rien à refaire
-            if (entry.target.classList.contains("revealed")) return;
-            entry.target.classList.add("revealed");
-            if (isSmallScreen) speedUp(entry.target, SMALL_SCREEN_SPEED);
-            markWhenOver(entry.target);
-            // Une seule fois : on arrête de surveiller ce bloc (sauf s'il doit rejouer son apparition)
-            if (!replayed.has(entry.target)) observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        // -15 % en bas : le bloc apparaît quand il est bien entré à l'écran, pas au ras du bord
-        // (-5 % sur téléphone, où il part plus tôt)
-        rootMargin: isSmallScreen ? "0px 0px -5% 0px" : "0px 0px -15% 0px",
-        // Le navigateur nous prévient à chacun des seuils demandés (ici 10 % et 35 %) ;
-        // new Set(...) retire les doublons de la liste
-        threshold: [...new Set(visibleNeeded.values())],
-      }
-    );
+    let observer;
+    let revealFrame = 0;
+    const thresholds = new Map();
 
-    visibleNeeded.forEach((visible, element) => observer.observe(element));
+    function observeReveals() {
+      observer?.disconnect();
+      isSmallScreen = window.matchMedia(SMALL_SCREEN).matches;
+      // rootMargin en % utilise la largeur de l'écran, y compris pour la marge du bas.
+      const margin = Math.round(window.innerHeight * (isSmallScreen ? 0.05 : 0.15));
+      visibleNeeded.forEach((visible, element) => {
+        // Un formulaire ou un parcours plus haut que l'écran doit aussi pouvoir apparaître.
+        const height = Math.max(element.getBoundingClientRect().height, 1);
+        thresholds.set(element, Math.min(
+          isSmallScreen ? DEFAULT_VISIBLE : visible,
+          ((window.innerHeight - margin) * 0.5) / height,
+        ));
+      });
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            // La tolérance évite de rater un seuil annoncé à 0.0999 au lieu de 0.1.
+            if (entry.isIntersecting && entry.intersectionRatio >= thresholds.get(entry.target) - 0.01) {
+              if (entry.target.classList.contains("revealed")) return;
+              entry.target.classList.add("revealed");
+              if (isSmallScreen) speedUp(entry.target, SMALL_SCREEN_SPEED);
+              markWhenOver(entry.target);
+              if (!replayed.has(entry.target)) observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          rootMargin: `0px 0px -${margin}px 0px`,
+          threshold: [...new Set(thresholds.values())],
+        },
+      );
+      visibleNeeded.forEach((visible, element) => {
+        if (replayed.has(element) || !element.classList.contains("revealed")) observer.observe(element);
+      });
+    }
+
+    function scheduleReveals() {
+      cancelAnimationFrame(revealFrame);
+      revealFrame = requestAnimationFrame(observeReveals);
+    }
+
+    observeReveals();
+    // Rotation, chargement des polices, changement de langue ou champs supplémentaires du formulaire.
+    const sizes = new ResizeObserver(scheduleReveals);
+    visibleNeeded.forEach((visible, element) => sizes.observe(element));
+    window.addEventListener("resize", scheduleReveals, { passive: true });
 
     // Les blocs « replay » : dès qu'ils sont entièrement sortis de l'écran, par le haut ou par le bas,
     // ils sont remis en attente (cachés). À leur retour, l'observateur ci-dessus rejoue leur apparition.
     // Sans réglage, un IntersectionObserver regarde tout l'écran et prévient à l'entrée et à la sortie.
     const exitObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting || isBeingFilled(entry.target)) return;
+        if (entry.isIntersecting) return;
+        revealRuns.delete(entry.target);
         entry.target.classList.remove("revealed", "reveal-over");
       });
     });
@@ -286,16 +308,25 @@ function ScrollReveal() {
           }
         });
       },
-      { rootMargin: "0px 0px -20% 0px" }
+      { rootMargin: `0px 0px -${Math.round(window.innerHeight * 0.2)}px 0px` }
     );
 
     seams.forEach((section) => seamObserver.observe(section));
 
     return () => {
       observer.disconnect();
+      sizes.disconnect();
+      cancelAnimationFrame(revealFrame);
+      window.removeEventListener("resize", scheduleReveals);
       exitObserver.disconnect();
       seamObserver.disconnect();
       stopWelds.forEach((stop) => stop());
+      visibleNeeded.forEach((visible, element) => {
+        revealRuns.delete(element);
+        element.classList.remove("reveal", "revealed", "reveal-over", ...TARGETS.map(({ effect }) => `reveal-${effect}`));
+        element.style.removeProperty("--reveal-delay");
+      });
+      seams.forEach((section) => section.classList.remove("seam-pending", "seam-welded"));
     };
   }, [pathname]); // on recommence à chaque changement de page
 

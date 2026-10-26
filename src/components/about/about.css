@@ -10,11 +10,10 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 50%;
+  left: calc(50% - 50vw);
   z-index: -1;
   overflow: clip;
   width: 100vw;
-  transform: translateX(-50%);
   pointer-events: none;
 }
 
@@ -24,6 +23,8 @@
   position: sticky;
   top: var(--navbar-h, 73px);
   height: calc(100vh - var(--navbar-h, 73px));
+  /* La barre d'adresse mobile ne redimensionne plus le dessin pendant le défilement. */
+  height: calc(100svh - var(--navbar-h, 73px));
 }
 
 /* ----- L'épure : le fond de l'À propos (voir Epure.jsx) ----- */
@@ -67,10 +68,10 @@
   stroke: none;
 }
 
-/* Un trait qui se trace : sa longueur vaut 1 (pathLength dans le SVG), son tiret aussi. En décalant
-   ce tiret de 1, le trait est entièrement caché ; l'animation ramène le décalage à 0. */
+/* Un tiret de la longueur réelle du trait, mesurée dans Epure.jsx avant le premier affichage. */
 .epure-line {
-  stroke-dasharray: 1;
+  stroke-dasharray: var(--length);
+  stroke-dashoffset: 0;
 }
 
 /* L'épure se trace une fois le cordon de la section soudé (classes posées par ScrollReveal, voir
@@ -92,7 +93,10 @@ main > section.seam-welded .epure-fade {
 
 @keyframes epure-draw {
   from {
-    stroke-dashoffset: 1;
+    stroke-dashoffset: var(--length);
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 

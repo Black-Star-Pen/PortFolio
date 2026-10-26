@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useReplayOnReturn } from "../../hooks/useReplayOnReturn";
 
 // L'épure : le fond de la section À propos. Un dessin technique de chaudronnier, tracé en traits fins :
@@ -40,12 +40,19 @@ function coneArc(radius) {
 }
 
 // Les classes du dessin (voir le CSS) :
-//   epure-shape : les formes, en doré        epure-line : un trait qui se trace (pathLength="1")
+//   epure-shape : les formes, en doré        epure-line : un trait dont on mesure la longueur
 //   epure-axis  : les axes, en trait mixte   epure-fade : un groupe qui apparaît en fondu
 //   epure-dim   : les cotes, en bleu         --i : l'ordre de passage (plus il est grand, plus c'est tard)
 function Epure() {
   const rootRef = useRef(null);
   useReplayOnReturn(rootRef);
+
+  // Les tirets utilisent la longueur réelle, sans dépendre de pathLength sur les cercles SVG.
+  useLayoutEffect(() => {
+    rootRef.current.querySelectorAll(".epure-line").forEach((line) => {
+      line.style.setProperty("--length", line.getTotalLength());
+    });
+  }, []);
 
   return (
     // aria-hidden : un décor, les lecteurs d'écran l'ignorent
@@ -77,7 +84,6 @@ function Epure() {
                 key={radius}
                 className="epure-line"
                 style={{ "--i": index }}
-                pathLength="1"
                 cx={FLANGE.x}
                 cy={FLANGE.y}
                 r={radius}
@@ -88,21 +94,19 @@ function Epure() {
                 key={`${x}-${y}`}
                 className="epure-line"
                 style={{ "--i": 3 + index * 0.3 }}
-                pathLength="1"
                 cx={x}
                 cy={y}
                 r="16"
               />
             ))}
 
-            <path className="epure-line" style={{ "--i": 1 }} pathLength="1" d={coneArc(CONE.outer)} />
-            <path className="epure-line" style={{ "--i": 2 }} pathLength="1" d={coneArc(CONE.inner)} />
+            <path className="epure-line" style={{ "--i": 1 }} d={coneArc(CONE.outer)} />
+            <path className="epure-line" style={{ "--i": 2 }} d={coneArc(CONE.inner)} />
             {generators.map((line, index) => (
               <path
                 key={line}
                 className="epure-line"
                 style={{ "--i": 3 + index * 0.25 }}
-                pathLength="1"
                 d={line}
               />
             ))}
