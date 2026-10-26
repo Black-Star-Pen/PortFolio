@@ -105,7 +105,10 @@ export function scrollToElement(element) {
 // Fait défiler jusqu'à une position, en pixels depuis le haut de la page
 export function scrollToPosition(top) {
   if (lenis) lenis.scrollTo(top);
-  else window.scrollTo({ top, behavior: "smooth" });
+  else window.scrollTo({
+    top,
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+  });
 }
 
 // Coupe l'élan en cours : à appeler avant de déplacer la page nous-mêmes (voir scrollToSiteTop),

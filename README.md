@@ -175,8 +175,15 @@ Utiliser un widget distinct pour la production. Redémarrer les deux serveurs ap
 | `npm run build` | construit la version de production dans `dist/` |
 | `npm run preview` | sert cette version en local, pour la vérifier |
 | `npm run lint` | vérifie le code avec ESLint |
+| `npm run test:browser` | vérifie les animations, la navigation et les modales sur Chromium, Firefox et WebKit, en mobile et bureau |
 | `npm run images` | convertit les captures de `images-source/projects/` en WebP dans `public/projects/`, en trois largeurs |
 | `npm run icons` | télécharge dans `public/icons/` les logos listés dans `src/data/technoIcons.js` |
+
+Pour les tests navigateur, installer les moteurs une première fois avec
+`npx playwright install --with-deps chromium firefox webkit`, puis lancer `npm run test:browser`.
+Playwright démarre le site sur le port 4173. Les services de santé et d'anti-bot sont simulés :
+ces tests n'envoient aucun email. WebKit vérifie le moteur de Safari ; les gestes et le clavier
+virtuel d'un véritable iPhone demandent aussi un essai sur appareil.
 
 ## Contact
 

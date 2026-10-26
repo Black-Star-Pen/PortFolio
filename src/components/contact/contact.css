@@ -604,6 +604,7 @@
   width: 100%;
   max-width: 760px;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   border: 1px solid rgba(var(--rgb-accent), 0.4);
   background-color: var(--color-surface);

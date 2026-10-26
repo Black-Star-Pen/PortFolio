@@ -7,7 +7,12 @@
 
 // Un bloc est « revenu » quand il dépasse de 20 % dans l'écran, par le haut ou par le bas : il est
 // alors franchement visible, pas au ras du bord. (On retire 20 % en haut et en bas de la zone surveillée.)
-const RETURN_ZONE = "-20% 0px -20% 0px";
+// Les pourcentages de rootMargin sont calculés sur la LARGEUR, même en haut et en bas.
+// En pixels, la zone reste utilisable aussi en paysage et sur un écran ultralarge.
+function returnZone() {
+  const margin = Math.round(window.innerHeight * 0.2);
+  return `-${margin}px 0px -${margin}px 0px`;
+}
 
 // Surveille « element » et appelle onReturn() chaque fois qu'il revient à l'écran après en être
 // complètement sorti, par le haut ou par le bas. La toute première arrivée ne compte pas : c'est
@@ -33,24 +38,28 @@ export function watchReturn(element, onReturn) {
     element.classList.add("replay-wait");
   });
 
-  const returnObserver = new IntersectionObserver(
-    (entries) => {
+  let returnObserver;
+  function observeReturns() {
+    returnObserver?.disconnect();
+    returnObserver = new IntersectionObserver((entries) => {
       if (!entries.at(-1).isIntersecting) return;
       wasSeen = true;
       if (!hasLeft) return;
       hasLeft = false;
       element.classList.remove("replay-wait");
       onReturn();
-    },
-    { rootMargin: RETURN_ZONE }
-  );
+    }, { rootMargin: returnZone() });
+    returnObserver.observe(element);
+  }
 
   leaveObserver.observe(element);
-  returnObserver.observe(element);
+  observeReturns();
+  window.addEventListener("resize", observeReturns, { passive: true });
 
   return () => {
     leaveObserver.disconnect();
     returnObserver.disconnect();
+    window.removeEventListener("resize", observeReturns);
     element.classList.remove("replay-wait");
   };
 }

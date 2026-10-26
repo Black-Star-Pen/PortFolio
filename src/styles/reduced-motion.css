@@ -1,6 +1,10 @@
 /* ===== Accessibilité : animations réduites ===== */
 @media (prefers-reduced-motion: reduce) {
 
+  html {
+    scroll-behavior: auto !important;
+  }
+
   .weld-line {
     animation: none;
     transform: none;
